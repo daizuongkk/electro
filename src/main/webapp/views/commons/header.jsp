@@ -1,7 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ page import="com.daizuongkk.web.model.Role" %>
-
+<fmt:setLocale value="vi_VN"/>
 
 <!-- HEADER -->
 <header>
@@ -21,7 +23,7 @@
                 </c:choose>
                 <c:choose>
                     <c:when test="${sessionScope.account != null}">
-                        <li><a href="#"><i class="fa fa-user-o"></i>Tài Khoản</a></li>
+                        <li><a href="#"><i class="fa fa-user-o"></i>${sessionScope.account.firstName} ${sessionScope.account.lastName}</a></li>
                         <li><a href="logout"><i class="fa fa-sign-out"></i>Đăng Xuất</a></li>
                     </c:when>
                     <c:otherwise>
@@ -55,12 +57,13 @@
                     <div class="header-search">
                         <form>
                             <select class="input-select">
-                                <option value="0">All Categories</option>
-                                <option value="1">Category 01</option>
-                                <option value="1">Category 02</option>
+                                <option value="0">Tất Cả</option>
+                                <c:forEach var="category" items="${categories}">
+                                    <option value="${category.key}">${category.value}</option>
+                                </c:forEach>
                             </select>
-                            <input class="input" placeholder="Search here">
-                            <button class="search-btn">Search</button>
+                            <input class="input" placeholder="Tìm kếm...">
+                            <button class="search-btn">Tìm Kếm</button>
                         </form>
                     </div>
                 </div>
@@ -73,7 +76,7 @@
                         <div>
                             <a href="#">
                                 <i class="fa fa-heart-o"></i>
-                                <span>Your Wishlist</span>
+                                <span>Yêu Thích</span>
                                 <div class="qty">2</div>
                             </a>
                         </div>
@@ -84,67 +87,54 @@
                             <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
                                 <i class="fa fa-shopping-cart"></i>
                                 <span>Giỏ Hàng</span>
-                                <div class="qty">3</div>
+                                <div class="qty">${fn:length(cart)}</div>
                             </a>
                             <div class="cart-dropdown">
                                 <div class="cart-list">
-                                    <div class="product-widget">
-                                        <div class="product-img">
-                                            <img src="assets/img/product01.png" alt="">
-                                        </div>
-                                        <div class="product-body">
-                                            <h3 class="product-name"><a href="#">product name goes here</a></h3>
-                                            <h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
-                                        </div>
-                                        <button class="delete"><i class="fa fa-close"></i></button>
-                                    </div>
 
-                                    <div class="product-widget">
-                                        <div class="product-img">
-                                            <img src="assets/img/product01.png" alt="">
-                                        </div>
-                                        <div class="product-body">
-                                            <h3 class="product-name"><a href="#">product name goes here</a></h3>
-                                            <h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
-                                        </div>
-                                        <button class="delete"><i class="fa fa-close"></i></button>
-                                    </div>
-                                    <div class="product-widget">
-                                        <div class="product-img">
-                                            <img src="assets/img/product01.png" alt="">
-                                        </div>
-                                        <div class="product-body">
-                                            <h3 class="product-name"><a href="#">product name goes here</a></h3>
-                                            <h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
-                                        </div>
-                                        <button class="delete"><i class="fa fa-close"></i></button>
-                                    </div>
-                                    <div class="product-widget">
-                                        <div class="product-img">
-                                            <img src="assets/img/product01.png" alt="">
-                                        </div>
-                                        <div class="product-body">
-                                            <h3 class="product-name"><a href="#">product name goes here</a></h3>
-                                            <h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
-                                        </div>
-                                        <button class="delete"><i class="fa fa-close"></i></button>
-                                    </div>
+                                    <c:choose>
+                                        <c:when test="${empty sessionScope.cart}">
+                                            <p>Giỏ hàng trống</p>
+                                        </c:when>
 
+                                        <c:otherwise>
+                                            <c:forEach var="item" items="${sessionScope.cart}">
+                                                <div class="product-widget">
+                                                    <div class="product-img">
+                                                        <img src="${item.product.imageUrl[0]}" alt="">
+                                                    </div>
+                                                    <div class="product-body">
+                                                        <h3 class="product-name"><a href="#">${item.product.name}</a>
+                                                        </h3>
+                                                        <h4 class="product-price"><span
+                                                                class="qty">${item.quantity}</span>
+                                                            <fmt:formatNumber
+                                                                    value="${item.product.price}"
+                                                                    type="currency"
+                                                                    currencySymbol="₫" />
+                                                        </h4>
+                                                    </div>
+                                                    <button class="delete"><i class="fa fa-close"></i></button>
+                                                </div>
+                                            </c:forEach>
 
-                                    <div class="product-widget">
-                                        <div class="product-img">
-                                            <img src="assets/img/product02.png" alt="">
-                                        </div>
-                                        <div class="product-body">
-                                            <h3 class="product-name"><a href="#">product name goes here</a></h3>
-                                            <h4 class="product-price"><span class="qty">3x</span>$980.00</h4>
-                                        </div>
-                                        <button class="delete"><i class="fa fa-close"></i></button>
-                                    </div>
+                                        </c:otherwise>
+                                    </c:choose>
+
                                 </div>
                                 <div class="cart-summary">
-                                    <small>3 Item(s) selected</small>
-                                    <h5>SUBTOTAL: $2940.00</h5>
+                                    <small>${fn:length(cart)} Đã chọn</small>
+
+                                    <c:set var="totalPrice" value="0" />
+
+                                    <c:forEach var="item" items="${sessionScope.cart}">
+                                        <c:set var="totalPrice" value="${totalPrice + item.product.price * item.quantity}" />
+                                    </c:forEach>
+                                    <h5>Tổng: 
+                                        <fmt:formatNumber
+                                                value="${totalPrice}"
+                                                type="currency"
+                                                currencySymbol="₫" /></h5>
                                 </div>
                                 <div class="cart-btns">
                                     <%--                                    <button id="open-cart-modal" type="button" data-toggle="modal" data-target="#cart-modal">--%>

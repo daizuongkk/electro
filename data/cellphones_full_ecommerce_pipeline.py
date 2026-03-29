@@ -25,7 +25,7 @@ import re
 import sys
 import time
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 from urllib.parse import urlparse
@@ -440,7 +440,12 @@ class CellphoneSCrawler:
             detail = detail[:5000]
         return detail
 
-    def _extract_images(self, soup: BeautifulSoup, product_json: Optional[Dict[str, Any]]) -> List[str]:
+    def _extract_images(
+        self,
+        soup: BeautifulSoup,
+        product_json: Optional[Dict[str, Any]],
+        page_html: Optional[str] = None,
+    ) -> List[str]:
         urls: List[str] = []
         seen = set()
 
@@ -464,6 +469,34 @@ class CellphoneSCrawler:
             seen.add(url)
             urls.append(url)
 
+        def extract_from_text(raw_text: str) -> None:
+            if not raw_text:
+                return
+
+            # Decode common escaped slash forms used inside embedded JSON/script payloads.
+            decoded = (
+                raw_text
+                .replace("\\/", "/")
+                .replace("\\u002F", "/")
+                .replace("\\u002f", "/")
+                .replace("\\x2F", "/")
+                .replace("\\x2f", "/")
+            )
+
+            abs_pattern = re.compile(
+                r"https?://[^\s\"'<>\\]*?/media/catalog/product/[^\s\"'<>\\]+",
+                re.IGNORECASE,
+            )
+            rel_pattern = re.compile(
+                r"/media/catalog/product/[^\s\"'<>\\]+",
+                re.IGNORECASE,
+            )
+
+            for match in abs_pattern.findall(decoded):
+                add(match)
+            for match in rel_pattern.findall(decoded):
+                add(match)
+
         if product_json:
             img = product_json.get("image")
             if isinstance(img, str):
@@ -472,17 +505,15 @@ class CellphoneSCrawler:
                 for u in img:
                     add(str(u))
 
+        if page_html:
+            extract_from_text(page_html)
+
         # Extract image URLs from inline scripts where gallery arrays are often embedded.
-        script_pattern = re.compile(
-            r"https?://[^\s\"']*?/media/catalog/product/[^\s\"']+",
-            re.IGNORECASE,
-        )
         for script in soup.find_all("script"):
             raw = script.string or script.get_text() or ""
             if not raw:
                 continue
-            for match in script_pattern.findall(raw):
-                add(match)
+            extract_from_text(raw)
 
         og = soup.find("meta", attrs={"property": "og:image"})
         if og and og.get("content"):
@@ -508,8 +539,6 @@ class CellphoneSCrawler:
                 else:
                     if "/media/catalog/product" in raw_val:
                         add(raw_val)
-            if len(urls) >= 120:
-                break
 
         # Keep all product gallery images (no low count cap) while deduplicated.
         return urls
@@ -552,7 +581,7 @@ class CellphoneSCrawler:
         category = self._extract_category(soup, url)
         price, promotion = self._extract_price_and_promo(soup, html, product_json)
         brand = self._extract_brand(name, product_json)
-        images = self._extract_images(soup, product_json)
+        images = self._extract_images(soup, product_json, page_html=html)
 
         rating_value = 0.0
         rating_count = 0
@@ -591,8 +620,13 @@ class EcommerceNormalizer:
         self.synthetic_relations = synthetic_relations
         self.rng = random.Random(seed)
 
+    def _random_created_at(self, end_dt: datetime, max_age_days: int = 730) -> str:
+        seconds = self.rng.randint(0, max_age_days * 24 * 60 * 60)
+        return (end_dt - timedelta(seconds=seconds)).strftime("%Y-%m-%d %H:%M:%S")
+
     def build(self, products_raw: Sequence[ProductRaw]) -> Dict[str, List[Dict[str, Any]]]:
-        now = now_ts()
+        end_dt = datetime.now()
+        now = end_dt.strftime("%Y-%m-%d %H:%M:%S")
 
         tables: Dict[str, List[Dict[str, Any]]] = {
             "users": [],
@@ -612,6 +646,7 @@ class EcommerceNormalizer:
         for idx, p in enumerate(products_raw, start=1):
             # deterministic quantity by product URL hash
             qty = 5 + (sha_seed(p.url) % 196)
+            created_at = self._random_created_at(end_dt)
             tables["products"].append(
                 {
                     "id": idx,
@@ -625,7 +660,7 @@ class EcommerceNormalizer:
                     "promotion": p.promotion,
                     "quantity": qty,
                     "view": 0,
-                    "created_at": now,
+                    "created_at": created_at,
                     "updated_at": now,
                 }
             )
@@ -644,6 +679,7 @@ class EcommerceNormalizer:
         user_count = min(80, max(20, max(1, len(products_raw) // 15)))
         for uid in range(1, user_count + 1):
             username = f"customer_{uid:04d}"
+            created_at = self._random_created_at(end_dt)
             tables["users"].append(
                 {
                     "id": uid,
@@ -658,7 +694,7 @@ class EcommerceNormalizer:
                     "status": "ACTIVE",
                     "verified": 1,
                     "last_login": now,
-                    "created_at": now,
+                    "created_at": created_at,
                     "updated_at": now,
                 }
             )
@@ -675,6 +711,7 @@ class EcommerceNormalizer:
                 f"Đánh giá tổng hợp từ trang sản phẩm: {p.name}. "
                 f"Điểm trung bình {p.rating_value:.1f} ({p.rating_count} lượt đánh giá)."
             )
+            created_at = self._random_created_at(end_dt)
             tables["reviews"].append(
                 {
                     "id": review_id,
@@ -682,7 +719,7 @@ class EcommerceNormalizer:
                     "score": score,
                     "user_id": reviewer_id,
                     "product_id": pid,
-                    "created_at": now,
+                    "created_at": created_at,
                 }
             )
             review_id += 1
@@ -695,6 +732,7 @@ class EcommerceNormalizer:
                     continue
                 reviewer_id = 1 + (sha_seed(f"fallback-review-{p.url}") % user_count)
                 score = self.rng.choice([4, 4, 5, 5, 3])
+                created_at = self._random_created_at(end_dt)
                 tables["reviews"].append(
                     {
                         "id": review_id,
@@ -702,17 +740,17 @@ class EcommerceNormalizer:
                         "score": score,
                         "user_id": reviewer_id,
                         "product_id": pid,
-                        "created_at": now,
+                        "created_at": created_at,
                     }
                 )
                 review_id += 1
 
         if self.synthetic_relations and tables["products"] and tables["users"]:
-            self._build_relations(tables, now)
+            self._build_relations(tables, end_dt)
 
         return tables
 
-    def _build_relations(self, tables: Dict[str, List[Dict[str, Any]]], now: str) -> None:
+    def _build_relations(self, tables: Dict[str, List[Dict[str, Any]]], end_dt: datetime) -> None:
         user_ids = [u["id"] for u in tables["users"]]
         product_ids = [p["id"] for p in tables["products"]]
 
@@ -720,6 +758,7 @@ class EcommerceNormalizer:
         addr_id = 1
         for uid in user_ids:
             province = VI_PROVINCES[(uid - 1) % len(VI_PROVINCES)]
+            created_at = self._random_created_at(end_dt)
             tables["addresses"].append(
                 {
                     "id": addr_id,
@@ -732,7 +771,7 @@ class EcommerceNormalizer:
                     "street": f"{100 + uid} Đường Mẫu",
                     "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
                     "is_default": 1,
-                    "created_at": now,
+                    "created_at": created_at,
                 }
             )
             addr_id += 1
@@ -799,7 +838,7 @@ class EcommerceNormalizer:
                     "recipient_name": f"User{uid} Demo",
                     "phone": f"09{uid:08d}"[-10:],
                     "address": f"{100 + uid} Đường Mẫu, Quận {(uid % 12) + 1}, {VI_PROVINCES[uid % len(VI_PROVINCES)]}",
-                    "created_at": now,
+                    "created_at": self._random_created_at(end_dt),
                 }
             )
 
@@ -919,7 +958,7 @@ class Exporter:
 def run_pipeline(args: argparse.Namespace) -> int:
     crawler = CellphoneSCrawler(delay=args.delay, timeout=args.timeout)
     max_products = args.max_products
-    if max_products <= 0 or max_products > 500:
+    if max_products <= 0 or max_products > 50000:
         max_products = 500
 
     print("[1/4] Discovering product URLs from sitemap...")

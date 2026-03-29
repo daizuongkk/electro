@@ -40,10 +40,20 @@
     .product .product-name {
         margin: 5px 0;
         min-height: 50px;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .product .product-name a {
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+        color: inherit;
+        text-decoration: none;
     }
 
     .product .product-price {
@@ -78,26 +88,33 @@
         <div class="product-body">
             <p class="product-category"><c:out value="${product.category}" default="N/A"/></p>
             <h3 class="product-name">
-                <a href="${pageContext.request.contextPath}/products?id=${product.id}">
+                <a href="${pageContext.request.contextPath}/products?id=${product.id}"  title="${product.name}">
                     <c:out value="${product.name}"/>
                 </a>
             </h3>
             <h4 class="product-price">
                 <c:choose>
                     <c:when test="${product.price != null}">
-                        $<fmt:formatNumber
-                            value="${product.price - (product.price * product.promotion / 100)}"
-                            type="number"
-                            pattern="#.00" />
+                        <c:set var="newPrice" value="${product.price - (product.price * product.promotion / 100)}"/>
+
+                        <fmt:setLocale value="vi_VN"/>
+                        <fmt:formatNumber
+                            value="${newPrice}"
+                            type="currency"
+                            currencySymbol="₫" />
                     </c:when>
-                    <c:otherwise>Contact</c:otherwise>
+                    <c:otherwise>Liên Hệ</c:otherwise>
                 </c:choose>
                 <c:if test="${product.promotion != null && product.promotion > 0}">
-                    <del class="product-old-price"><c:out value="${product.price}"/></del>
+                    <del class="product-old-price"> <fmt:setLocale value="vi_VN"/>
+                        <fmt:formatNumber
+                                value="${product.price}"
+                                type="currency"
+                                currencySymbol="₫" /></del>
                 </c:if>
             </h4>
             <div class="product-rating">
-                <c:set target="${product}" property="reviewScore" value="${3}"/>
+
                 <c:choose>
                     <c:when test="${product.reviewScore != 0}">
                         <c:forEach begin="1" end="${product.reviewScore}" var="i">

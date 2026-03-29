@@ -1,8 +1,12 @@
 package com.daizuongkk.web.controller;
 
+import com.daizuongkk.web.dto.response.CartItemResponse;
 import com.daizuongkk.web.dto.response.UserResponse;
+import com.daizuongkk.web.model.Cart;
+import com.daizuongkk.web.model.CartItem;
 import com.daizuongkk.web.model.Role;
 import com.daizuongkk.web.service.AuthService;
+import com.daizuongkk.web.service.CartService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.Cookie;
@@ -12,15 +16,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet(name = "Login", value = "/login")
 public class LoginController extends HttpServlet {
 
     private AuthService authService;
-
+    private CartService cartService;
     @Override
     public void init() {
         this.authService = new AuthService();
+        this.cartService = new CartService();
     }
 
     @Override
@@ -65,8 +71,12 @@ public class LoginController extends HttpServlet {
             request.getRequestDispatcher("/views/pages/login.jsp").forward(request, response);
             return;
         }
+
+        List<CartItemResponse> cart = cartService.getCart(res.getId());
+
         HttpSession session = request.getSession(true);
         session.setAttribute("account", res);
+        session.setAttribute("cart", cart);
 
         writeRememberCookie(response, username.trim(), rememberMe, request.isSecure(), request.getContextPath());
         response.sendRedirect("home");

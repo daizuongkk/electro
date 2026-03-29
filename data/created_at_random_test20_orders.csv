@@ -1,0 +1,9 @@
+﻿id,user_id,total_price,status,recipient_name,phone,address,created_at
+1,2,24970000,SHIPPED,User2 Demo,0900000002,"102 Đường Mẫu, Quận 3, Đà Nẵng",2025-02-25 20:05:44
+2,4,37360000,SHIPPED,User4 Demo,0900000004,"104 Đường Mẫu, Quận 5, Hải Phòng",2024-09-03 06:01:26
+3,5,24780000,PAID,User5 Demo,0900000005,"105 Đường Mẫu, Quận 6, Hà Nội",2026-02-19 07:11:10
+4,8,12580000,SHIPPED,User8 Demo,0900000008,"108 Đường Mẫu, Quận 9, Cần Thơ",2025-09-22 14:42:53
+5,10,18680000,PAID,User10 Demo,0900000010,"110 Đường Mẫu, Quận 11, Hà Nội",2025-10-20 09:54:58
+6,15,24970000,SHIPPED,User15 Demo,0900000015,"115 Đường Mẫu, Quận 4, Hà Nội",2025-03-02 11:15:30
+7,16,24970000,COMPLETED,User16 Demo,0900000016,"116 Đường Mẫu, Quận 5, TP. Hồ Chí Minh",2025-06-14 04:27:31
+8,18,18680000,PENDING,User18 Demo,0900000018,"118 Đường Mẫu, Quận 7, Cần Thơ",2025-05-14 11:50:05

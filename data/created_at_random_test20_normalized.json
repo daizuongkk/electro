@@ -1,0 +1,1489 @@
+{
+  "metadata": {
+    "source": "https://cellphones.com.vn",
+    "generated_at": "2026-03-29 11:43:10",
+    "tables": {
+      "users": 20,
+      "products": 2,
+      "product_images": 64,
+      "addresses": 20,
+      "carts": 20,
+      "cart_items": 33,
+      "orders": 8,
+      "order_items": 14,
+      "reviews": 0,
+      "wishlists": 16
+    }
+  },
+  "tables": {
+    "users": [
+      {
+        "id": 1,
+        "username": "customer_0001",
+        "email": "customer_0001@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User1",
+        "last_name": "Demo",
+        "phone": "0900000001",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2024-07-05 10:09:11",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 2,
+        "username": "customer_0002",
+        "email": "customer_0002@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User2",
+        "last_name": "Demo",
+        "phone": "0900000002",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2025-07-02 21:57:19",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 3,
+        "username": "customer_0003",
+        "email": "customer_0003@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User3",
+        "last_name": "Demo",
+        "phone": "0900000003",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2025-04-21 09:01:07",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 4,
+        "username": "customer_0004",
+        "email": "customer_0004@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User4",
+        "last_name": "Demo",
+        "phone": "0900000004",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2025-03-07 00:33:22",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 5,
+        "username": "customer_0005",
+        "email": "customer_0005@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User5",
+        "last_name": "Demo",
+        "phone": "0900000005",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2024-08-17 02:44:58",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 6,
+        "username": "customer_0006",
+        "email": "customer_0006@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User6",
+        "last_name": "Demo",
+        "phone": "0900000006",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2025-12-19 14:27:28",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 7,
+        "username": "customer_0007",
+        "email": "customer_0007@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User7",
+        "last_name": "Demo",
+        "phone": "0900000007",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2024-09-14 17:55:38",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 8,
+        "username": "customer_0008",
+        "email": "customer_0008@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User8",
+        "last_name": "Demo",
+        "phone": "0900000008",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2025-03-14 09:41:03",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 9,
+        "username": "customer_0009",
+        "email": "customer_0009@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User9",
+        "last_name": "Demo",
+        "phone": "0900000009",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2024-04-09 02:37:02",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 10,
+        "username": "customer_0010",
+        "email": "customer_0010@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User10",
+        "last_name": "Demo",
+        "phone": "0900000010",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2024-04-03 10:28:24",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 11,
+        "username": "customer_0011",
+        "email": "customer_0011@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User11",
+        "last_name": "Demo",
+        "phone": "0900000011",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2026-02-01 05:11:35",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 12,
+        "username": "customer_0012",
+        "email": "customer_0012@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User12",
+        "last_name": "Demo",
+        "phone": "0900000012",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2024-10-26 11:27:46",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 13,
+        "username": "customer_0013",
+        "email": "customer_0013@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User13",
+        "last_name": "Demo",
+        "phone": "0900000013",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2024-07-09 05:00:37",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 14,
+        "username": "customer_0014",
+        "email": "customer_0014@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User14",
+        "last_name": "Demo",
+        "phone": "0900000014",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2026-02-01 12:16:13",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 15,
+        "username": "customer_0015",
+        "email": "customer_0015@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User15",
+        "last_name": "Demo",
+        "phone": "0900000015",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2025-12-27 16:12:01",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 16,
+        "username": "customer_0016",
+        "email": "customer_0016@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User16",
+        "last_name": "Demo",
+        "phone": "0900000016",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2024-09-27 00:42:08",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 17,
+        "username": "customer_0017",
+        "email": "customer_0017@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User17",
+        "last_name": "Demo",
+        "phone": "0900000017",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2026-03-07 07:11:29",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 18,
+        "username": "customer_0018",
+        "email": "customer_0018@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User18",
+        "last_name": "Demo",
+        "phone": "0900000018",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2024-07-15 02:26:53",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 19,
+        "username": "customer_0019",
+        "email": "customer_0019@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User19",
+        "last_name": "Demo",
+        "phone": "0900000019",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2024-06-30 07:15:40",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 20,
+        "username": "customer_0020",
+        "email": "customer_0020@example.com",
+        "password": "$2b$12$abcdefghijklmnopqrstuv1234567890abcdefghi",
+        "first_name": "User20",
+        "last_name": "Demo",
+        "phone": "0900000020",
+        "avt_url": "",
+        "role": "CUSTOMER",
+        "status": "ACTIVE",
+        "verified": 1,
+        "last_login": "2026-03-29 11:43:10",
+        "created_at": "2025-06-05 06:25:13",
+        "updated_at": "2026-03-29 11:43:10"
+      }
+    ],
+    "products": [
+      {
+        "id": 1,
+        "name": "HONOR X8d 8GB 128GB - Đã kích hoạt",
+        "description": "Mua điện thoại HONOR X8d 8GB 128GB đã kích hoạt bảo hành, đổi mới 30 ngày, có trả góp 0%",
+        "detail": "- Kích thước màn hình: 6.77 inches\n- Công nghệ màn hình: AMOLED\n- Camera sau: Camera chính 108MP (f/1.75) + Camera rộng 5MP (f/2.2)\n- Camera trước: 16MP (f/2.45)\n- Chipset: Snapdragon 6s 4G thế hệ 2\n- Công nghệ NFC: Có\n- Dung lượng RAM: 8 GB\n- Bộ nhớ trong: 128 GB\n- Pin: 6800mAh (giá trị định mức), 7000 mAh (giá trị điển hình)\n- Thẻ SIM: 2 Nano-SIM\n- Hệ điều hành: MagicOS 10 (Dựa trên Android 16)\n- Độ phân giải màn hình: 1080 x 2392 pixels\n- Tính năng màn hình: Màu sắc: 1,07 tỷ màuCông nghệ Eye Comfort800 nit (điển hình) 1300 nit (loại HBM) 3000 nit (loại APL)Chất liệu kính Thủy tinh Aluminosilicate\n- Loại CPU: Octa-core, 4 * A73 2,9 GHz + 4 * A53 1,9 GHz",
+        "summary": "Mua điện thoại HONOR X8d 8GB 128GB đã kích hoạt bảo hành, đổi mới 30 ngày, có trả góp 0%",
+        "category": "Điện thoại",
+        "price": 6290000,
+        "brand": "HONOR",
+        "promotion": 2,
+        "quantity": 46,
+        "view": 0,
+        "created_at": "2026-02-23 12:27:29",
+        "updated_at": "2026-03-29 11:43:10"
+      },
+      {
+        "id": 2,
+        "name": "POCO X8 Pro Max 5G 12GB 256GB - Đã kích hoạt",
+        "description": "Mua điện thoại Poco X8 Pro Max 12GB/256GB đã kích hoạt bảo hành, đổi mới 30 ngày, có trả góp 0%",
+        "detail": "- Kích thước màn hình: 6.83 inches\n- Công nghệ màn hình: AMOLED\n- Camera sau: 50 MP f/1.5 (cảm biến Light Hunter 600, OIS) + 8 MP (góc siêu rộng)\n- Camera trước: 20 MP\n- Chipset: MediaTek Dimensity 9500s\n- Dung lượng RAM: 12 GB\n- Bộ nhớ trong: 256 GB\n- Pin: 8.500 mAh\n- Thẻ SIM: Dual nano-SIM hoặc 1 nano-SIM + 1 eSIM\n- Hệ điều hành: Xiaomi HyperOS 3 (Android 16)\n- Độ phân giải màn hình: 2772 x 1280 pixels\n- Tính năng màn hình: Độ sáng tối đa 3.500 nits, PWM 3840Hz, 68 tỷ màu, dải màu DCI-P3, HDR10+\n- Loại CPU: 1 × Cortex-X925 (tối đa 3.73GHz) + 3 × Cortex-X4 (tối đa 3.3GHz) + 4 × Cortex-A720 (tối đa 2.4GHz)",
+        "summary": "Mua điện thoại Poco X8 Pro Max 12GB/256GB đã kích hoạt bảo hành, đổi mới 30 ngày, có trả góp 0%",
+        "category": "Điện thoại",
+        "price": 12390000,
+        "brand": "Xiaomi",
+        "promotion": 2,
+        "quantity": 199,
+        "view": 0,
+        "created_at": "2025-08-18 21:26:26",
+        "updated_at": "2026-03-29 11:43:10"
+      }
+    ],
+    "product_images": [
+      {
+        "id": 1,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/media/catalog/product/h/o/honor-x8d-2_2.jpg"
+      },
+      {
+        "id": 2,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/d/i/dien-thoai-honor-x8d_1_1.jpg"
+      },
+      {
+        "id": 3,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/d/i/dien-thoai-honor-x8d-1_1_1.jpg"
+      },
+      {
+        "id": 4,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/d/i/dien-thoai-honor-x8d-2_1_1.jpg"
+      },
+      {
+        "id": 5,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/d/i/dien-thoai-honor-x8d-3_1_1.jpg"
+      },
+      {
+        "id": 6,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/d/i/dien-thoai-honor-x8d-4_1.jpg"
+      },
+      {
+        "id": 7,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/honor-x8d-2_2.jpg"
+      },
+      {
+        "id": 8,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/honor-x8d-5_1.jpg"
+      },
+      {
+        "id": 9,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/honor-x8d-3_1.jpg"
+      },
+      {
+        "id": 10,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/honor-x8d-6_1.jpg"
+      },
+      {
+        "id": 11,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/honor-x8d-1_2.jpg"
+      },
+      {
+        "id": 12,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/honor-x8d-8_1.jpg"
+      },
+      {
+        "id": 13,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/honor-x8d-9_1.jpg"
+      },
+      {
+        "id": 14,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/honor-x8d-10_1.jpg"
+      },
+      {
+        "id": 15,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/honor-x8d-7_1.jpg"
+      },
+      {
+        "id": 16,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/honor-x8d-11_1.jpg"
+      },
+      {
+        "id": 17,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/honor-x8d_2.jpg"
+      },
+      {
+        "id": 18,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/honor-x8d-12_1.jpg"
+      },
+      {
+        "id": 19,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/honor-x8d-13_1.jpg"
+      },
+      {
+        "id": 20,
+        "product_id": 1,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/h/o/honor-x8d-14_1.jpg"
+      },
+      {
+        "id": 21,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/d/i/dien-thoai-honor-x8d-cu-da-kich-hoat.jpg"
+      },
+      {
+        "id": 22,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/h/o/honor-x8d-2_2.jpg"
+      },
+      {
+        "id": 23,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/d/i/dien-thoai-honor-x8d_1_1.jpg"
+      },
+      {
+        "id": 24,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/d/i/dien-thoai-honor-x8d-1_1_1.jpg"
+      },
+      {
+        "id": 25,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/d/i/dien-thoai-honor-x8d-2_1_1.jpg"
+      },
+      {
+        "id": 26,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/d/i/dien-thoai-honor-x8d-3_1_1.jpg"
+      },
+      {
+        "id": 27,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/d/i/dien-thoai-honor-x8d-4_1.jpg"
+      },
+      {
+        "id": 28,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/h/o/honor-x8d-5_1.jpg"
+      },
+      {
+        "id": 29,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/h/o/honor-x8d-3_1.jpg"
+      },
+      {
+        "id": 30,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/h/o/honor-x8d-6_1.jpg"
+      },
+      {
+        "id": 31,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/h/o/honor-x8d-1_2.jpg"
+      },
+      {
+        "id": 32,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/h/o/honor-x8d-8_1.jpg"
+      },
+      {
+        "id": 33,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/h/o/honor-x8d-9_1.jpg"
+      },
+      {
+        "id": 34,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/h/o/honor-x8d-10_1.jpg"
+      },
+      {
+        "id": 35,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/h/o/honor-x8d-7_1.jpg"
+      },
+      {
+        "id": 36,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/h/o/honor-x8d-11_1.jpg"
+      },
+      {
+        "id": 37,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/h/o/honor-x8d_2.jpg"
+      },
+      {
+        "id": 38,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/h/o/honor-x8d-12_1.jpg"
+      },
+      {
+        "id": 39,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/h/o/honor-x8d-13_1.jpg"
+      },
+      {
+        "id": 40,
+        "product_id": 1,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/h/o/honor-x8d-14_1.jpg"
+      },
+      {
+        "id": 41,
+        "product_id": 2,
+        "image_url": "https://cdn2.cellphones.com.vn/media/catalog/product/x/i/xiaomi-poco-x8-pro-max_2_1.jpg"
+      },
+      {
+        "id": 42,
+        "product_id": 2,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/d/i/dien-thoai-xiaomi-poco-x8-pro-max_2.jpg"
+      },
+      {
+        "id": 43,
+        "product_id": 2,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/d/i/dien-thoai-xiaomi-poco-x8-pro-max-1_2.jpg"
+      },
+      {
+        "id": 44,
+        "product_id": 2,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/d/i/dien-thoai-xiaomi-poco-x8-pro-max-2_2.jpg"
+      },
+      {
+        "id": 45,
+        "product_id": 2,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/d/i/dien-thoai-xiaomi-poco-x8-pro-max-3_2.jpg"
+      },
+      {
+        "id": 46,
+        "product_id": 2,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/d/i/dien-thoai-xiaomi-poco-x8-pro-max-4_2.jpg"
+      },
+      {
+        "id": 47,
+        "product_id": 2,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/x/i/xiaomi-poco-x8-pro-max_2_1.jpg"
+      },
+      {
+        "id": 48,
+        "product_id": 2,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/x/i/xiaomi-poco-x8-pro-max-1_3.jpg"
+      },
+      {
+        "id": 49,
+        "product_id": 2,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/x/i/xiaomi-poco-x8-pro-max-4_2.jpg"
+      },
+      {
+        "id": 50,
+        "product_id": 2,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/x/i/xiaomi-poco-x8-pro-max-5_2.jpg"
+      },
+      {
+        "id": 51,
+        "product_id": 2,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/x/i/xiaomi-poco-x8-pro-max-2_2.jpg"
+      },
+      {
+        "id": 52,
+        "product_id": 2,
+        "image_url": "https://cdn2.cellphones.com.vn/x/media/catalog/product/x/i/xiaomi-poco-x8-pro-max-3_2.jpg"
+      },
+      {
+        "id": 53,
+        "product_id": 2,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/d/i/dien-thoai-xiaomi-poco-x8-pro-max-cu-da-kich-hoat.jpg"
+      },
+      {
+        "id": 54,
+        "product_id": 2,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/x/i/xiaomi-poco-x8-pro-max_2_1.jpg"
+      },
+      {
+        "id": 55,
+        "product_id": 2,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/d/i/dien-thoai-xiaomi-poco-x8-pro-max_2.jpg"
+      },
+      {
+        "id": 56,
+        "product_id": 2,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/d/i/dien-thoai-xiaomi-poco-x8-pro-max-1_2.jpg"
+      },
+      {
+        "id": 57,
+        "product_id": 2,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/d/i/dien-thoai-xiaomi-poco-x8-pro-max-2_2.jpg"
+      },
+      {
+        "id": 58,
+        "product_id": 2,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/d/i/dien-thoai-xiaomi-poco-x8-pro-max-3_2.jpg"
+      },
+      {
+        "id": 59,
+        "product_id": 2,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/d/i/dien-thoai-xiaomi-poco-x8-pro-max-4_2.jpg"
+      },
+      {
+        "id": 60,
+        "product_id": 2,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/x/i/xiaomi-poco-x8-pro-max-1_3.jpg"
+      },
+      {
+        "id": 61,
+        "product_id": 2,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/x/i/xiaomi-poco-x8-pro-max-4_2.jpg"
+      },
+      {
+        "id": 62,
+        "product_id": 2,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/x/i/xiaomi-poco-x8-pro-max-5_2.jpg"
+      },
+      {
+        "id": 63,
+        "product_id": 2,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/x/i/xiaomi-poco-x8-pro-max-2_2.jpg"
+      },
+      {
+        "id": 64,
+        "product_id": 2,
+        "image_url": "https://cellphones.com.vn/media/catalog/product/x/i/xiaomi-poco-x8-pro-max-3_2.jpg"
+      }
+    ],
+    "addresses": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "recipient_name": "User1 Demo",
+        "phone": "0900000001",
+        "province": "Hà Nội",
+        "district": "Quận 2",
+        "ward": "Phường 2",
+        "street": "101 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2025-11-05 00:09:18"
+      },
+      {
+        "id": 2,
+        "user_id": 2,
+        "recipient_name": "User2 Demo",
+        "phone": "0900000002",
+        "province": "TP. Hồ Chí Minh",
+        "district": "Quận 3",
+        "ward": "Phường 3",
+        "street": "102 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2025-07-09 16:59:31"
+      },
+      {
+        "id": 3,
+        "user_id": 3,
+        "recipient_name": "User3 Demo",
+        "phone": "0900000003",
+        "province": "Đà Nẵng",
+        "district": "Quận 4",
+        "ward": "Phường 4",
+        "street": "103 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2025-09-07 19:52:36"
+      },
+      {
+        "id": 4,
+        "user_id": 4,
+        "recipient_name": "User4 Demo",
+        "phone": "0900000004",
+        "province": "Cần Thơ",
+        "district": "Quận 5",
+        "ward": "Phường 5",
+        "street": "104 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2024-11-28 03:33:02"
+      },
+      {
+        "id": 5,
+        "user_id": 5,
+        "recipient_name": "User5 Demo",
+        "phone": "0900000005",
+        "province": "Hải Phòng",
+        "district": "Quận 6",
+        "ward": "Phường 6",
+        "street": "105 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2024-06-05 06:45:22"
+      },
+      {
+        "id": 6,
+        "user_id": 6,
+        "recipient_name": "User6 Demo",
+        "phone": "0900000006",
+        "province": "Hà Nội",
+        "district": "Quận 7",
+        "ward": "Phường 7",
+        "street": "106 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2025-02-08 18:56:17"
+      },
+      {
+        "id": 7,
+        "user_id": 7,
+        "recipient_name": "User7 Demo",
+        "phone": "0900000007",
+        "province": "TP. Hồ Chí Minh",
+        "district": "Quận 8",
+        "ward": "Phường 8",
+        "street": "107 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2024-04-30 14:45:45"
+      },
+      {
+        "id": 8,
+        "user_id": 8,
+        "recipient_name": "User8 Demo",
+        "phone": "0900000008",
+        "province": "Đà Nẵng",
+        "district": "Quận 9",
+        "ward": "Phường 9",
+        "street": "108 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2024-11-08 14:06:59"
+      },
+      {
+        "id": 9,
+        "user_id": 9,
+        "recipient_name": "User9 Demo",
+        "phone": "0900000009",
+        "province": "Cần Thơ",
+        "district": "Quận 10",
+        "ward": "Phường 10",
+        "street": "109 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2025-02-18 11:52:06"
+      },
+      {
+        "id": 10,
+        "user_id": 10,
+        "recipient_name": "User10 Demo",
+        "phone": "0900000010",
+        "province": "Hải Phòng",
+        "district": "Quận 11",
+        "ward": "Phường 11",
+        "street": "110 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2026-01-12 01:43:43"
+      },
+      {
+        "id": 11,
+        "user_id": 11,
+        "recipient_name": "User11 Demo",
+        "phone": "0900000011",
+        "province": "Hà Nội",
+        "district": "Quận 12",
+        "ward": "Phường 12",
+        "street": "111 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2025-07-09 18:15:06"
+      },
+      {
+        "id": 12,
+        "user_id": 12,
+        "recipient_name": "User12 Demo",
+        "phone": "0900000012",
+        "province": "TP. Hồ Chí Minh",
+        "district": "Quận 1",
+        "ward": "Phường 13",
+        "street": "112 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2024-09-06 12:04:37"
+      },
+      {
+        "id": 13,
+        "user_id": 13,
+        "recipient_name": "User13 Demo",
+        "phone": "0900000013",
+        "province": "Đà Nẵng",
+        "district": "Quận 2",
+        "ward": "Phường 14",
+        "street": "113 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2025-10-09 09:35:08"
+      },
+      {
+        "id": 14,
+        "user_id": 14,
+        "recipient_name": "User14 Demo",
+        "phone": "0900000014",
+        "province": "Cần Thơ",
+        "district": "Quận 3",
+        "ward": "Phường 15",
+        "street": "114 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2024-09-29 22:41:44"
+      },
+      {
+        "id": 15,
+        "user_id": 15,
+        "recipient_name": "User15 Demo",
+        "phone": "0900000015",
+        "province": "Hải Phòng",
+        "district": "Quận 4",
+        "ward": "Phường 16",
+        "street": "115 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2024-10-16 16:35:25"
+      },
+      {
+        "id": 16,
+        "user_id": 16,
+        "recipient_name": "User16 Demo",
+        "phone": "0900000016",
+        "province": "Hà Nội",
+        "district": "Quận 5",
+        "ward": "Phường 17",
+        "street": "116 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2025-04-16 20:27:58"
+      },
+      {
+        "id": 17,
+        "user_id": 17,
+        "recipient_name": "User17 Demo",
+        "phone": "0900000017",
+        "province": "TP. Hồ Chí Minh",
+        "district": "Quận 6",
+        "ward": "Phường 18",
+        "street": "117 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2025-01-02 21:00:07"
+      },
+      {
+        "id": 18,
+        "user_id": 18,
+        "recipient_name": "User18 Demo",
+        "phone": "0900000018",
+        "province": "Đà Nẵng",
+        "district": "Quận 7",
+        "ward": "Phường 19",
+        "street": "118 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2025-01-28 01:05:38"
+      },
+      {
+        "id": 19,
+        "user_id": 19,
+        "recipient_name": "User19 Demo",
+        "phone": "0900000019",
+        "province": "Cần Thơ",
+        "district": "Quận 8",
+        "ward": "Phường 20",
+        "street": "119 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2025-01-17 16:31:07"
+      },
+      {
+        "id": 20,
+        "user_id": 20,
+        "recipient_name": "User20 Demo",
+        "phone": "0900000020",
+        "province": "Hải Phòng",
+        "district": "Quận 9",
+        "ward": "Phường 1",
+        "street": "120 Đường Mẫu",
+        "detail": "Địa chỉ tạo tự động để seed dữ liệu quan hệ.",
+        "is_default": 1,
+        "created_at": "2025-12-01 00:33:58"
+      }
+    ],
+    "carts": [
+      {
+        "id": 1,
+        "user_id": 1
+      },
+      {
+        "id": 2,
+        "user_id": 2
+      },
+      {
+        "id": 3,
+        "user_id": 3
+      },
+      {
+        "id": 4,
+        "user_id": 4
+      },
+      {
+        "id": 5,
+        "user_id": 5
+      },
+      {
+        "id": 6,
+        "user_id": 6
+      },
+      {
+        "id": 7,
+        "user_id": 7
+      },
+      {
+        "id": 8,
+        "user_id": 8
+      },
+      {
+        "id": 9,
+        "user_id": 9
+      },
+      {
+        "id": 10,
+        "user_id": 10
+      },
+      {
+        "id": 11,
+        "user_id": 11
+      },
+      {
+        "id": 12,
+        "user_id": 12
+      },
+      {
+        "id": 13,
+        "user_id": 13
+      },
+      {
+        "id": 14,
+        "user_id": 14
+      },
+      {
+        "id": 15,
+        "user_id": 15
+      },
+      {
+        "id": 16,
+        "user_id": 16
+      },
+      {
+        "id": 17,
+        "user_id": 17
+      },
+      {
+        "id": 18,
+        "user_id": 18
+      },
+      {
+        "id": 19,
+        "user_id": 19
+      },
+      {
+        "id": 20,
+        "user_id": 20
+      }
+    ],
+    "cart_items": [
+      {
+        "id": 1,
+        "cart_id": 1,
+        "product_id": 1,
+        "quantity": 1
+      },
+      {
+        "id": 2,
+        "cart_id": 1,
+        "product_id": 2,
+        "quantity": 1
+      },
+      {
+        "id": 3,
+        "cart_id": 2,
+        "product_id": 1,
+        "quantity": 1
+      },
+      {
+        "id": 4,
+        "cart_id": 2,
+        "product_id": 2,
+        "quantity": 2
+      },
+      {
+        "id": 5,
+        "cart_id": 3,
+        "product_id": 2,
+        "quantity": 1
+      },
+      {
+        "id": 6,
+        "cart_id": 3,
+        "product_id": 1,
+        "quantity": 2
+      },
+      {
+        "id": 7,
+        "cart_id": 4,
+        "product_id": 2,
+        "quantity": 2
+      },
+      {
+        "id": 8,
+        "cart_id": 4,
+        "product_id": 1,
+        "quantity": 1
+      },
+      {
+        "id": 9,
+        "cart_id": 5,
+        "product_id": 1,
+        "quantity": 1
+      },
+      {
+        "id": 10,
+        "cart_id": 5,
+        "product_id": 2,
+        "quantity": 1
+      },
+      {
+        "id": 11,
+        "cart_id": 6,
+        "product_id": 1,
+        "quantity": 1
+      },
+      {
+        "id": 12,
+        "cart_id": 6,
+        "product_id": 2,
+        "quantity": 2
+      },
+      {
+        "id": 13,
+        "cart_id": 7,
+        "product_id": 1,
+        "quantity": 2
+      },
+      {
+        "id": 14,
+        "cart_id": 8,
+        "product_id": 2,
+        "quantity": 2
+      },
+      {
+        "id": 15,
+        "cart_id": 8,
+        "product_id": 1,
+        "quantity": 2
+      },
+      {
+        "id": 16,
+        "cart_id": 9,
+        "product_id": 1,
+        "quantity": 2
+      },
+      {
+        "id": 17,
+        "cart_id": 9,
+        "product_id": 2,
+        "quantity": 2
+      },
+      {
+        "id": 18,
+        "cart_id": 10,
+        "product_id": 2,
+        "quantity": 2
+      },
+      {
+        "id": 19,
+        "cart_id": 11,
+        "product_id": 2,
+        "quantity": 2
+      },
+      {
+        "id": 20,
+        "cart_id": 11,
+        "product_id": 1,
+        "quantity": 2
+      },
+      {
+        "id": 21,
+        "cart_id": 12,
+        "product_id": 1,
+        "quantity": 2
+      },
+      {
+        "id": 22,
+        "cart_id": 12,
+        "product_id": 2,
+        "quantity": 2
+      },
+      {
+        "id": 23,
+        "cart_id": 13,
+        "product_id": 1,
+        "quantity": 1
+      },
+      {
+        "id": 24,
+        "cart_id": 13,
+        "product_id": 2,
+        "quantity": 1
+      },
+      {
+        "id": 25,
+        "cart_id": 14,
+        "product_id": 1,
+        "quantity": 1
+      },
+      {
+        "id": 26,
+        "cart_id": 15,
+        "product_id": 1,
+        "quantity": 2
+      },
+      {
+        "id": 27,
+        "cart_id": 16,
+        "product_id": 2,
+        "quantity": 2
+      },
+      {
+        "id": 28,
+        "cart_id": 16,
+        "product_id": 1,
+        "quantity": 1
+      },
+      {
+        "id": 29,
+        "cart_id": 17,
+        "product_id": 1,
+        "quantity": 1
+      },
+      {
+        "id": 30,
+        "cart_id": 18,
+        "product_id": 1,
+        "quantity": 2
+      },
+      {
+        "id": 31,
+        "cart_id": 19,
+        "product_id": 2,
+        "quantity": 2
+      },
+      {
+        "id": 32,
+        "cart_id": 20,
+        "product_id": 2,
+        "quantity": 1
+      },
+      {
+        "id": 33,
+        "cart_id": 20,
+        "product_id": 1,
+        "quantity": 1
+      }
+    ],
+    "orders": [
+      {
+        "id": 1,
+        "user_id": 2,
+        "total_price": 24970000,
+        "status": "SHIPPED",
+        "recipient_name": "User2 Demo",
+        "phone": "0900000002",
+        "address": "102 Đường Mẫu, Quận 3, Đà Nẵng",
+        "created_at": "2025-02-25 20:05:44"
+      },
+      {
+        "id": 2,
+        "user_id": 4,
+        "total_price": 37360000,
+        "status": "SHIPPED",
+        "recipient_name": "User4 Demo",
+        "phone": "0900000004",
+        "address": "104 Đường Mẫu, Quận 5, Hải Phòng",
+        "created_at": "2024-09-03 06:01:26"
+      },
+      {
+        "id": 3,
+        "user_id": 5,
+        "total_price": 24780000,
+        "status": "PAID",
+        "recipient_name": "User5 Demo",
+        "phone": "0900000005",
+        "address": "105 Đường Mẫu, Quận 6, Hà Nội",
+        "created_at": "2026-02-19 07:11:10"
+      },
+      {
+        "id": 4,
+        "user_id": 8,
+        "total_price": 12580000,
+        "status": "SHIPPED",
+        "recipient_name": "User8 Demo",
+        "phone": "0900000008",
+        "address": "108 Đường Mẫu, Quận 9, Cần Thơ",
+        "created_at": "2025-09-22 14:42:53"
+      },
+      {
+        "id": 5,
+        "user_id": 10,
+        "total_price": 18680000,
+        "status": "PAID",
+        "recipient_name": "User10 Demo",
+        "phone": "0900000010",
+        "address": "110 Đường Mẫu, Quận 11, Hà Nội",
+        "created_at": "2025-10-20 09:54:58"
+      },
+      {
+        "id": 6,
+        "user_id": 15,
+        "total_price": 24970000,
+        "status": "SHIPPED",
+        "recipient_name": "User15 Demo",
+        "phone": "0900000015",
+        "address": "115 Đường Mẫu, Quận 4, Hà Nội",
+        "created_at": "2025-03-02 11:15:30"
+      },
+      {
+        "id": 7,
+        "user_id": 16,
+        "total_price": 24970000,
+        "status": "COMPLETED",
+        "recipient_name": "User16 Demo",
+        "phone": "0900000016",
+        "address": "116 Đường Mẫu, Quận 5, TP. Hồ Chí Minh",
+        "created_at": "2025-06-14 04:27:31"
+      },
+      {
+        "id": 8,
+        "user_id": 18,
+        "total_price": 18680000,
+        "status": "PENDING",
+        "recipient_name": "User18 Demo",
+        "phone": "0900000018",
+        "address": "118 Đường Mẫu, Quận 7, Cần Thơ",
+        "created_at": "2025-05-14 11:50:05"
+      }
+    ],
+    "order_items": [
+      {
+        "id": 1,
+        "order_id": 1,
+        "product_id": 2,
+        "price": 12390000,
+        "quantity": 1
+      },
+      {
+        "id": 2,
+        "order_id": 1,
+        "product_id": 1,
+        "price": 6290000,
+        "quantity": 2
+      },
+      {
+        "id": 3,
+        "order_id": 2,
+        "product_id": 2,
+        "price": 12390000,
+        "quantity": 2
+      },
+      {
+        "id": 4,
+        "order_id": 2,
+        "product_id": 1,
+        "price": 6290000,
+        "quantity": 2
+      },
+      {
+        "id": 5,
+        "order_id": 3,
+        "product_id": 2,
+        "price": 12390000,
+        "quantity": 2
+      },
+      {
+        "id": 6,
+        "order_id": 4,
+        "product_id": 1,
+        "price": 6290000,
+        "quantity": 2
+      },
+      {
+        "id": 7,
+        "order_id": 5,
+        "product_id": 1,
+        "price": 6290000,
+        "quantity": 1
+      },
+      {
+        "id": 8,
+        "order_id": 5,
+        "product_id": 2,
+        "price": 12390000,
+        "quantity": 1
+      },
+      {
+        "id": 9,
+        "order_id": 6,
+        "product_id": 1,
+        "price": 6290000,
+        "quantity": 2
+      },
+      {
+        "id": 10,
+        "order_id": 6,
+        "product_id": 2,
+        "price": 12390000,
+        "quantity": 1
+      },
+      {
+        "id": 11,
+        "order_id": 7,
+        "product_id": 1,
+        "price": 6290000,
+        "quantity": 2
+      },
+      {
+        "id": 12,
+        "order_id": 7,
+        "product_id": 2,
+        "price": 12390000,
+        "quantity": 1
+      },
+      {
+        "id": 13,
+        "order_id": 8,
+        "product_id": 2,
+        "price": 12390000,
+        "quantity": 1
+      },
+      {
+        "id": 14,
+        "order_id": 8,
+        "product_id": 1,
+        "price": 6290000,
+        "quantity": 1
+      }
+    ],
+    "reviews": [],
+    "wishlists": [
+      {
+        "user_id": 2,
+        "product_id": 2
+      },
+      {
+        "user_id": 2,
+        "product_id": 1
+      },
+      {
+        "user_id": 4,
+        "product_id": 2
+      },
+      {
+        "user_id": 4,
+        "product_id": 1
+      },
+      {
+        "user_id": 7,
+        "product_id": 2
+      },
+      {
+        "user_id": 7,
+        "product_id": 1
+      },
+      {
+        "user_id": 8,
+        "product_id": 2
+      },
+      {
+        "user_id": 8,
+        "product_id": 1
+      },
+      {
+        "user_id": 10,
+        "product_id": 1
+      },
+      {
+        "user_id": 12,
+        "product_id": 2
+      },
+      {
+        "user_id": 12,
+        "product_id": 1
+      },
+      {
+        "user_id": 15,
+        "product_id": 2
+      },
+      {
+        "user_id": 15,
+        "product_id": 1
+      },
+      {
+        "user_id": 18,
+        "product_id": 1
+      },
+      {
+        "user_id": 18,
+        "product_id": 2
+      },
+      {
+        "user_id": 20,
+        "product_id": 2
+      }
+    ]
+  }
+}

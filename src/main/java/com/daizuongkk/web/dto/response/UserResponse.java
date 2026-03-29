@@ -9,6 +9,7 @@ import lombok.*;
 @Setter
 @Getter
 public class UserResponse {
+    Long id;
     private String username;
     private String firstName;
     private String lastName;

@@ -111,7 +111,7 @@ public class ProductRepository {
 
     public synchronized List<Product> findLatest(int limit) {
         int normalizedLimit = Math.max(limit, 1);
-        String sql = "SELECT * FROM ( SELECT * FROM products ORDER BY RAND() LIMIT ?) AS tmp ORDER BY created_at DESC";
+        String sql = "SELECT * FROM  products ORDER BY created_at DESC LIMIT ?";
         return findManyBySql(sql, statement -> statement.setInt(1, normalizedLimit));
     }
 

@@ -61,8 +61,15 @@ public class ProductService {
         return productToProductResponse(productRepository.findById(id))  ;
     }
 
-    public List<Product> getProductsByCategory(String category) {
-        return productRepository.findByCategory(category);
+    public List<ProductResponse> getProductsByCategory(String category) {
+
+
+        List<Product> products = productRepository.findByCategory(category);
+        List<ProductResponse> productResponses = new ArrayList<>();
+        for (Product product : products) {
+            productResponses.add(productToProductResponse(product));
+        }
+        return productResponses;
     }
 
     public List<Product> searchProductsByName(String keyword) {

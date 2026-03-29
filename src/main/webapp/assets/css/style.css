@@ -1461,8 +1461,37 @@ textarea.input {
 #product-imgs .product-preview {
   margin: 0px 5px;
   border: 1px solid #E4E7ED;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/*daizuongkk*/
+#product-imgs .product-preview img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;      /* thumbnail đồng đều, không méo */
+}
+
+#product-main-img .product-preview {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#product-main-img .product-preview img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;    /* giữ trọn ảnh chính */
+}
 #product-imgs .product-preview.slick-current {
   border-color: #D10024;
 }

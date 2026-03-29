@@ -1,57 +1,96 @@
 package com.daizuongkk.web.service;
 
 import com.daizuongkk.web.dto.response.ReviewResponse;
+import com.daizuongkk.web.dto.response.UserResponse;
+import com.daizuongkk.web.model.Review;
 import com.daizuongkk.web.repository.ReviewRepository;
+import com.daizuongkk.web.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class ReviewService {
-	private final ReviewRepository reviewRepository;
+    private final ReviewRepository reviewRepository;
+	private final UserService userService;
 
-	public ReviewService() {
-		this.reviewRepository = new ReviewRepository();
-	}
+    public ReviewService() {
+        this.userService = new UserService();
+        this.reviewRepository = new ReviewRepository();
+    }
 
-	public ReviewService(ReviewRepository reviewRepository) {
-		this.reviewRepository = reviewRepository;
-	}
 
-	public List<ReviewResponse> getReviewsByProductId(Long productId, int page, int size) {
-		if (productId == null || productId <= 0) {
-			return Collections.emptyList();
-		}
+    public ReviewService(ReviewRepository reviewRepository, UserService userService) {
+        this.reviewRepository = reviewRepository;
+        this.userService = userService;
+    }
 
-		int normalizedPage = Math.max(page, 1);
-		int normalizedSize = Math.max(size, 1);
-		return reviewRepository.findByProductId(productId, normalizedPage, normalizedSize);
-	}
+    public List<ReviewResponse> getReviewsByProductId(Long productId, int page, int size) {
+        if (productId == null || productId <= 0) {
+            return Collections.emptyList();
+        }
 
-	public boolean addReview(Long productId, Long userId, String feedback, int score) {
-		if (productId == null || productId <= 0 || userId == null || userId <= 0) {
-			return false;
-		}
+        int normalizedPage = Math.max(page, 1);
+        int normalizedSize = Math.max(size, 1);
+        List<Review> reviews = reviewRepository.findByProductId(productId, normalizedPage, normalizedSize);
 
-		if (score < 1 || score > 5) {
-			return false;
-		}
+        List<ReviewResponse> reviewResponses = new ArrayList<ReviewResponse>();
+        for (Review review : reviews) {
 
-		if (reviewRepository.existsByProductIdAndUserId(productId, userId)) {
-			return false;
-		}
+            UserResponse userResponse = userService.findById(review.getUserId());
 
-		return reviewRepository.create(productId, userId, feedback, score);
-	}
 
-	public long countReviewsByProductId(Long productId) {
-		return reviewRepository.countByProductId(productId);
-	}
+            ReviewResponse reviewResponse = reviewToResponse(review);
 
-	public double getAverageScoreByProductId(Long productId) {
-		return reviewRepository.findAverageScoreByProductId(productId);
-	}
+            reviewResponse.setUserDisplayName(userResponse.getFirstName() + " " + userResponse.getLastName());
+            reviewResponse.setFiveStars((int) reviews.stream().filter(r -> r.getScore() == 5).count());
+            reviewResponse.setFourStars((int) reviews.stream().filter(r -> r.getScore() == 4).count());
+            reviewResponse.setThreeStars((int) reviews.stream().filter(r -> r.getScore() == 3).count());
+            reviewResponse.setTwoStars((int) reviews.stream().filter(r -> r.getScore() == 2).count());
+            reviewResponse.setOneStars((int) reviews.stream().filter(r -> r.getScore() == 1).count());
+            reviewResponses.add(reviewResponse);
+        }
+        return reviewResponses;
+    }
 
-	public boolean hasUserReviewedProduct(Long productId, Long userId) {
-		return reviewRepository.existsByProductIdAndUserId(productId, userId);
-	}
+    public boolean addReview(Long productId, Long userId, String message, int score) {
+        if (productId == null || productId <= 0 || userId == null || userId <= 0) {
+            return false;
+        }
+
+        if (score < 1 || score > 5) {
+            return false;
+        }
+
+        if (reviewRepository.existsByProductIdAndUserId(productId, userId)) {
+            return false;
+        }
+
+        return reviewRepository.create(productId, userId, message, score);
+    }
+
+    public long countReviewsByProductId(Long productId) {
+        return reviewRepository.countByProductId(productId);
+    }
+
+    public double getAverageScoreByProductId(Long productId) {
+        return reviewRepository.findAverageScoreByProductId(productId);
+    }
+
+    public boolean hasUserReviewedProduct(Long productId, Long userId) {
+        return reviewRepository.existsByProductIdAndUserId(productId, userId);
+    }
+
+
+    private ReviewResponse reviewToResponse(Review review) {
+
+
+        return ReviewResponse.builder()
+                .id(review.getId())
+                .productId(review.getProductId())
+                .userId(review.getUserId())
+                .message(review.getMessage())
+                .createdAt(review.getCreatedAt())
+                .build();
+    }
 }

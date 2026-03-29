@@ -1,6 +1,6 @@
 package com.daizuongkk.web.repository;
 
-import com.daizuongkk.web.dto.response.ReviewResponse;
+import com.daizuongkk.web.model.Review;
 import com.daizuongkk.web.util.JDBCUtils;
 
 import java.sql.Connection;
@@ -22,7 +22,7 @@ public class ReviewRepository {
 		this.connection = connection;
 	}
 
-	public synchronized List<ReviewResponse> findByProductId(Long productId, int page, int size) {
+	public List<Review> findByProductId(Long productId, int page, int size) {
 		if (productId == null || productId <= 0) {
 			return Collections.emptyList();
 		}
@@ -31,16 +31,16 @@ public class ReviewRepository {
 		int normalizedSize = Math.max(size, 1);
 		int offset = (normalizedPage - 1) * normalizedSize;
 
-		String sql = "SELECT r.id, r.product_id, r.user_id, r.feedback, r.score, r.created_at, " +
-				"COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.username, 'Anonymous') AS user_display_name " +
-				"FROM reviews r " +
-				"LEFT JOIN users u ON u.id = r.user_id " +
-				"WHERE r.product_id = ? " +
-				"ORDER BY r.created_at DESC " +
+		String sql = "SELECT * FROM reviews " +
+				"WHERE product_id = ? " +
+				"ORDER BY created_at DESC " +
 				"LIMIT ? OFFSET ?";
 
-		List<ReviewResponse> reviews = new ArrayList<>();
-		try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
+		List<Review> reviews = new ArrayList<>();
+
+		try (Connection conn = getConnection();
+			 PreparedStatement statement = conn.prepareStatement(sql)) {
+
 			statement.setLong(1, productId);
 			statement.setInt(2, normalizedSize);
 			statement.setInt(3, offset);
@@ -50,24 +50,24 @@ public class ReviewRepository {
 					reviews.add(resultSetToReview(resultSet));
 				}
 			}
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return reviews;
 	}
 
-	public synchronized boolean create(Long productId, Long userId, String feedback, int score) {
+	public  boolean create(Long productId, Long userId, String message, int score) {
 		if (productId == null || productId <= 0 || userId == null || userId <= 0) {
 			return false;
 		}
 
-		String normalizedFeedback = feedback == null ? "" : feedback.trim();
-		String sql = "INSERT INTO reviews (product_id, user_id, feedback, score) VALUES (?, ?, ?, ?)";
+		String normalizedMessage = message == null ? "" : message.trim();
+		String sql = "INSERT INTO reviews (product_id, user_id, message, score) VALUES (?, ?, ?, ?)";
 
 		try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			statement.setLong(2, userId);
-			statement.setString(3, normalizedFeedback);
+			statement.setString(3, normalizedMessage);
 			statement.setInt(4, score);
 			return statement.executeUpdate() > 0;
 		} catch (Exception e) {
@@ -76,7 +76,7 @@ public class ReviewRepository {
 		}
 	}
 
-	public synchronized long countByProductId(Long productId) {
+	public  long countByProductId(Long productId) {
 		if (productId == null || productId <= 0) {
 			return 0;
 		}
@@ -95,7 +95,7 @@ public class ReviewRepository {
 		return 0;
 	}
 
-	public synchronized Double findAverageScoreByProductId(Long productId) {
+	public  Double findAverageScoreByProductId(Long productId) {
 		if (productId == null || productId <= 0) {
 			return 0.0;
 		}
@@ -114,7 +114,7 @@ public class ReviewRepository {
 		return 0.0;
 	}
 
-	public synchronized boolean existsByProductIdAndUserId(Long productId, Long userId) {
+	public  boolean existsByProductIdAndUserId(Long productId, Long userId) {
 		if (productId == null || userId == null || productId <= 0 || userId <= 0) {
 			return false;
 		}
@@ -132,17 +132,18 @@ public class ReviewRepository {
 		}
 	}
 
-	private ReviewResponse resultSetToReview(ResultSet resultSet) throws SQLException {
-		return ReviewResponse.builder()
+	private Review resultSetToReview(ResultSet resultSet) throws SQLException {
+		return Review.builder()
 				.id(resultSet.getLong("id"))
 				.productId(resultSet.getLong("product_id"))
 				.userId(resultSet.getLong("user_id"))
-				.userDisplayName(resultSet.getString("user_display_name"))
-				.feedback(resultSet.getString("feedback"))
+				.message(resultSet.getString("message"))
 				.score(resultSet.getInt("score"))
 				.createdAt(resultSet.getTimestamp("created_at"))
 				.build();
 	}
+
+
 
 	private Connection getConnection() {
 		try {
@@ -155,7 +156,7 @@ public class ReviewRepository {
 		}
 	}
 
-	public synchronized void closeConnection() {
+	public  void closeConnection() {
 		if (this.connection == null) {
 			return;
 		}

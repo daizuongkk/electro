@@ -21,7 +21,7 @@ public class ProductResponse {
     private Double price;
     private List<String> imageUrl;
     private Long promotion;
-
+    private Long quantity;
     private Long reviewScore;
     private Date createdAt;
 

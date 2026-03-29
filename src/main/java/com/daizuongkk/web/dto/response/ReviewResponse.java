@@ -18,8 +18,13 @@ public class ReviewResponse {
     private Long productId;
     private Long userId;
     private String userDisplayName;
-    private String feedback;
-    private Integer score;
+    private String message;
+    private Integer oneStars;
+
+    private Integer twoStars;
+    private Integer threeStars;
+    private Integer fourStars;
+    private Integer fiveStars;
     private Date createdAt;
 
 }

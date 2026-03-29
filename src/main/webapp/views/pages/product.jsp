@@ -350,57 +350,36 @@
                                 <div class="col-md-6">
                                     <div id="reviews">
                                         <ul class="reviews">
-                                            <li>
-                                                <div class="review-heading">
-                                                    <h5 class="name">John</h5>
-                                                    <p class="date">27 DEC 2018, 8:0 PM</p>
-                                                    <div class="review-rating">
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star-o empty"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="review-body">
-                                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
-                                                        eiusmod tempor incididunt ut labore et dolore magna aliqua</p>
-                                                </div>
-                                            </li>
-                                            <li>
-                                                <div class="review-heading">
-                                                    <h5 class="name">John</h5>
-                                                    <p class="date">27 DEC 2018, 8:0 PM</p>
-                                                    <div class="review-rating">
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star-o empty"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="review-body">
-                                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
-                                                        eiusmod tempor incididunt ut labore et dolore magna aliqua</p>
-                                                </div>
-                                            </li>
-                                            <li>
-                                                <div class="review-heading">
-                                                    <h5 class="name">John</h5>
-                                                    <p class="date">27 DEC 2018, 8:0 PM</p>
-                                                    <div class="review-rating">
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star-o empty"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="review-body">
-                                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
-                                                        eiusmod tempor incididunt ut labore et dolore magna aliqua</p>
-                                                </div>
-                                            </li>
+                                            
+                                            <c:if test="${fn:length(reviews) == 0}">
+                                                <li>
+                                                    <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+                                                </li>
+                                            </c:if>
+                                            
+                                            <c:if test="${fn:length(reviews) > 0}">
+                                                <c:forEach items="${reviews}" var="review">
+                                                    <li>
+                                                        <div class="review-heading">
+                                                            <h5 class="name"><c:out value="${review.userDisplayName}"/></h5>
+                                                            <p class="date"><fmt:formatDate value="${review.createdAt}" pattern="dd MMM yyyy, h:mm a"/></p>
+                                                            <div class="review-rating">
+                                                                <c:forEach begin="1" end="${product.reviewScore}" var="i">
+                                                                    <i class="fa fa-star"></i>
+                                                                </c:forEach>
+                                                                <c:forEach begin="${product.reviewScore + 1}" end="5" var="i">
+                                                                    <i class="fa fa-star-o empty"></i>
+                                                                </c:forEach>
+                                                            </div>
+                                                        </div>
+                                                        <div class="review-body">
+                                                            <p><c:out value="${review.message}" escapeXml="false"/></p>
+                                                        </div>
+                                                    </li>
+                                                </c:forEach>
+                                            </c:if>
+
+                                            
                                         </ul>
                                         <ul class="reviews-pagination">
                                             <li class="active">1</li>
@@ -464,147 +443,42 @@
 
             <div class="col-md-12">
                 <div class="section-title text-center">
-                    <h3 class="title">Related Products</h3>
+                    <h3 class="title">Sản Phẩm Tương Tự</h3>
                 </div>
             </div>
-
-            <!-- product -->
-            <div class="col-md-3 col-xs-6">
-                <div class="product">
-                    <div class="product-img">
-                        <img src="assets/img/product01.png" alt="">
-                        <div class="product-label">
-                            <span class="sale">-30%</span>
-                        </div>
-                    </div>
-                    <div class="product-body">
-                        <p class="product-category">Category</p>
-                        <h3 class="product-name"><a href="#">${product.name}</a></h3>
-                        <h4 class="product-price">${product.price}
-                            <del class="product-old-price">$990.00</del>
-                        </h4>
-                        <div class="product-rating">
-                        </div>
-                        <div class="product-btns">
-                            <button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">thêm yêu thích</span>
-                            </button>
-                            <button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">thêm so sánh</span>
-                            </button>
-                            <button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">xem nhanh</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="add-to-cart">
-                        <button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-                    </div>
-                </div>
-            </div>
-            <!-- /product -->
-
-            <!-- product -->
-            <div class="col-md-3 col-xs-6">
-                <div class="product">
-                    <div class="product-img">
-                        <img src="assets/img/product02.png" alt="">
-                        <div class="product-label">
-                            <span class="new">NEW</span>
-                        </div>
-                    </div>
-                    <div class="product-body">
-                        <p class="product-category">Category</p>
-                        <h3 class="product-name"><a href="#">${product.name}</a></h3>
-                        <h4 class="product-price">${product.price}
-                            <del class="product-old-price">$990.00</del>
-                        </h4>
-                        <div class="product-rating">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                        </div>
-                        <div class="product-btns">
-                            <button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">thêm yêu thích</span>
-                            </button>
-                            <button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">thêm so sánh</span>
-                            </button>
-                            <button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">xem nhanh</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="add-to-cart">
-                        <button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-                    </div>
-                </div>
-            </div>
-            <!-- /product -->
 
             <div class="clearfix visible-sm visible-xs"></div>
 
-            <!-- product -->
-            <div class="col-md-3 col-xs-6">
-                <div class="product">
-                    <div class="product-img">
-                        <img src="assets/img/product03.png" alt="">
-                    </div>
-                    <div class="product-body">
-                        <p class="product-category">Phân loại</p>
-                        <h3 class="product-name"><a href="#">${product.name}</a></h3>
-                        <h4 class="product-price">${product.price}
-                            <del class="product-old-price">$990.00</del>
-                        </h4>
-                        <div class="product-rating">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star-o"></i>
+            <!-- Products tab & slick -->
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="products-tabs">
+                        <!-- tab -->
+                        <div id="tab1" class="tab-pane active">
+                            <div class="products-slick" data-nav="#slick-nav-1">
+                                <c:forEach var="item" items="${relatedProducts}">
+                                    <div class="col-md-4 col-xs-6">
+                                        <c:set var="product" value="${item}" scope="request"/>
+                                        <jsp:include page="../commons/product-card.jsp" />
+                                    </div>
+                                </c:forEach>
+                                <c:remove var="product" scope="request"/>
+
+                                <c:if test="${empty relatedProducts}">
+                                    <div class="col-md-12">
+                                        <p>Không có sản phẩm tương tự.</p>
+                                    </div>
+                                </c:if><!-- product -->
+                            </div>
+                            <div id="slick-nav-1" class="products-slick-nav"></div>
                         </div>
-                        <div class="product-btns">
-                            <button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">thêm yêu thích</span>
-                            </button>
-                            <button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">thêm so sánh</span>
-                            </button>
-                            <button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">xem nhanh</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="add-to-cart">
-                        <button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+                        <!-- /tab -->
                     </div>
                 </div>
             </div>
             <!-- /product -->
 
-            <!-- product -->
-            <div class="col-md-3 col-xs-6">
-                <div class="product">
-                    <div class="product-img">
-                        <img src="assets/img/product04.png" alt="">
-                    </div>
-                    <div class="product-body">
-                        <p class="product-category">Category</p>
-                        <h3 class="product-name"><a href="#">${product.name}</a></h3>
-                        <h4 class="product-price">${product.price}
-                            <del class="product-old-price">$990.00</del>
-                        </h4>
-                        <div class="product-rating">
-                        </div>
-                        <div class="product-btns">
-                            <button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">thêm yêu thích</span>
-                            </button>
-                            <button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">thêm so sánh</span>
-                            </button>
-                            <button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">xem nhanh</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="add-to-cart">
-                        <button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-                    </div>
-                </div>
-            </div>
-            <!-- /product -->
+
 
         </div>
         <!-- /row -->
@@ -621,7 +495,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="newsletter">
-                    <p>Sign Up for the <strong>NEWSLETTER</strong></p>
+                    <p>Đăng kí nhận thông tin từ <strong>CellphoneS</strong></p>
                     <form>
                         <input class="input" type="email" placeholder="Enter Your Email">
                         <button class="newsletter-btn"><i class="fa fa-envelope"></i> Subscribe</button>

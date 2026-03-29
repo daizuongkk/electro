@@ -48,7 +48,8 @@
             <div class="col-md-12 ">
                 <div class="row">
                     <div class="col-md-6">
-                        <img class="login-banner center-block" src="./assets/img/red-login-banner.jpg" alt="login-banner">
+                        <img class="login-banner center-block" src="./assets/img/red-login-banner.jpg"
+                             alt="login-banner">
                     </div>
                     <div class="col-md-6">
                         <div class="login-container center-block">
@@ -61,7 +62,8 @@
                                                     <path d="M16 2C8.3 2 2 8.3 2 16s6.3 14 14 14 14-6.3 14-14S23.7 2 16 2z"
                                                           fill="none"
                                                           stroke="currentColor" stroke-width="1.5"/>
-                                                    <path d="M12 16a4 4 0 108 0" stroke="currentColor" stroke-width="1.5"
+                                                    <path d="M12 16a4 4 0 108 0" stroke="currentColor"
+                                                          stroke-width="1.5"
                                                           stroke-linecap="round"/>
                                                     <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
                                                     <circle cx="20" cy="12" r="1.5" fill="currentColor"/>
@@ -79,7 +81,8 @@
                                 <form class="comfort-form" id="loginForm" novalidate action="login" method="post">
                                     <div class="soft-field">
                                         <div class="field-container">
-                                            <input type="text" id="username" name="username" required autocomplete="username" value="${submittedUsername}">
+                                            <input type="text" id="username" name="username" required
+                                                   autocomplete="username" value="${submittedUsername}">
                                             <label for="username">Tên đăng nhập</label>
                                             <div class="field-accent"></div>
                                         </div>
@@ -102,7 +105,8 @@
                                                                     stroke-width="1.5"
                                                                     fill="none"/>
                                                         </svg>
-                                                        <svg class="eye-closed" width="20" height="20" viewBox="0 0 20 20"
+                                                        <svg class="eye-closed" width="20" height="20"
+                                                             viewBox="0 0 20 20"
                                                              fill="none">
                                                             <path d="M3 3l14 14M8.5 8.5a3 3 0 004 4m2.5-2.5C15 10 12.5 7 10 7c-.5 0-1 .1-1.5.3M10 13c-2.5 0-4.5-2-5-3 .3-.6.7-1.2 1.2-1.7"
                                                                   stroke="currentColor" stroke-width="1.5"
@@ -118,7 +122,8 @@
                                     </div>
                                     <div class="comfort-options">
                                         <label class="gentle-checkbox">
-                                            <input type="checkbox" id="remember" name="remember" <c:if test="${rememberChecked}">checked</c:if>>
+                                            <input type="checkbox" id="remember" name="remember"
+                                                   <c:if test="${rememberChecked}">checked</c:if>>
                                             <span class="checkbox-soft">
                             <div class="check-circle"></div>
                             <svg class="check-mark" width="12" height="10" viewBox="0 0 12 10" fill="none">
@@ -142,7 +147,9 @@
                                         <div class="button-glow"></div>
                                     </button>
                                 </form>
-                                <div id="accept" class="text-center">Bằng việc đăng nhập, bạn đã đồng ý với Electro. về <span><a href="">Điều khoản dịch vụ</a></span> & <span><a href="">Chính sách bảo mật.</a></span></div>
+                                <div id="accept" class="text-center">Bằng việc đăng nhập, bạn đã đồng ý với Electro. về
+                                    <span><a href="">Điều khoản dịch vụ</a></span> & <span><a href="">Chính sách bảo mật.</a></span>
+                                </div>
                                 <div class="gentle-divider">
                                     <div class="divider-line"></div>
                                     <span class="divider-text">hoặc tiếp tục với</span>

@@ -63,8 +63,10 @@ public class ProductController extends HttpServlet {
 
         List<ReviewResponse>   reviews = reviewService.getReviewsByProductId(productId, currentPage,3);
 
-		request.setAttribute("product", product);
+		List<ProductResponse> relatedProducts = productService.getProductsByCategory(product.getCategory());
 
+		request.setAttribute("product", product);
+		request.setAttribute("relatedProducts", relatedProducts);
 		request.setAttribute("reviews", reviews);
 		request.getRequestDispatcher("views/pages/product.jsp").forward(request, response);
 	}

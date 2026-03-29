@@ -1,5 +1,7 @@
 package com.daizuongkk.web.repository;
 
+import com.daizuongkk.web.model.Cart;
+import com.daizuongkk.web.model.CartItem;
 import com.daizuongkk.web.model.ProductImg;
 import com.daizuongkk.web.util.JDBCUtils;
 
@@ -24,26 +26,26 @@ public class CartRepository {
         this.connection = connection;
     }
 
-    public synchronized List<ProductImg> findByProductId(Long productId) {
-        if (productId == null || productId <= 0) {
+    public synchronized List<CartItem> findByUserId(Long userId) {
+        if (userId == null || userId <= 0) {
             return Collections.emptyList();
         }
 
-        String sql = "SELECT id, product_id, image_url FROM product_images WHERE product_id = ? ORDER BY id ASC";
-        List<ProductImg> images = new ArrayList<>();
+        String sql = "SELECT ci.* FROM carts c JOIN cart_items ci ON c.id = ci.cart_id  WHERE c.user_id = ?";
+        List<CartItem> carts = new ArrayList<>();
 
         try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
-            statement.setLong(1, productId);
+            statement.setLong(1, userId);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    images.add(resultSetToProductImg(resultSet));
+                    carts.add(resultSetToCartItem(resultSet));
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return images;
+        return carts;
     }
 
     public synchronized List<String> findUrlsByProductId(Long productId) {
@@ -220,11 +222,12 @@ public class CartRepository {
         }
     }
 
-    private ProductImg resultSetToProductImg(ResultSet resultSet) throws SQLException {
-        return ProductImg.builder()
+    private CartItem resultSetToCartItem(ResultSet resultSet) throws SQLException {
+        return CartItem.builder()
                 .id(resultSet.getLong("id"))
+                .cartId(resultSet.getLong("cart_id"))
+                .quantity(resultSet.getLong("quantity"))
                 .productId(resultSet.getLong("product_id"))
-                .url(resultSet.getString("image_url"))
                 .build();
     }
 
