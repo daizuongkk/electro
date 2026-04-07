@@ -34,10 +34,11 @@
             <div class="col-md-8">
                 <div class="cart-panel">
                     <div class="cart-panel-header clearfix">
-                        <h3 class="cart-title">Giỏ Hàng Của Bạn</h3>
-                        <span class="cart-count">${cartCount} sản phẩm</span>
+                        <h3 class="cart-title">Giỏ Hàng</h3>
+                        <span id="cart-count-display" class="cart-count">${cartCount} sản phẩm</span>
                     </div>
 
+                    <div id="cart-items-container">
                     <c:choose>
                         <c:when test="${empty cartItems}">
                             <div class="cart-empty-state text-center">
@@ -52,10 +53,14 @@
                                 <table class="table cart-table">
                                     <thead>
                                     <tr>
+                                        <th class="text-center cart-select-col">
+                                            <input id="toggle-select-all" type="checkbox" class="cart-item-check" onclick="selectAll(this)" aria-label="Chọn tất cả sản phẩm" checked="checked"/>
+                                        </th>
                                         <th>Sản phẩm</th>
                                         <th class="text-center">Đơn giá</th>
                                         <th class="text-center">Số lượng</th>
                                         <th class="text-right">Tạm tính</th>
+                                        <th class="text-center cart-action-col">Xóa</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -65,6 +70,9 @@
                                         <c:set var="subtotal" value="${subtotal + lineTotal}"/>
 
                                         <tr class="cart-row" data-unit-price="${item.product.price}">
+                                            <td class="text-center cart-select-col">
+                                                <input type="checkbox" class="cart-item-check" checked aria-label="Chọn sản phẩm ${item.product.name}">
+                                            </td>
                                             <td>
                                                 <div class="cart-product">
                                                     <a class="cart-product-image" href="products?id=${item.product.id}">
@@ -72,7 +80,6 @@
                                                     </a>
                                                     <div class="cart-product-info">
                                                         <h4><a href="products?id=${item.product.id}">${item.product.name}</a></h4>
-                                                        <span>${item.product.brand}</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -91,13 +98,18 @@
                                                     <fmt:formatNumber value="${lineTotal}" type="currency" currencySymbol="₫"/>
                                                 </strong>
                                             </td>
+                                            <td class="text-center cart-action-col">
+                                                <button type="button" class="cart-remove-btn" aria-label="Xóa sản phẩm ${item.product.name}">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </td>
                                         </tr>
                                     </c:forEach>
                                     </tbody>
                                 </table>
                             </div>
 
-                            <div class="cart-actions clearfix">
+                            <div id="cart-actions-panel" class="cart-actions clearfix">
                                 <div class="pull-left cart-coupon">
                                     <input type="text" class="input" placeholder="Nhập mã giảm giá">
                                     <button type="button" class="primary-btn">Áp dụng</button>
@@ -106,6 +118,7 @@
                             </div>
                         </c:otherwise>
                     </c:choose>
+                    </div>
                 </div>
             </div>
 
@@ -135,7 +148,7 @@
                         </strong>
                     </div>
 
-                    <button type="button" class="primary-btn order-submit btn-block" ${empty cartItems ? 'disabled' : ''}>
+                    <button id="checkout-btn" type="button" class="primary-btn order-submit btn-block" ${empty cartItems ? 'disabled' : ''}>
                         Tiến hành thanh toán
                     </button>
                 </div>
@@ -170,6 +183,24 @@
 <%@ include file="../commons/script.jsp" %>
 
 <script>
+
+    const toggle = document.getElementById('toggle-select-all');
+
+    // Click "select all"
+    toggle.addEventListener('change', function () {
+        const checkboxes = document.querySelectorAll('#cart-page .cart-item-check');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    // Click từng checkbox con
+    document.addEventListener('change', function (e) {
+        if (e.target.matches('#cart-page .cart-item-check')) {
+            const checkboxes = document.querySelectorAll(
+                '#cart-page .cart-item-check:not(#toggle-select-all)'
+            );            toggle.checked = Array.from(checkboxes).every(cb => cb.checked);
+        }
+    });
+
     function formatCurrencyVND(value) {
         return new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(value || 0);
     }
@@ -207,6 +238,53 @@
         }
     }
 
+    function updateCartCountDisplay() {
+        var rows = document.querySelectorAll('#cart-page .cart-row');
+        var countEl = document.getElementById('cart-count-display');
+        if (countEl) {
+            countEl.textContent = rows.length + ' sản phẩm';
+        }
+    }
+
+    function renderEmptyCartState() {
+        return '' +
+            '<div class="cart-empty-state text-center">' +
+            '<i class="fa fa-shopping-cart"></i>' +
+            '<h4>Giỏ hàng đang trống</h4>' +
+            '<p>Hãy thêm sản phẩm để tiếp tục mua sắm.</p>' +
+            '<a href="shop" class="primary-btn">Mua sắm ngay</a>' +
+            '</div>';
+    }
+
+    function syncCartUIState() {
+        var rows = document.querySelectorAll('#cart-page .cart-row');
+        var itemsContainer = document.getElementById('cart-items-container');
+        var actionsPanel = document.getElementById('cart-actions-panel');
+        var checkoutBtn = document.getElementById('checkout-btn');
+
+        updateCartCountDisplay();
+
+        if (rows.length > 0) {
+            if (actionsPanel) {
+                actionsPanel.style.display = '';
+            }
+            if (checkoutBtn) {
+                checkoutBtn.disabled = false;
+            }
+            return;
+        }
+
+        if (actionsPanel) {
+            actionsPanel.style.display = 'none';
+        }
+        if (checkoutBtn) {
+            checkoutBtn.disabled = true;
+        }
+        if (itemsContainer) {
+            itemsContainer.innerHTML = renderEmptyCartState();
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         var page = document.getElementById('cart-page');
         if (!page) {
@@ -239,11 +317,30 @@
             updateCartSummaryFromUI();
         });
 
+        page.addEventListener('click', function (event) {
+            var removeButton = event.target.closest('.cart-remove-btn');
+            if (!removeButton) {
+                return;
+            }
+
+            var row = removeButton.closest('.cart-row');
+            if (!row) {
+                return;
+            }
+
+            row.remove();
+            updateCartSummaryFromUI();
+            syncCartUIState();
+        });
+
         page.addEventListener('input', function (event) {
             if (event.target.classList.contains('cart-qty-input')) {
                 updateCartSummaryFromUI();
             }
         });
+
+        updateCartSummaryFromUI();
+        syncCartUIState();
     });
 </script>
 
