@@ -100,7 +100,7 @@ public class ProductService {
 
         productResponse.setImageUrl(imageUrls);
 
-        Long reviewScore = reviewRepository.findAverageScoreByProductId(product.getId()).longValue();
+        Double reviewScore = reviewRepository.findAverageScoreByProductId(product.getId());
         productResponse.setReviewScore(reviewScore);
 
 

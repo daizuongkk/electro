@@ -7,9 +7,12 @@
         <div id="responsive-nav">
             <!-- NAV -->
             <ul class="main-nav nav navbar-nav">
-                <li class="active"><a href="shop?tab=all">Tất Cả</a></li>
+                <c:set var="allTabActive" value="${param.tab eq 'all' or (empty param.category and empty selectedCategories)}"/>
+                <li class="${allTabActive ? 'active' : ''}"><a href="shop?tab=all">Tất Cả</a></li>
                 <c:forEach var="category" items="${categories}">
-                    <li>
+                    <c:set var="categoryActive"
+                           value="${(not empty selectedCategories and selectedCategories.contains(category.key)) or (param.category eq category.key)}"/>
+                    <li class="${categoryActive ? 'active' : ''}">
                         <a href="shop?category=${category.key}">
                                 ${category.value}
                         </a>

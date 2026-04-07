@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 public class Cart {
     private Long id;
-    private Long productId;
+    private Long userId;
 
 }

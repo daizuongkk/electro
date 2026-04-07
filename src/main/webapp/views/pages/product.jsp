@@ -6,6 +6,8 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
+<fmt:setLocale value="vi_VN"/>
+<c:set var="reviewScore" value="${product.reviewScore}"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,9 +34,8 @@
             <div class="col-md-12">
                 <ul class="breadcrumb-tree">
                     <li><a href="#">Home</a></li>
-                    <li><a href="#">All Categories</a></li>
-                    <li><a href="#">Accessories</a></li>
-                    <li><a href="#">Headphones</a></li>
+
+                    <li><a href="#">${product.category}</a></li>
                     <li class="active">${product.name}</li>
                 </ul>
             </div>
@@ -86,11 +87,11 @@
                     <div>
                         <div class="product-rating">
                             <c:choose>
-                                <c:when test="${product.reviewScore != 0}">
-                                    <c:forEach begin="1" end="${product.reviewScore}" var="i">
+                                <c:when test="${reviewScore != 0}">
+                                    <c:forEach begin="1" end="${reviewScore}" var="i">
                                         <i class="fa fa-star"></i>
                                     </c:forEach>
-                                    <c:forEach begin="${product.reviewScore + 1}" end="5" var="i">
+                                    <c:forEach begin="${reviewScore + 1}" end="5" var="i">
                                         <i class="fa fa-star-o"></i>
                                     </c:forEach>
                                 </c:when>
@@ -101,21 +102,28 @@
                                 </c:otherwise>
                             </c:choose>
                         </div>
-                        <a class="review-link" href="#">${fn:length(reviews)} Đánh Giá</a>
+                        <a class="review-link" href="#">${totalRv} Đánh Giá</a>
                     </div>
                     <div>
                         <h3 class="product-price">
                             <c:choose>
                                 <c:when test="${product.price != null}">
-                                    $<fmt:formatNumber
-                                        value="${product.price - (product.price * product.promotion / 100)}"
-                                        type="number"
-                                        pattern="#.00"/>
+                                    <c:set var="newPrice"
+                                           value="${product.price - (product.price * product.promotion / 100)}"/>
+
+                                    <fmt:formatNumber
+                                            value="${newPrice}"
+                                            type="currency"
+                                            currencySymbol="₫"/>
                                 </c:when>
-                                <c:otherwise>Contact</c:otherwise>
+                                <c:otherwise>Liên Hệ</c:otherwise>
                             </c:choose>
                             <c:if test="${product.promotion != null && product.promotion > 0}">
-                                <del class="product-old-price"><c:out value="${product.price}"/></del>
+                                <del class="product-old-price">
+                                    <fmt:formatNumber
+                                            value="${product.price}"
+                                            type="currency"
+                                            currencySymbol="₫"/></del>
                             </c:if>
                         </h3>
                         <span class="product-available">In Stock</span>
@@ -192,7 +200,7 @@
                     <ul class="tab-nav">
                         <li class="active"><a data-toggle="tab" href="#tab1">Mô tả</a></li>
                         <li><a data-toggle="tab" href="#tab2">Chi tiết</a></li>
-                        <li><a data-toggle="tab" href="#tab3">Đánh giá (${fn:length(reviews)})</a></li>
+                        <li><a data-toggle="tab" href="#tab3">Đánh giá (${totalRv})</a></li>
                     </ul>
                     <!-- /product tab nav -->
 
@@ -214,7 +222,6 @@
                         <div id="tab2" class="tab-pane fade in">
                             <div class="row">
                                 <div class="col-md-12">
-
 
 
                                     <table class="table table-hover">
@@ -250,9 +257,9 @@
                                     </table>
 
                                     <p>
-<%--                                        <c:if test="${product.detail != null}">--%>
-<%--                                            <c:out value="${product.detail}" escapeXml="false"/>--%>
-<%--                                        </c:if>--%>
+                                        <%--                                        <c:if test="${product.detail != null}">--%>
+                                        <%--                                            <c:out value="${product.detail}" escapeXml="false"/>--%>
+                                        <%--                                        </c:if>--%>
                                     </p>
                                 </div>
                             </div>
@@ -266,13 +273,23 @@
                                 <div class="col-md-3">
                                     <div id="rating">
                                         <div class="rating-avg">
-                                            <span>4.5</span>
+                                            <span><fmt:formatNumber value="${reviewScore}" pattern="0.#"/> </span>
                                             <div class="rating-stars">
-                                                <i class="fa fa-star"></i>
-                                                <i class="fa fa-star"></i>
-                                                <i class="fa fa-star"></i>
-                                                <i class="fa fa-star"></i>
-                                                <i class="fa fa-star-o"></i>
+                                                <c:choose>
+                                                    <c:when test="${reviewScore != 0}">
+                                                        <c:forEach begin="1" end="${reviewScore}" var="i">
+                                                            <i class="fa fa-star"></i>
+                                                        </c:forEach>
+                                                        <c:forEach begin="${reviewScore + 1}" end="5" var="i">
+                                                            <i class="fa fa-star-o"></i>
+                                                        </c:forEach>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <c:forEach begin="1" end="5" var="i">
+                                                            <i class="fa fa-star-o"></i>
+                                                        </c:forEach>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </div>
                                         </div>
                                         <ul class="rating">
@@ -285,9 +302,9 @@
                                                     <i class="fa fa-star"></i>
                                                 </div>
                                                 <div class="rating-progress">
-                                                    <div style="width: 80%;"></div>
+                                                    <div style="width: ${stars.fiveStars / totalRv * 100}%"></div>
                                                 </div>
-                                                <span class="sum">3</span>
+                                                <span class="sum">${stars.fiveStars}</span>
                                             </li>
                                             <li>
                                                 <div class="rating-stars">
@@ -298,9 +315,9 @@
                                                     <i class="fa fa-star-o"></i>
                                                 </div>
                                                 <div class="rating-progress">
-                                                    <div style="width: 60%;"></div>
+                                                    <div style="width: ${stars.fourStars / totalRv * 100}%"></div>
                                                 </div>
-                                                <span class="sum">2</span>
+                                                <span class="sum">${stars.fourStars}</span>
                                             </li>
                                             <li>
                                                 <div class="rating-stars">
@@ -311,9 +328,9 @@
                                                     <i class="fa fa-star-o"></i>
                                                 </div>
                                                 <div class="rating-progress">
-                                                    <div></div>
+                                                    <div style="width: ${stars.threeStars / totalRv * 100}%"></div>
                                                 </div>
-                                                <span class="sum">0</span>
+                                                <span class="sum">${stars.threeStars}</span>
                                             </li>
                                             <li>
                                                 <div class="rating-stars">
@@ -324,9 +341,9 @@
                                                     <i class="fa fa-star-o"></i>
                                                 </div>
                                                 <div class="rating-progress">
-                                                    <div></div>
+                                                    <div style="width: ${stars.twoStars / totalRv * 100}%"></div>
                                                 </div>
-                                                <span class="sum">0</span>
+                                                <span class="sum">${stars.twoStars}</span>
                                             </li>
                                             <li>
                                                 <div class="rating-stars">
@@ -337,9 +354,9 @@
                                                     <i class="fa fa-star-o"></i>
                                                 </div>
                                                 <div class="rating-progress">
-                                                    <div></div>
+                                                    <div style="width: ${stars.oneStars / totalRv * 100}%"></div>
                                                 </div>
-                                                <span class="sum">0</span>
+                                                <span class="sum">${stars.oneStars}</span>
                                             </li>
                                         </ul>
                                     </div>
@@ -350,24 +367,28 @@
                                 <div class="col-md-6">
                                     <div id="reviews">
                                         <ul class="reviews">
-                                            
-                                            <c:if test="${fn:length(reviews) == 0}">
+
+                                            <c:if test="${totalRv == 0}">
                                                 <li>
                                                     <p>Chưa có đánh giá nào cho sản phẩm này.</p>
                                                 </li>
                                             </c:if>
-                                            
-                                            <c:if test="${fn:length(reviews) > 0}">
+
+                                            <c:if test="${totalRv > 0}">
                                                 <c:forEach items="${reviews}" var="review">
                                                     <li>
                                                         <div class="review-heading">
-                                                            <h5 class="name"><c:out value="${review.userDisplayName}"/></h5>
-                                                            <p class="date"><fmt:formatDate value="${review.createdAt}" pattern="dd MMM yyyy, h:mm a"/></p>
+                                                            <h5 class="name"><c:out
+                                                                    value="${review.userDisplayName}"/></h5>
+                                                            <p class="date"><fmt:formatDate value="${review.createdAt}"
+                                                                                            pattern="dd MMM yyyy, h:mm a"/></p>
                                                             <div class="review-rating">
-                                                                <c:forEach begin="1" end="${product.reviewScore}" var="i">
+                                                                <c:forEach begin="1" end="${reviewScore}"
+                                                                           var="i">
                                                                     <i class="fa fa-star"></i>
                                                                 </c:forEach>
-                                                                <c:forEach begin="${product.reviewScore + 1}" end="5" var="i">
+                                                                <c:forEach begin="${reviewScore + 1}" end="5"
+                                                                           var="i">
                                                                     <i class="fa fa-star-o empty"></i>
                                                                 </c:forEach>
                                                             </div>
@@ -379,7 +400,7 @@
                                                 </c:forEach>
                                             </c:if>
 
-                                            
+
                                         </ul>
                                         <ul class="reviews-pagination">
                                             <li class="active">1</li>
@@ -396,9 +417,8 @@
                                 <div class="col-md-3">
                                     <div id="review-form">
                                         <form class="review-form">
-                                            <input class="input" type="text" placeholder="Your Name">
-                                            <input class="input" type="email" placeholder="Your Email">
-                                            <textarea class="input" placeholder="Your Review"></textarea>
+
+                                            <textarea class="input" placeholder="Đánh giá"></textarea>
                                             <div class="input-rating">
                                                 <span>Your Rating: </span>
                                                 <div class="stars">
@@ -459,7 +479,7 @@
                                 <c:forEach var="item" items="${relatedProducts}">
                                     <div class="col-md-4 col-xs-6">
                                         <c:set var="product" value="${item}" scope="request"/>
-                                        <jsp:include page="../commons/product-card.jsp" />
+                                        <jsp:include page="../commons/product-card.jsp"/>
                                     </div>
                                 </c:forEach>
                                 <c:remove var="product" scope="request"/>
@@ -477,7 +497,6 @@
                 </div>
             </div>
             <!-- /product -->
-
 
 
         </div>

@@ -3,6 +3,7 @@ package com.daizuongkk.web.repository;
 import com.daizuongkk.web.dto.request.SearchProductRequest;
 import com.daizuongkk.web.model.Product;
 import com.daizuongkk.web.util.JDBCUtils;
+import org.eclipse.tags.shaded.org.apache.bcel.Repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,27 +14,19 @@ import java.util.Collections;
 import java.util.List;
 
 
-public class ProductRepository {
+public class ProductRepository  {
     private static final String SQL =
             "SELECT p.* FROM products p ";
 
-    private Connection connection;
 
-    public ProductRepository() {
-        this.connection = JDBCUtils.getConnection();
-    }
 
-    public ProductRepository(Connection connection) {
-        this.connection = connection;
-    }
-
-    public synchronized List<Product> findAll() {
+    public  List<Product> findAll() {
         String sql = SQL + " ORDER BY p.created_at DESC";
         return findManyBySql(sql, statement -> {
         });
     }
 
-    public synchronized List<Product> findPage(int page, int size) {
+    public  List<Product> findPage(int page, int size) {
         int normalizedPage = Math.max(page, 1);
         int normalizedSize = Math.max(size, 1);
         int offset = (normalizedPage - 1) * normalizedSize;
@@ -72,13 +65,14 @@ public class ProductRepository {
         });
     }
 
-    public synchronized Product findById(Long id) {
+    public  Product findById(Long id) {
         if (id == null) {
             return null;
         }
 
         String sql = SQL + " WHERE p.id = ? LIMIT 1";
-        try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -91,7 +85,7 @@ public class ProductRepository {
         return null;
     }
 
-    public synchronized List<Product> findByCategory(String category) {
+    public  List<Product> findByCategory(String category) {
         if (category == null || category.trim().isEmpty()) {
             return Collections.emptyList();
         }
@@ -100,7 +94,7 @@ public class ProductRepository {
         return findManyBySql(sql, statement -> statement.setString(1, category.trim()));
     }
 
-    public synchronized List<Product> searchByName(String keyword) {
+    public  List<Product> searchByName(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return Collections.emptyList();
         }
@@ -109,15 +103,16 @@ public class ProductRepository {
         return findManyBySql(sql, statement -> statement.setString(1, "%" + keyword.trim() + "%"));
     }
 
-    public synchronized List<Product> findLatest(int limit) {
+    public  List<Product> findLatest(int limit) {
         int normalizedLimit = Math.max(limit, 1);
         String sql = "SELECT * FROM  products ORDER BY created_at DESC LIMIT ?";
         return findManyBySql(sql, statement -> statement.setInt(1, normalizedLimit));
     }
 
-    public synchronized Long countAll() {
+    public  Long countAll() {
         String sql = "SELECT COUNT(*) FROM products";
-        try (PreparedStatement statement = getConnection().prepareStatement(sql);
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
             if (resultSet.next()) {
                 return resultSet.getLong(1);
@@ -134,7 +129,8 @@ public class ProductRepository {
             return 0L;
         }
         String sql = "SELECT COUNT(*) FROM products WHERE category = ?";
-        try (PreparedStatement statement = getConnection().prepareStatement(sql);
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
 
             // set params
@@ -160,7 +156,8 @@ public class ProductRepository {
         List<Object> params = buildFilterParams(sql, filters);
 
         // 1. Chỉ khởi tạo PreparedStatement trước
-        try (PreparedStatement statement = getConnection().prepareStatement(sql.toString())) {
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
 
             // 2. PHẢI Set params TRƯỚC KHI execute
             for (int i = 0; i < params.size(); i++) {
@@ -184,7 +181,7 @@ public class ProductRepository {
 
     private String buildOrderClause(SearchProductRequest filters) {
         if (filters == null || filters.getSortBy() == null || filters.getSortBy().isBlank()) {
-            return " ORDER BY p.created_at DESC";
+            return " ";
         }
 
         return switch (filters.getSortBy().trim().toLowerCase()) {
@@ -192,7 +189,7 @@ public class ProductRepository {
             case "price_desc" -> " ORDER BY p.price DESC";
             case "newest" -> " ORDER BY p.created_at DESC";
             case "oldest" -> " ORDER BY p.created_at ASC";
-            default -> " ORDER BY p.created_at DESC";
+            default -> "";
         };
     }
 
@@ -238,23 +235,12 @@ public class ProductRepository {
         return params;
     }
 
-    public synchronized void closeConnection() {
-        if (this.connection == null) {
-            return;
-        }
 
-        try {
-            if (!this.connection.isClosed()) {
-                this.connection.close();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Cannot close database connection", e);
-        }
-    }
 
     private List<Product> findManyBySql(String sql, StatementBinder binder) {
         List<Product> products = new ArrayList<>();
-        try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             binder.bind(statement);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -287,17 +273,6 @@ public class ProductRepository {
                 .createdAt(resultSet.getTimestamp("created_at"))
                 .updatedAt(resultSet.getTimestamp("updated_at"))
                 .build();
-    }
-
-    private Connection getConnection() {
-        try {
-            if (this.connection == null || this.connection.isClosed()) {
-                this.connection = JDBCUtils.getConnection();
-            }
-            return this.connection;
-        } catch (SQLException e) {
-            throw new RuntimeException("Cannot initialize database connection", e);
-        }
     }
 
 

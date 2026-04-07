@@ -114,26 +114,59 @@
 
 	/////////////////////////////////////////
 
+	function extractDigits(value) {
+		return String(value == null ? '' : value).replace(/\D/g, '');
+	}
+
+	function formatVndNumber(value) {
+		var digits = extractDigits(value);
+		if (!digits) {
+			return '';
+		}
+		return Number(digits).toLocaleString('vi-VN');
+	}
+
+	window.extractDigits = extractDigits;
+	window.formatVndNumber = formatVndNumber;
+
 	// Input number
 	$('.input-number').each(function() {
 		var $this = $(this),
-		$input = $this.find('input[type="number"]'),
+		$input = $this.find('input').first(),
 		up = $this.find('.qty-up'),
 		down = $this.find('.qty-down');
 
 		down.on('click', function () {
-			var value = parseInt($input.val()) - 1;
+			var value = parseInt(extractDigits($input.val()) || '1', 10) - 1;
 			value = value < 1 ? 1 : value;
 			$input.val(value);
 			$input.change();
-			updatePriceSlider($this , value)
+			// Fix price filter: call updatePriceSlider and updateFilterURL if it's a price input
+			updatePriceSlider($this , value);
+			if ($this.hasClass('price-min') || $this.hasClass('price-max')) {
+				// Delay to allow price slider to update first
+				setTimeout(function() {
+					if (typeof updateFilterURL === 'function') {
+						updateFilterURL();
+					}
+				}, 100);
+			}
 		})
 
 		up.on('click', function () {
-			var value = parseInt($input.val()) + 1;
+			var value = parseInt(extractDigits($input.val()) || '0', 10) + 1;
 			$input.val(value);
 			$input.change();
-			updatePriceSlider($this , value)
+			// Fix price filter: call updatePriceSlider and updateFilterURL if it's a price input
+			updatePriceSlider($this , value);
+			if ($this.hasClass('price-min') || $this.hasClass('price-max')) {
+				// Delay to allow price slider to update first
+				setTimeout(function() {
+					if (typeof updateFilterURL === 'function') {
+						updateFilterURL();
+					}
+				}, 100);
+			}
 		})
 	});
 
@@ -141,39 +174,87 @@
 			priceInputMin = document.getElementById('price-min');
 
 	priceInputMax?.addEventListener('change', function(){
-		updatePriceSlider($(this).parent() , this.value)
+		updatePriceSlider($(this).parent() , extractDigits(this.value))
 	});
 
 	priceInputMin?.addEventListener('change', function(){
-		updatePriceSlider($(this).parent() , this.value)
+		updatePriceSlider($(this).parent() , extractDigits(this.value))
 	});
 
 	function updatePriceSlider(elem , value) {
+		if (!priceSlider || !priceSlider.noUiSlider) {
+			return;
+		}
+
 		if ( elem.hasClass('price-min') ) {
-			console.log('min')
-			priceSlider.noUiSlider.set([value, null]);
+			priceSlider.noUiSlider.set([extractDigits(value), null]);
 		} else if ( elem.hasClass('price-max')) {
-			console.log('max')
-			priceSlider.noUiSlider.set([null, value]);
+			priceSlider.noUiSlider.set([null, extractDigits(value)]);
 		}
 	}
 
 	// Price Slider
 	var priceSlider = document.getElementById('price-slider');
 	if (priceSlider) {
+		var sliderMin = parseInt(priceSlider.getAttribute('data-range-min') || '1', 10);
+		var sliderMax = parseInt(priceSlider.getAttribute('data-range-max') || '149999999', 10);
+		var initialMin = parseInt(priceSlider.getAttribute('data-selected-min') || String(sliderMin), 10);
+		var initialMax = parseInt(priceSlider.getAttribute('data-selected-max') || String(sliderMax), 10);
+		var userInteractedWithSlider = false;
+
+		if (Number.isNaN(initialMin)) initialMin = sliderMin;
+		if (Number.isNaN(initialMax)) initialMax = sliderMax;
+		if (initialMin < sliderMin) initialMin = sliderMin;
+		if (initialMax > sliderMax) initialMax = sliderMax;
+		if (initialMin > initialMax) initialMin = sliderMin;
+
 		noUiSlider.create(priceSlider, {
-			start: [1, 9999],
+			start: [initialMin, initialMax],
 			connect: true,
-			step: 10,
+			step: 100000,
 			range: {
-				'min': 1,
-				'max': 9999
+				'min': sliderMin,
+				'max': sliderMax
 			}
 		});
 
+		if (priceInputMin) priceInputMin.placeholder = String(initialMin);
+		if (priceInputMax) priceInputMax.placeholder = String(initialMax);
+
+		// Mark only real user actions; programmatic .set() (restore/sync) won't trigger filter navigation.
+		priceSlider.addEventListener('mousedown', function () {
+			userInteractedWithSlider = true;
+		});
+		priceSlider.addEventListener('touchstart', function () {
+			userInteractedWithSlider = true;
+		}, { passive: true });
+		priceSlider.addEventListener('pointerdown', function () {
+			userInteractedWithSlider = true;
+		});
+
 		priceSlider.noUiSlider.on('update', function( values, handle ) {
-			var value = values[handle];
-			handle ? priceInputMax.value = value : priceInputMin.value = value
+			var numericValue = String(Math.round(parseFloat(values[handle])));
+			if (handle) {
+				if (priceInputMax) {
+					priceInputMax.value = numericValue;
+					priceInputMax.placeholder = numericValue;
+				}
+			} else {
+				if (priceInputMin) {
+					priceInputMin.value = numericValue;
+					priceInputMin.placeholder = numericValue;
+				}
+			}
+		});
+
+		priceSlider.noUiSlider.on('set', function() {
+			if (!userInteractedWithSlider) {
+				return;
+			}
+			userInteractedWithSlider = false;
+			if (typeof window.updateFilterURL === 'function') {
+				window.updateFilterURL();
+			}
 		});
 	}
 

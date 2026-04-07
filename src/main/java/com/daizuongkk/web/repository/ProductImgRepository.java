@@ -13,15 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 public class ProductImgRepository {
-	private Connection connection;
 
-	public ProductImgRepository() {
-		this.connection = JDBCUtils.getConnection();
-	}
-
-	public ProductImgRepository(Connection connection) {
-		this.connection = connection;
-	}
 
 	public synchronized List<ProductImg> findByProductId(Long productId) {
 		if (productId == null || productId <= 0) {
@@ -31,7 +23,8 @@ public class ProductImgRepository {
 		String sql = "SELECT id, product_id, image_url FROM product_images WHERE product_id = ? ORDER BY id ASC";
 		List<ProductImg> images = new ArrayList<>();
 
-		try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				while (resultSet.next()) {
@@ -53,7 +46,8 @@ public class ProductImgRepository {
 		String sql = "SELECT image_url FROM product_images WHERE product_id = ? ORDER BY id ASC";
 		List<String> urls = new ArrayList<>();
 
-		try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				while (resultSet.next()) {
@@ -73,7 +67,8 @@ public class ProductImgRepository {
 		}
 
 		String sql = "SELECT image_url FROM product_images WHERE product_id = ? ORDER BY id ASC LIMIT 1";
-		try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				if (resultSet.next()) {
@@ -97,7 +92,8 @@ public class ProductImgRepository {
 		}
 
 		String sql = "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)";
-		try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			statement.setString(2, normalizedUrl);
 			return statement.executeUpdate() > 0;
@@ -118,7 +114,8 @@ public class ProductImgRepository {
 		}
 
 		String sql = "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)";
-		try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
 			for (String normalizedUrl : normalizedUrls) {
 				statement.setLong(1, productId);
 				statement.setString(2, normalizedUrl);
@@ -145,7 +142,8 @@ public class ProductImgRepository {
 		}
 
 		String sql = "DELETE FROM product_images WHERE product_id = ?";
-		try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			statement.executeUpdate();
 			return true;
@@ -155,14 +153,14 @@ public class ProductImgRepository {
 		}
 	}
 
-	public synchronized int replaceAllByProductId(Long productId, List<String> imageUrls) {
+	public  int replaceAllByProductId(Long productId, List<String> imageUrls) {
 		if (productId == null || productId <= 0) {
 			return 0;
 		}
 
 		List<String> normalizedUrls = normalizeUniqueUrls(imageUrls);
 
-		Connection conn = getConnection();
+		Connection conn = JDBCUtils.getConnection();
 		boolean autoCommit;
 		try {
 			autoCommit = conn.getAutoCommit();
@@ -205,20 +203,6 @@ public class ProductImgRepository {
 		}
 	}
 
-	public synchronized void closeConnection() {
-		if (this.connection == null) {
-			return;
-		}
-
-		try {
-			if (!this.connection.isClosed()) {
-				this.connection.close();
-			}
-		} catch (SQLException e) {
-			throw new RuntimeException("Cannot close database connection", e);
-		}
-	}
-
 	private ProductImg resultSetToProductImg(ResultSet resultSet) throws SQLException {
 		return ProductImg.builder()
 				.id(resultSet.getLong("id"))
@@ -251,14 +235,5 @@ public class ProductImgRepository {
 		return normalized.isEmpty() ? null : normalized;
 	}
 
-	private Connection getConnection() {
-		try {
-			if (this.connection == null || this.connection.isClosed()) {
-				this.connection = JDBCUtils.getConnection();
-			}
-			return this.connection;
-		} catch (SQLException e) {
-			throw new RuntimeException("Cannot initialize database connection", e);
-		}
-	}
+
 }

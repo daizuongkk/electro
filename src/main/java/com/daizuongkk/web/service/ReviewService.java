@@ -4,11 +4,8 @@ import com.daizuongkk.web.dto.response.ReviewResponse;
 import com.daizuongkk.web.dto.response.UserResponse;
 import com.daizuongkk.web.model.Review;
 import com.daizuongkk.web.repository.ReviewRepository;
-import com.daizuongkk.web.repository.UserRepository;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class ReviewService {
     private final ReviewRepository reviewRepository;
@@ -38,20 +35,29 @@ public class ReviewService {
         for (Review review : reviews) {
 
             UserResponse userResponse = userService.findById(review.getUserId());
-
-
             ReviewResponse reviewResponse = reviewToResponse(review);
 
             reviewResponse.setUserDisplayName(userResponse.getFirstName() + " " + userResponse.getLastName());
-            reviewResponse.setFiveStars((int) reviews.stream().filter(r -> r.getScore() == 5).count());
-            reviewResponse.setFourStars((int) reviews.stream().filter(r -> r.getScore() == 4).count());
-            reviewResponse.setThreeStars((int) reviews.stream().filter(r -> r.getScore() == 3).count());
-            reviewResponse.setTwoStars((int) reviews.stream().filter(r -> r.getScore() == 2).count());
-            reviewResponse.setOneStars((int) reviews.stream().filter(r -> r.getScore() == 1).count());
             reviewResponses.add(reviewResponse);
         }
         return reviewResponses;
     }
+
+    public Map<String, Long> countStars(Long productId) {
+        if (productId == null || productId <= 0) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, Long> counts = new HashMap<>();
+        counts.put("oneStars", reviewRepository.countByScore(productId, 1));
+        counts.put("twoStars", reviewRepository.countByScore(productId, 2));
+        counts.put("threeStars", reviewRepository.countByScore(productId, 3));
+        counts.put("fourStars", reviewRepository.countByScore(productId, 4));
+        counts.put("fiveStars", reviewRepository.countByScore(productId, 5));
+        return counts;
+
+    }
+
 
     public boolean addReview(Long productId, Long userId, String message, int score) {
         if (productId == null || productId <= 0 || userId == null || userId <= 0) {
@@ -89,6 +95,7 @@ public class ReviewService {
                 .id(review.getId())
                 .productId(review.getProductId())
                 .userId(review.getUserId())
+                .score(review.getScore())
                 .message(review.getMessage())
                 .createdAt(review.getCreatedAt())
                 .build();

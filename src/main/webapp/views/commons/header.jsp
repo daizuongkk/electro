@@ -11,8 +11,8 @@
     <div id="top-header">
         <div class="container">
             <ul class="header-links pull-left">
-                <li><a href="#"><i class="fa fa-phone"></i> +021-95-51-84</a></li>
-                <li><a href="#"><i class="fa fa-envelope-o"></i> email@email.com</a></li>
+                <li><a href="tel:+84334727801"><i class="fa fa-phone"></i> +021-95-51-84</a></li>
+                <li><a href="mailto:trongdaidt147@gmail.com"><i class="fa fa-envelope-o"></i>trongdaidt147@gmail.com</a></li>
                 <li><a href="#"><i class="fa fa-map-marker"></i> 1734 Stonecoal Road</a></li>
             </ul>
             <ul class="header-links pull-right">
@@ -84,7 +84,7 @@
 
                         <!-- Cart -->
                         <div class="dropdown">
-                            <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                            <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" >
                                 <i class="fa fa-shopping-cart"></i>
                                 <span>Giỏ Hàng</span>
                                 <div class="qty">${fn:length(cart)}</div>
@@ -142,7 +142,7 @@
                                     <%--                                    </button>--%>
 
                                     <%--                                    <a href="#">Xem Giỏ Hàng</a>--%>
-                                    <a href="#">Xem Giỏ Hàng <i class="fa fa-shopping-cart"></i></a>
+                                    <a href="cart">Xem Giỏ Hàng <i class="fa fa-shopping-cart"></i></a>
                                 </div>
                             </div>
                         </div>

@@ -18,11 +18,12 @@ public class ProductResponse {
     private  String detail;
     private  String summary;
     private String category;
+    private String brand;
     private Double price;
     private List<String> imageUrl;
     private Long promotion;
     private Long quantity;
-    private Long reviewScore;
+    private Double reviewScore;
     private Date createdAt;
 
 }

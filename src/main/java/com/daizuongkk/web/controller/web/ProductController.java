@@ -68,6 +68,8 @@ public class ProductController extends HttpServlet {
 		request.setAttribute("product", product);
 		request.setAttribute("relatedProducts", relatedProducts);
 		request.setAttribute("reviews", reviews);
+		request.setAttribute("stars", reviewService.countStars(productId));
+		request.setAttribute("totalRv", reviewService.countReviewsByProductId(productId));
 		request.getRequestDispatcher("views/pages/product.jsp").forward(request, response);
 	}
 

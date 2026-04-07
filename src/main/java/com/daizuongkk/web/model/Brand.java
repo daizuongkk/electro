@@ -5,7 +5,14 @@ import java.util.Map;
 
 public enum Brand {
 
-    SAMSUNG("Sam Sung"), APPLE("Apple"), OPPO("Oppo"), XIAOMI("Xiaomi");
+    SAMSUNG("Sam Sung"),
+    APPLE("Apple"),
+    OPPO("Oppo"),
+    XIAOMI("Xiaomi"),
+    MSI("MSI"),
+    ASUS("Asus"),
+    PANASONIC("Panasonic"),
+    KHAC("Khác");
 
     private final String name;
 

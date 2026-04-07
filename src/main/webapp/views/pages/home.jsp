@@ -30,8 +30,8 @@
 								<img src="./assets/img/shop01.png" alt="">
 							</div>
 							<div class="shop-body">
-								<h3>Laptop<br>Collection</h3>
-								<a href="shop" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
+								<h3>Laptop<br>Chính hãng</h3>
+								<a href="shop?category=LAPTOP" class="cta-btn">Xem ngay <i class="fa fa-arrow-circle-right"></i></a>
 							</div>
 						</div>
 					</div>
@@ -44,8 +44,8 @@
 								<img src="./assets/img/shop03.png" alt="">
 							</div>
 							<div class="shop-body">
-								<h3>Accessories<br>Collection</h3>
-								<a href="shop" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
+								<h3>Phụ kiện<br>Chính hãng</h3>
+								<a href="shop?category=PHU_KIEN" class="cta-btn">Xem ngay<i class="fa fa-arrow-circle-right"></i></a>
 							</div>
 						</div>
 					</div>
@@ -57,9 +57,9 @@
 							<div class="shop-img">
 								<img src="./assets/img/shop02.png" alt="">
 							</div>
-							<div class="shop-body	">
-								<h3>Cameras<br>Collection</h3>
-								<a href="shop" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
+							<div class="shop-body">
+								<h3>Điện thoại<br>Chính hãng</h3>
+								<a href="shop?category=DIEN_THOAI" class="cta-btn">Xem ngay <i class="fa fa-arrow-circle-right"></i></a>
 							</div>
 						</div>
 					</div>
@@ -82,19 +82,6 @@
 					<div class="col-md-12">
 						<div class="section-title">
 							<h3 class="title">Mới ra mắt</h3>
-							<div class="section-nav">
-								<ul class="section-tab-nav tab-nav">
-									<li class="active"><a data-toggle="tab" href="#tab1">Tất Cả</a></li>
-
-									<c:forEach var="category" items="${categories}">
-										<li>
-											<a data-toggle="tab" href="#tab1">
-													${category.value}
-											</a>
-										</li>
-									</c:forEach>
-								</ul>
-							</div>
 						</div>
 					</div>
 					<!-- /section title -->
@@ -169,7 +156,7 @@
 								</li>
 							</ul>
 							<h2 class="text-uppercase">tuần lễ siêu khuyến mãi</h2>
-							<p>GIẢM GÁ TỚI 50% CHO NHỮNG MẪU MÁY HOT NHẤT 2026</p>
+							<p>GIẢM TỚI 50% CHO NHỮNG MẪU MÁY HOT NHẤT 2026</p>
 							<a class="primary-btn cta-btn" href="shop">MUA SẮM NGAY</a>
 						</div>
 					</div>
@@ -191,19 +178,6 @@
 					<div class="col-md-12">
 						<div class="section-title">
 							<h3 class="title">Bán Chạy</h3>
-							<div class="section-nav">
-								<ul class="section-tab-nav tab-nav">
-									<li class="active"><a data-toggle="tab" href="#tab2">Tất Cả</a></li>
-
-									<c:forEach var="category" items="${categories}">
-										<li>
-											<a data-toggle="tab" href="#tab2">
-													${category.value}
-											</a>
-										</li>
-									</c:forEach>
-								</ul>
-							</div>
 						</div>
 					</div>
 					<!-- /section title -->
@@ -713,7 +687,29 @@
 	<!-- jQuery Plugins -->
 		<%@ include file="../commons/script.jsp" %>
 
+	<script>
 
+		const addToCart = (productId) => {
+
+			$.ajax({
+				url: `${pageContext.request.contextPath}/api/carts/` + productId,
+				method: 'POST',
+				success: function (response) {
+					// alert('Sản phẩm đã được thêm vào giỏ hàng!');
+				},
+				error:  function (xhr) {
+					if (xhr.status === 401) {
+						window.location.href = "${pageContext.request.contextPath}/login";
+					}
+				}
+			});
+
+		}
+
+
+	</script>
 
 	</body>
+
+
 </html>

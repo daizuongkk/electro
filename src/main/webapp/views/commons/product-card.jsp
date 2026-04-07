@@ -4,6 +4,8 @@
 
 <c:url var="fallbackProductImage" value="/assets/img/product01.png"/>
 <jsp:useBean id="now" class="java.util.Date" />
+<fmt:setLocale value="vi_VN"/>
+
 <style>
     .product {
         display: flex;
@@ -80,7 +82,7 @@
                 <c:if test="${product.promotion != null && product.promotion > 0}">
                     <span class="sale">-<c:out value="${product.promotion}"/>%</span>
                 </c:if>
-                <c:if test="${(now.time - product.createdAt.time) < (30 * 24 * 60 * 60 * 1000)}">
+                <c:if test="${(now.time - product.createdAt.time) < (3 * 30 * 24 * 60 * 60 * 1000)}">
                     <span class="new">NEW</span>
                 </c:if>
             </div>
@@ -97,7 +99,6 @@
                     <c:when test="${product.price != null}">
                         <c:set var="newPrice" value="${product.price - (product.price * product.promotion / 100)}"/>
 
-                        <fmt:setLocale value="vi_VN"/>
                         <fmt:formatNumber
                             value="${newPrice}"
                             type="currency"
@@ -106,7 +107,7 @@
                     <c:otherwise>Liên Hệ</c:otherwise>
                 </c:choose>
                 <c:if test="${product.promotion != null && product.promotion > 0}">
-                    <del class="product-old-price"> <fmt:setLocale value="vi_VN"/>
+                    <del class="product-old-price">
                         <fmt:formatNumber
                                 value="${product.price}"
                                 type="currency"
@@ -144,8 +145,10 @@
             </div>
         </div>
         <div class="add-to-cart">
-            <button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i>Thêm Vào Giỏ</button>
+            <button class="add-to-cart-btn" onclick="addToCart(${product.id})"><i class="fa fa-shopping-cart" ></i>Thêm Vào Giỏ</button>
         </div>
     </div>
 </a>
+
+
 

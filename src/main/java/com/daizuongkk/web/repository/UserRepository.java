@@ -9,21 +9,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class UserRepository {
-    private Connection connection;
+public class UserRepository   {
 
-    public UserRepository() {
-        this.connection = JDBCUtils.getConnection();
-    }
 
-    // Shared connection is not thread-safe for parallel use, so serialize repository operations.
-    public synchronized User findByUsernameOrEmail(String username) {
+    public  User findByUsernameOrEmail(String username) {
         if (username == null || username.trim().isEmpty()) {
             return null;
         }
 
         String sql = "SELECT * FROM users WHERE username = ? OR email = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, username.trim());
             statement.setString(2, username.trim());
             ResultSet resultSet = statement.executeQuery();
@@ -58,17 +54,18 @@ public class UserRepository {
         return user;
     }
 
-    public synchronized boolean existsByUsername(String username) {
+    public  boolean existsByUsername(String username) {
         return exists("SELECT 1 FROM users WHERE username = ? LIMIT 1", username);
     }
 
-    public synchronized boolean existsByEmail(String email) {
+    public  boolean existsByEmail(String email) {
         return exists("SELECT 1 FROM users WHERE email = ? LIMIT 1", email);
     }
 
-    public synchronized boolean create(User user) {
+    public  boolean create(User user) {
         String sql = "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getEmail());
             statement.setString(3, user.getPassword());
@@ -85,7 +82,8 @@ public class UserRepository {
             return false;
         }
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, value.trim());
             try (ResultSet resultSet = statement.executeQuery()) {
                 return resultSet.next();
@@ -96,30 +94,6 @@ public class UserRepository {
         }
     }
 
-    private Connection getConnection() {
-        try {
-            if (this.connection == null || this.connection.isClosed()) {
-                this.connection = JDBCUtils.getConnection();
-            }
-            return this.connection;
-        } catch (SQLException e) {
-            throw new RuntimeException("Cannot initialize database connection", e);
-        }
-    }
-
-    public synchronized void closeConnection() {
-        if (this.connection == null) {
-            return;
-        }
-        try {
-            if (!this.connection.isClosed()) {
-                this.connection.close();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Cannot close database connection", e);
-        }
-    }
-
     public User findById(Long id) {
         String sql = "SELECT * FROM users WHERE id = ?";
         if (id == null) {
@@ -127,7 +101,8 @@ public class UserRepository {
         }
 
         User user = null;
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
 

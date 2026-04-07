@@ -12,15 +12,33 @@ import java.util.Collections;
 import java.util.List;
 
 public class ReviewRepository {
-	private Connection connection;
 
-	public ReviewRepository() {
-		this.connection = JDBCUtils.getConnection();
+
+	public Long countByScore(Long productId, Integer score) {
+		Long count = 0L;
+
+		if (productId == null ||  score == null) {
+			return count;
+		}
+
+		String sql = "select count(*) from reviews where product_id = ?  and score = ?";
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
+
+			statement.setLong(1, productId);
+			statement.setInt(2, score);
+
+			try (ResultSet resultSet = statement.executeQuery()) {
+				while (resultSet.next()) {
+					count = resultSet.getLong(1);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return count;
 	}
 
-	public ReviewRepository(Connection connection) {
-		this.connection = connection;
-	}
 
 	public List<Review> findByProductId(Long productId, int page, int size) {
 		if (productId == null || productId <= 0) {
@@ -38,8 +56,8 @@ public class ReviewRepository {
 
 		List<Review> reviews = new ArrayList<>();
 
-		try (Connection conn = getConnection();
-			 PreparedStatement statement = conn.prepareStatement(sql)) {
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setLong(1, productId);
 			statement.setInt(2, normalizedSize);
@@ -64,7 +82,8 @@ public class ReviewRepository {
 		String normalizedMessage = message == null ? "" : message.trim();
 		String sql = "INSERT INTO reviews (product_id, user_id, message, score) VALUES (?, ?, ?, ?)";
 
-		try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			statement.setLong(2, userId);
 			statement.setString(3, normalizedMessage);
@@ -82,7 +101,8 @@ public class ReviewRepository {
 		}
 
 		String sql = "SELECT COUNT(*) FROM reviews WHERE product_id = ?";
-		try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				if (resultSet.next()) {
@@ -101,7 +121,8 @@ public class ReviewRepository {
 		}
 
 		String sql = "SELECT COALESCE(AVG(score), 0) FROM reviews WHERE product_id = ?";
-		try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				if (resultSet.next()) {
@@ -120,7 +141,8 @@ public class ReviewRepository {
 		}
 
 		String sql = "SELECT 1 FROM reviews WHERE product_id = ? AND user_id = ? LIMIT 1";
-		try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			statement.setLong(2, userId);
 			try (ResultSet resultSet = statement.executeQuery()) {
@@ -144,29 +166,4 @@ public class ReviewRepository {
 	}
 
 
-
-	private Connection getConnection() {
-		try {
-			if (this.connection == null || this.connection.isClosed()) {
-				this.connection = JDBCUtils.getConnection();
-			}
-			return this.connection;
-		} catch (SQLException e) {
-			throw new RuntimeException("Cannot initialize database connection", e);
-		}
-	}
-
-	public  void closeConnection() {
-		if (this.connection == null) {
-			return;
-		}
-
-		try {
-			if (!this.connection.isClosed()) {
-				this.connection.close();
-			}
-		} catch (SQLException e) {
-			throw new RuntimeException("Cannot close database connection", e);
-		}
-	}
 }

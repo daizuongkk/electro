@@ -78,20 +78,39 @@
                 <!-- aside Widget -->
                 <div class="aside">
                     <h3 class="aside-title">Giá</h3>
-                    <div class="price-filter">
-                        <div id="price-slider"></div>
-                        <div class="input-number price-min">
-                            <input id="price-min" type="number" value="${filterMinPrice != null ? filterMinPrice : ''}">
-                            <span class="qty-up">+</span>
-                            <span class="qty-down">-</span>
+                    <form action="shop" method="get" id="priceFilter">
+                        <div class="price-filter">
+                            <div id="price-slider"
+                                 data-range-min="1"
+                                 data-range-max="149999999"
+                                 data-selected-min="${filterMinPrice != null ? filterMinPrice : 1}"
+                                 data-selected-max="${filterMaxPrice != null ? filterMaxPrice : 149999999}"></div>
+                            <div class="input-number price-min">
+                                <input id="price-min" type="number" inputmode="numeric" name="minPrice" onchange="updateFilterURL()"
+                                       value="${filterMinPrice != null ? filterMinPrice : ''}"
+                                       placeholder="${filterMinPrice != null ? filterMinPrice : 1}">
+                                <%--                            <span class="qty-up">+</span>--%>
+                                <%--                            <span class="qty-down">-</span>--%>
+                            </div>
+
+                            <span>-</span>
+                            <div class="input-number price-max">
+                                <input id="price-max" type="number" inputmode="numeric" name="maxPrice" onChange="updateFilterURL()"
+                                       value="${filterMaxPrice != null ? filterMaxPrice : ''}"
+                                       placeholder="${filterMaxPrice != null ? filterMaxPrice : 149999999}">
+                                <%--                            <span class="qty-up">+</span>--%>
+                                <%--                            <span class="qty-down">-</span>--%>
+                            </div>
+<%--                            <ul class="store-grid">--%>
+<%--                                <li class="active">--%>
+<%--                                    <button type="button" onclick="updateFilterURL()"--%>
+<%--                                            style="border: none; background: transparent;">--%>
+<%--                                        <i class="fa fa-money"></i>--%>
+<%--                                    </button>--%>
+<%--                                </li>--%>
+<%--                            </ul>--%>
                         </div>
-                        <span>-</span>
-                        <div class="input-number price-max">
-                            <input id="price-max" type="number" value="${filterMaxPrice != null ? filterMaxPrice : ''}">
-                            <span class="qty-up">+</span>
-                            <span class="qty-down">-</span>
-                        </div>
-                    </div>
+                    </form>
                 </div>
                 <!-- /aside Widget -->
 
@@ -121,7 +140,7 @@
 
                 <!-- aside Widget -->
                 <div class="aside">
-                    <h3 class="aside-title">Bán Chạy</h3>
+                    <h3 class="aside-title">Nổi Bật</h3>
                     <div class="product-widget">
                         <div class="product-img">
                             <img src="assets/img/product01.png" alt="">
@@ -220,34 +239,7 @@
                 </div>
                 <!-- /store products -->
 
-
                 <!-- store bottom filter -->
-                <%--						<div class="store-filter clearfix">--%>
-                <%--							<span class="store-qty">Showing ${totalProducts} products</span>--%>
-                <%--							<ul class="store-pagination">--%>
-                <%--								<c:if test="${currentPage > 1}">--%>
-                <%--									<li>--%>
-                <%--										<a href="${pageContext.request.contextPath}/shop?page=${currentPage - 1}&size=${pageSize}">--%>
-                <%--											<i class="fa fa-angle-left"></i>--%>
-                <%--										</a>--%>
-                <%--									</li>--%>
-                <%--								</c:if>--%>
-
-                <%--								<c:forEach begin="1" end="${totalPages}" var="pageNum">--%>
-                <%--									<li class="${pageNum == currentPage ? 'active' : ''}">--%>
-                <%--										<a href="${pageContext.request.contextPath}/shop?page=${pageNum}&size=${pageSize}">${pageNum}</a>--%>
-                <%--									</li>--%>
-                <%--								</c:forEach>--%>
-
-                <%--								<c:if test="${currentPage < totalPages}">--%>
-                <%--									<li>--%>
-                <%--										<a href="${pageContext.request.contextPath}/shop?page=${currentPage + 1}&size=${pageSize}">--%>
-                <%--											<i class="fa fa-angle-right"></i>--%>
-                <%--										</a>--%>
-                <%--									</li>--%>
-                <%--								</c:if>--%>
-                <%--							</ul>--%>
-                <%--						</div>--%>
                 <div class="store-filter clearfix">
                     <span class="store-qty">Showing ${totalProducts} products</span>
 
@@ -257,18 +249,7 @@
                         <c:if test="${currentPage > 1}">
                             <c:url var="prevUrl" value="/shop">
                                 <c:param name="page" value="${currentPage - 1}"/>
-                                <c:param name="size" value="${pageSize}"/>
-                                <c:param name="name" value="${filterName}"/>
-                                <c:param name="sortBy" value="${selectedSort}"/>
-                                <c:param name="minPrice" value="${filterMinPrice}"/>
-                                <c:param name="maxPrice" value="${filterMaxPrice}"/>
-
-                                <c:forEach var="cat" items="${selectedCategories}">
-                                    <c:param name="category" value="${cat}"/>
-                                </c:forEach>
-                                <c:forEach var="brand" items="${selectedBrands}">
-                                    <c:param name="brand" value="${brand}"/>
-                                </c:forEach>
+                                <%@ include file="../commons/pagination-params-tag.jsp" %>
                             </c:url>
 
                             <li>
@@ -279,46 +260,71 @@
                         </c:if>
 
                         <!-- PAGE NUMBER -->
-                        <c:forEach begin="1" end="${totalPages}" var="pageNum">
+                        <c:if test="${totalPages <= 5}">
+                            <c:forEach begin="1" end="${totalPages}" var="pageNum">
+                                <c:url var="pageUrl" value="/shop">
+                                    <c:param name="page" value="${pageNum}"/>
+                                    <%@ include file="../commons/pagination-params-tag.jsp" %>
+                                </c:url>
 
-                            <c:url var="pageUrl" value="/shop">
-                                <c:param name="page" value="${pageNum}"/>
-                                <c:param name="size" value="${pageSize}"/>
-                                <c:param name="name" value="${filterName}"/>
-                                <c:param name="sortBy" value="${selectedSort}"/>
-                                <c:param name="minPrice" value="${filterMinPrice}"/>
-                                <c:param name="maxPrice" value="${filterMaxPrice}"/>
+                                <li class="${pageNum == currentPage ? 'active' : ''}">
+                                    <a href="${pageUrl}">${pageNum}</a>
+                                </li>
+                            </c:forEach>
+                        </c:if>
 
-                                <c:forEach var="cat" items="${selectedCategories}">
-                                    <c:param name="category" value="${cat}"/>
-                                </c:forEach>
-                                <c:forEach var="brand" items="${selectedBrands}">
-                                    <c:param name="brand" value="${brand}"/>
-                                </c:forEach>
-                            </c:url>
+                        <c:if test="${totalPages > 5}">
+                            <c:set var="startPage" value="${currentPage - 2}"/>
+                            <c:set var="endPage" value="${currentPage + 2}"/>
 
-                            <li class="${pageNum == currentPage ? 'active' : ''}">
-                                <a href="${pageUrl}">${pageNum}</a>
-                            </li>
+                            <c:if test="${startPage < 1}">
+                                <c:set var="endPage" value="${endPage + (1 - startPage)}"/>
+                                <c:set var="startPage" value="1"/>
+                            </c:if>
 
-                        </c:forEach>
+                            <c:if test="${endPage > totalPages}">
+                                <c:set var="startPage" value="${startPage - (endPage - totalPages)}"/>
+                                <c:set var="endPage" value="${totalPages}"/>
+                            </c:if>
+
+                            <!-- Trang đầu -->
+                            <c:if test="${startPage > 1}">
+                                <c:url var="firstPageUrl" value="/shop">
+                                    <c:param name="page" value="1"/>
+                                    <%@ include file="../commons/pagination-params-tag.jsp" %>
+                                </c:url>
+                                <li><a href="${firstPageUrl}">1</a></li>
+                                <li class="disabled"><span>...</span></li>
+                            </c:if>
+
+                            <!-- Loop các trang -->
+                            <c:forEach begin="${startPage}" end="${endPage}" var="pageNum">
+                                <c:url var="pageUrl" value="/shop">
+                                    <c:param name="page" value="${pageNum}"/>
+                                    <%@ include file="../commons/pagination-params-tag.jsp" %>
+                                </c:url>
+
+                                <li class="${pageNum == currentPage ? 'active' : ''}">
+                                    <a href="${pageUrl}">${pageNum}</a>
+                                </li>
+                            </c:forEach>
+
+                            <!-- Trang cuối -->
+                            <c:if test="${endPage < totalPages}">
+                                <li class="disabled"><span>...</span></li>
+                                <c:url var="lastPageUrl" value="/shop">
+                                    <c:param name="page" value="${totalPages}"/>
+                                    <%@ include file="../commons/pagination-params-tag.jsp" %>
+                                </c:url>
+                                <li><a href="${lastPageUrl}">${totalPages}</a></li>
+                            </c:if>
+                        </c:if>
 
                         <!-- NEXT -->
                         <c:if test="${currentPage < totalPages}">
                             <c:url var="nextUrl" value="/shop">
                                 <c:param name="page" value="${currentPage + 1}"/>
-                                <c:param name="size" value="${pageSize}"/>
-                                <c:param name="name" value="${filterName}"/>
-                                <c:param name="sortBy" value="${selectedSort}"/>
-                                <c:param name="minPrice" value="${filterMinPrice}"/>
-                                <c:param name="maxPrice" value="${filterMaxPrice}"/>
-
-                                <c:forEach var="cat" items="${selectedCategories}">
-                                    <c:param name="category" value="${cat}"/>
-                                </c:forEach>
-                                <c:forEach var="brand" items="${selectedBrands}">
-                                    <c:param name="brand" value="${brand}"/>
-                                </c:forEach>
+                                <%@ include file="../commons/pagination-params-tag.jsp" %>
                             </c:url>
 
                             <li>
@@ -480,16 +486,21 @@
 <%@ include file="../commons/script.jsp" %>
 
 <script>
+    function extractDigitsSafe(value) {
+        return String(value == null ? '' : value).replace(/\D/g, '');
+    }
+
     function updateFilterURL() {
-        // Get all selected categories
         const categoryCheckboxes = document.querySelectorAll('input[name="category"]:checked');
         const categories = Array.from(categoryCheckboxes).map(cb => cb.value);
 
         const brandCheckboxes = document.querySelectorAll('input[name="brand"]:checked');
         const brands = Array.from(brandCheckboxes).map(cb => cb.value);
 
-        const minPrice = document.getElementById('price-min').value;
-        const maxPrice = document.getElementById('price-max').value;
+        const minPriceInput = document.getElementById('price-min');
+        const maxPriceInput = document.getElementById('price-max');
+        const minPrice = minPriceInput ? extractDigitsSafe(minPriceInput.value) : '';
+        const maxPrice = maxPriceInput ? extractDigitsSafe(maxPriceInput.value) : '';
 
         const sortSelect = document.querySelector('select[name="sortBy"]');
         const sortBy = sortSelect ? sortSelect.value : '';
@@ -500,46 +511,76 @@
         const nameInput = document.querySelector('input[name="name"]');
         const name = nameInput ? nameInput.value : '';
 
-        let url = '${pageContext.request.contextPath}/shop?page=1&size=' + pageSize;
+        const params = new URLSearchParams();
+        params.set('page', '1');
+        params.set('size', pageSize);
 
         categories.forEach(cat => {
-            url += '&category=' + encodeURIComponent(cat);
+            params.append('category', cat);
         });
 
         brands.forEach(brand => {
-            url += '&brand=' + encodeURIComponent(brand);
+            params.append('brand', brand);
         });
 
         if (minPrice) {
-            url += '&minPrice=' + minPrice;
+            params.set('minPrice', minPrice);
         }
         if (maxPrice) {
-            url += '&maxPrice=' + maxPrice;
+            params.set('maxPrice', maxPrice);
         }
 
         if (sortBy) {
-            url += '&sortBy=' + encodeURIComponent(sortBy);
+            params.set('sortBy', sortBy);
         }
 
         if (name) {
-            url += '&name=' + encodeURIComponent(name);
+            params.set('name', name);
         }
 
-        window.location.href = url;
+        window.location.href = '${pageContext.request.contextPath}/shop?' + params.toString();
     }
 
-    // Keep the existing filter values when price input changes.
+    function restoreFilterUIFromURL() {
+        const query = new URLSearchParams(window.location.search);
+        const priceMinInput = document.getElementById('price-min');
+        const priceMaxInput = document.getElementById('price-max');
+        const priceSlider = document.getElementById('price-slider');
+
+        const min = extractDigitsSafe(query.get('minPrice'));
+        const max = extractDigitsSafe(query.get('maxPrice'));
+
+        if (priceMinInput && min) {
+            priceMinInput.value = min;
+            priceMinInput.placeholder = min;
+        }
+
+        if (priceMaxInput && max) {
+            priceMaxInput.value = max;
+            priceMaxInput.placeholder = max;
+        }
+
+        // noUiSlider may be initialized asynchronously in shared scripts, so retry briefly.
+        let retries = 20;
+        const applySliderValue = function () {
+            if (!priceSlider || !priceSlider.noUiSlider) {
+                if (retries-- > 0) {
+                    window.setTimeout(applySliderValue, 50);
+                }
+                return;
+            }
+
+            priceSlider.noUiSlider.set([
+                min || null,
+                max || null
+            ]);
+        };
+
+        applySliderValue();
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
-        const minPriceInput = document.getElementById('price-min');
-        const maxPriceInput = document.getElementById('price-max');
-
-        if (minPriceInput) {
-            minPriceInput.addEventListener('change', updateFilterURL);
-        }
-
-        if (maxPriceInput) {
-            maxPriceInput.addEventListener('change', updateFilterURL);
-        }
+        restoreFilterUIFromURL();
     });
 </script>
 

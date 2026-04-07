@@ -16,17 +16,9 @@ import java.util.List;
 
 public class CartRepository {
 
-    private Connection connection;
 
-    public CartRepository() {
-        this.connection = JDBCUtils.getConnection();
-    }
 
-    public CartRepository(Connection connection) {
-        this.connection = connection;
-    }
-
-    public synchronized List<CartItem> findByUserId(Long userId) {
+    public  List<CartItem> findItemsByUserId(Long userId) {
         if (userId == null || userId <= 0) {
             return Collections.emptyList();
         }
@@ -34,7 +26,8 @@ public class CartRepository {
         String sql = "SELECT ci.* FROM carts c JOIN cart_items ci ON c.id = ci.cart_id  WHERE c.user_id = ?";
         List<CartItem> carts = new ArrayList<>();
 
-        try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, userId);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -48,179 +41,7 @@ public class CartRepository {
         return carts;
     }
 
-    public synchronized List<String> findUrlsByProductId(Long productId) {
-        if (productId == null || productId <= 0) {
-            return Collections.emptyList();
-        }
 
-        String sql = "SELECT image_url FROM product_images WHERE product_id = ? ORDER BY id ASC";
-        List<String> urls = new ArrayList<>();
-
-        try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
-            statement.setLong(1, productId);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    urls.add(resultSet.getString("image_url"));
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return urls;
-    }
-
-    public synchronized String findPrimaryUrlByProductId(Long productId) {
-        if (productId == null || productId <= 0) {
-            return null;
-        }
-
-        String sql = "SELECT image_url FROM product_images WHERE product_id = ? ORDER BY id ASC LIMIT 1";
-        try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
-            statement.setLong(1, productId);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getString("image_url");
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public synchronized boolean create(Long productId, String imageUrl) {
-        if (productId == null || productId <= 0) {
-            return false;
-        }
-
-        String normalizedUrl = normalizeUrl(imageUrl);
-        if (normalizedUrl == null) {
-            return false;
-        }
-
-        String sql = "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)";
-        try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
-            statement.setLong(1, productId);
-            statement.setString(2, normalizedUrl);
-            return statement.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public synchronized int createBatch(Long productId, List<String> imageUrls) {
-        if (productId == null || productId <= 0 || imageUrls == null || imageUrls.isEmpty()) {
-            return 0;
-        }
-
-        List<String> normalizedUrls = normalizeUniqueUrls(imageUrls);
-        if (normalizedUrls.isEmpty()) {
-            return 0;
-        }
-
-        String sql = "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)";
-        try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
-            for (String normalizedUrl : normalizedUrls) {
-                statement.setLong(1, productId);
-                statement.setString(2, normalizedUrl);
-                statement.addBatch();
-            }
-
-            int[] rows = statement.executeBatch();
-            int affectedRows = 0;
-            for (int row : rows) {
-                if (row > 0) {
-                    affectedRows += row;
-                }
-            }
-            return affectedRows;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
-    public synchronized boolean deleteByProductId(Long productId) {
-        if (productId == null || productId <= 0) {
-            return false;
-        }
-
-        String sql = "DELETE FROM product_images WHERE product_id = ?";
-        try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
-            statement.setLong(1, productId);
-            statement.executeUpdate();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public synchronized int replaceAllByProductId(Long productId, List<String> imageUrls) {
-        if (productId == null || productId <= 0) {
-            return 0;
-        }
-
-        List<String> normalizedUrls = normalizeUniqueUrls(imageUrls);
-
-        Connection conn = getConnection();
-        boolean autoCommit;
-        try {
-            autoCommit = conn.getAutoCommit();
-            conn.setAutoCommit(false);
-
-            try (PreparedStatement deleteStatement = conn.prepareStatement("DELETE FROM product_images WHERE product_id = ?")) {
-                deleteStatement.setLong(1, productId);
-                deleteStatement.executeUpdate();
-            }
-
-            int inserted = 0;
-            if (!normalizedUrls.isEmpty()) {
-                try (PreparedStatement insertStatement = conn.prepareStatement("INSERT INTO product_images (product_id, image_url) VALUES (?, ?)")) {
-                    for (String normalizedUrl : normalizedUrls) {
-                        insertStatement.setLong(1, productId);
-                        insertStatement.setString(2, normalizedUrl);
-                        insertStatement.addBatch();
-                    }
-
-                    int[] rows = insertStatement.executeBatch();
-                    for (int row : rows) {
-                        if (row > 0) {
-                            inserted += row;
-                        }
-                    }
-                }
-            }
-
-            conn.commit();
-            conn.setAutoCommit(autoCommit);
-            return inserted;
-        } catch (Exception e) {
-            try {
-                conn.rollback();
-            } catch (SQLException rollbackException) {
-                rollbackException.printStackTrace();
-            }
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
-    public synchronized void closeConnection() {
-        if (this.connection == null) {
-            return;
-        }
-
-        try {
-            if (!this.connection.isClosed()) {
-                this.connection.close();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Cannot close database connection", e);
-        }
-    }
 
     private CartItem resultSetToCartItem(ResultSet resultSet) throws SQLException {
         return CartItem.builder()
@@ -231,40 +52,31 @@ public class CartRepository {
                 .build();
     }
 
-    private List<String> normalizeUniqueUrls(List<String> imageUrls) {
-        if (imageUrls == null || imageUrls.isEmpty()) {
-            return Collections.emptyList();
-        }
 
-        LinkedHashSet<String> uniqueUrls = new LinkedHashSet<>();
-        for (String imageUrl : imageUrls) {
-            String normalized = normalizeUrl(imageUrl);
-            if (normalized != null) {
-                uniqueUrls.add(normalized);
-            }
-        }
-        return new ArrayList<>(uniqueUrls);
-    }
 
-    private String normalizeUrl(String imageUrl) {
-        if (imageUrl == null) {
+
+    public Cart findByUserId(Long userId) {
+
+        if (userId == null || userId <= 0) {
             return null;
         }
 
-        String normalized = imageUrl.trim();
-        return normalized.isEmpty() ? null : normalized;
-    }
+        String sql = "SELECT * FROM carts WHERE user_id = ?";
+        Cart cart= new Cart();
 
-    private Connection getConnection() {
-        try {
-            if (this.connection == null || this.connection.isClosed()) {
-                this.connection = JDBCUtils.getConnection();
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, userId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    cart.setId(resultSet.getLong("id"));
+                    cart.setUserId(resultSet.getLong("user_id"));
+                }
             }
-            return this.connection;
-        } catch (SQLException e) {
-            throw new RuntimeException("Cannot initialize database connection", e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
+        return cart;
     }
-
-
 }
