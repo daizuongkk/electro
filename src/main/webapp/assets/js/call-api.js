@@ -116,7 +116,6 @@
                 return $(this).val();
             })
             .get()
-
         if (productIds.length === 0) {
             alert("Chưa chọn sản phẩm nào")
             return;

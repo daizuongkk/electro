@@ -26,7 +26,6 @@ public class AdminController extends HttpServlet {
                response.sendRedirect("views/pages/users.jsp");
                return;
            case "inventory":
-
                response.sendRedirect("views/pages/inventory.jsp");
                return;
            case "reports":
