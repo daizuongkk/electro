@@ -683,32 +683,8 @@
 
 		<!-- /FOOTER -->
 
-
 	<!-- jQuery Plugins -->
 		<%@ include file="../commons/script.jsp" %>
-
-	<script>
-
-		const addToCart = (productId) => {
-
-			$.ajax({
-				url: `${pageContext.request.contextPath}/api/carts/` + productId,
-				method: 'POST',
-				success: function (response) {
-					// alert('Sản phẩm đã được thêm vào giỏ hàng!');
-				},
-				error:  function (xhr) {
-					if (xhr.status === 401) {
-						window.location.href = "${pageContext.request.contextPath}/login";
-					}
-				}
-			});
-
-		}
-
-
-	</script>
-
 	</body>
 
 

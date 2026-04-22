@@ -3,6 +3,8 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ page import="com.daizuongkk.web.model.Role" %>
+<base href="${pageContext.request.contextPath}/">
+
 <fmt:setLocale value="vi_VN"/>
 
 <!-- HEADER -->
@@ -11,9 +13,9 @@
     <div id="top-header">
         <div class="container">
             <ul class="header-links pull-left">
-                <li><a href="tel:+84334727801"><i class="fa fa-phone"></i> +021-95-51-84</a></li>
+                <li><a href="tel:+84334727801"><i class="fa fa-phone"></i> +84 334 727 801</a></li>
                 <li><a href="mailto:trongdaidt147@gmail.com"><i class="fa fa-envelope-o"></i>trongdaidt147@gmail.com</a></li>
-                <li><a href="#"><i class="fa fa-map-marker"></i> 1734 Stonecoal Road</a></li>
+                <li><a href="#"><i class="fa fa-map-marker"></i> Xứ sở thần tiên, Việt Nam</a></li>
             </ul>
             <ul class="header-links pull-right">
                 <c:choose>
@@ -87,61 +89,57 @@
                             <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" >
                                 <i class="fa fa-shopping-cart"></i>
                                 <span>Giỏ Hàng</span>
-                                <div class="qty">${fn:length(cart)}</div>
+                                <div class="qty"> ${fn:length(cart)}</div>
                             </a>
                             <div class="cart-dropdown">
                                 <div class="cart-list">
+
 
                                     <c:choose>
                                         <c:when test="${empty sessionScope.cart}">
                                             <p>Giỏ hàng trống</p>
                                         </c:when>
 
-                                        <c:otherwise>
-                                            <c:forEach var="item" items="${sessionScope.cart}">
-                                                <div class="product-widget">
-                                                    <div class="product-img">
-                                                        <img src="${item.product.imageUrl[0]}" alt="">
-                                                    </div>
-                                                    <div class="product-body">
-                                                        <h3 class="product-name"><a href="#">${item.product.name}</a>
-                                                        </h3>
-                                                        <h4 class="product-price"><span
-                                                                class="qty">${item.quantity}</span>
-                                                            <fmt:formatNumber
-                                                                    value="${item.product.price}"
-                                                                    type="currency"
-                                                                    currencySymbol="₫" />
-                                                        </h4>
-                                                    </div>
-                                                    <button class="delete"><i class="fa fa-close"></i></button>
-                                                </div>
-                                            </c:forEach>
+<%--                                        <c:otherwise>--%>
+<%--                                            <c:forEach var="item" items="${sessionScope.cart}">--%>
+<%--                                                <div class="product-widget">--%>
+<%--                                                    <div class="product-img">--%>
+<%--                                                        <img src="${item.product.imageUrl[0]}" alt="">--%>
+<%--                                                    </div>--%>
+<%--                                                    <div class="product-body">--%>
+<%--                                                        <h3 class="product-name"><a href="#">${item.product.name}</a>--%>
+<%--                                                        </h3>--%>
+<%--                                                        <h4 class="product-price"><span--%>
+<%--                                                                class="qty">${item.quantity}</span>--%>
+<%--                                                            <fmt:formatNumber--%>
+<%--                                                                    value="${item.product.price}"--%>
+<%--                                                                    type="currency"--%>
+<%--                                                                    currencySymbol="₫" />--%>
+<%--                                                        </h4>--%>
+<%--                                                    </div>--%>
+<%--                                                    <button class="delete"><i class="fa fa-close"></i></button>--%>
+<%--                                                </div>--%>
+<%--                                            </c:forEach>--%>
 
-                                        </c:otherwise>
+<%--                                        </c:otherwise>--%>
                                     </c:choose>
 
                                 </div>
                                 <div class="cart-summary">
-                                    <small>${fn:length(cart)} Đã chọn</small>
+<%--                                    <small>${fn:length(cart)} Đã chọn</small>--%>
 
-                                    <c:set var="totalPrice" value="0" />
+<%--                                    <c:set var="totalPrice" value="0" />--%>
 
-                                    <c:forEach var="item" items="${sessionScope.cart}">
-                                        <c:set var="totalPrice" value="${totalPrice + item.product.price * item.quantity}" />
-                                    </c:forEach>
-                                    <h5>Tổng: 
-                                        <fmt:formatNumber
-                                                value="${totalPrice}"
-                                                type="currency"
-                                                currencySymbol="₫" /></h5>
+<%--                                    <c:forEach var="item" items="${sessionScope.cart}">--%>
+<%--                                        <c:set var="totalPrice" value="${totalPrice + item.product.price * item.quantity}" />--%>
+<%--                                    </c:forEach>--%>
+<%--                                    <h5>Tổng:--%>
+<%--                                        <fmt:formatNumber--%>
+<%--                                                value="${totalPrice}"--%>
+<%--                                                type="currency"--%>
+<%--                                                currencySymbol="₫" /></h5>--%>
                                 </div>
                                 <div class="cart-btns">
-                                    <%--                                    <button id="open-cart-modal" type="button" data-toggle="modal" data-target="#cart-modal">--%>
-                                    <%--                                        Giỏ Hàng--%>
-                                    <%--                                    </button>--%>
-
-                                    <%--                                    <a href="#">Xem Giỏ Hàng</a>--%>
                                     <a href="cart">Xem Giỏ Hàng <i class="fa fa-shopping-cart"></i></a>
                                 </div>
                             </div>

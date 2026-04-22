@@ -29,7 +29,7 @@
 </div>
 
 <div class="section">
-    <div class="container">
+    <div class="cart-container">
         <div class="row">
             <div class="col-md-8">
                 <div class="cart-panel">
@@ -54,7 +54,7 @@
                                     <thead>
                                     <tr>
                                         <th class="text-center cart-select-col">
-                                            <input id="toggle-select-all" type="checkbox" class="cart-item-check" onclick="selectAll(this)" aria-label="Chọn tất cả sản phẩm" checked="checked"/>
+                                            <input id="toggle-select-all" type="checkbox" class="cart-item-check" aria-label="Chọn tất cả sản phẩm" checked="checked"/>
                                         </th>
                                         <th>Sản phẩm</th>
                                         <th class="text-center">Đơn giá</th>
@@ -71,7 +71,7 @@
 
                                         <tr class="cart-row" data-unit-price="${item.product.price}">
                                             <td class="text-center cart-select-col">
-                                                <input type="checkbox" class="cart-item-check" checked aria-label="Chọn sản phẩm ${item.product.name}">
+                                                <input type="checkbox" class="cart-item-check" checked aria-label="Chọn sản phẩm ${item.product.name}" value="${item.product.id}"/>
                                             </td>
                                             <td>
                                                 <div class="cart-product">
@@ -111,10 +111,10 @@
 
                             <div id="cart-actions-panel" class="cart-actions clearfix">
                                 <div class="pull-left cart-coupon">
-                                    <input type="text" class="input" placeholder="Nhập mã giảm giá">
-                                    <button type="button" class="primary-btn">Áp dụng</button>
+<%--                                    <input type="text" class="input" placeholder="Nhập mã giảm giá">--%>
+                                    <button id="delete-carts" type="button" class="primary-btn">Xóa</button>
                                 </div>
-                                <a href="shop" class="primary-btn pull-right">Tiếp tục mua sắm</a>
+                                <a href="shop" class="primary-btn pull-right">Tiếp tục mua sắm <span> <i class="fa fa-arrow-right"></i> </span> </a>
                             </div>
                         </c:otherwise>
                     </c:choose>
@@ -122,24 +122,53 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="cart-panel cart-summary-panel">
-                    <h3 class="cart-title">Tổng Đơn Hàng</h3>
 
-                    <c:set var="subtotal" value="0"/>
-                    <c:forEach var="item" items="${cartItems}">
-                        <c:set var="subtotal" value="${subtotal + (item.product.price * item.quantity)}"/>
-                    </c:forEach>
 
-                    <div class="cart-summary-line">
-                        <span>Tạm tính</span>
-                        <strong id="cart-subtotal-display">
-                            <fmt:formatNumber value="${subtotal}" type="currency" currencySymbol="₫"/>
-                        </strong>
+<%--            <div class="col-md-4">--%>
+<%--                <div class="cart-panel cart-summary-panel">--%>
+<%--                    <h3 class="cart-title">Tổng Đơn Hàng</h3>--%>
+
+<%--                    <c:set var="subtotal" value="0"/>--%>
+<%--                    <c:forEach var="item" items="${cartItems}">--%>
+<%--                        <c:set var="subtotal" value="${subtotal + (item.product.price * item.quantity)}"/>--%>
+<%--                    </c:forEach>--%>
+
+<%--                    <div class="cart-summary-line">--%>
+<%--                        <span>Tạm tính</span>--%>
+<%--                        <strong id="cart-subtotal-display">--%>
+<%--                            <fmt:formatNumber value="${subtotal}" type="currency" currencySymbol="₫"/>--%>
+<%--                        </strong>--%>
+<%--                    </div>--%>
+<%--                    <div class="cart-summary-line">--%>
+<%--                        <span>Vận chuyển</span>--%>
+<%--                        <strong>Miễn phí</strong>--%>
+<%--                    </div>--%>
+<%--                    <div class="cart-summary-line total">--%>
+<%--                        <span>Tổng cộng</span>--%>
+<%--                        <strong id="cart-total-display">--%>
+<%--                            <fmt:formatNumber value="${subtotal}" type="currency" currencySymbol="₫"/>--%>
+<%--                        </strong>--%>
+<%--                    </div>--%>
+
+<%--                    <button id="checkout-btn" type="button" class="primary-btn order-submit btn-block" ${empty cartItems ? 'disabled' : ''}>--%>
+<%--                        Tiến hành thanh toán--%>
+<%--                    </button>--%>
+<%--                </div>--%>
+<%--            </div>--%>
+            <div class="col-md-4 order-details">
+                <div class="section-title text-center">
+                    <h3 class="title">Đơn Hàng</h3>
+                </div>
+                <div class="order-summary">
+                    <div class="order-col">
+                        <div><strong>Sản Phẩm</strong></div>
+                        <div><strong>Giá</strong></div>
                     </div>
-                    <div class="cart-summary-line">
-                        <span>Vận chuyển</span>
-                        <strong>Miễn phí</strong>
+                    <div class="order-products">
+                    </div>
+                    <div class="order-col">
+                        <div>Phí Vận chuển</div>
+                        <div><strong>Miễn phí</strong></div>
                     </div>
                     <div class="cart-summary-line total">
                         <span>Tổng cộng</span>
@@ -147,11 +176,47 @@
                             <fmt:formatNumber value="${subtotal}" type="currency" currencySymbol="₫"/>
                         </strong>
                     </div>
-
-                    <button id="checkout-btn" type="button" class="primary-btn order-submit btn-block" ${empty cartItems ? 'disabled' : ''}>
-                        Tiến hành thanh toán
-                    </button>
                 </div>
+                <div class="payment-method">
+                    <div class="input-radio">
+                        <input type="radio" name="payment" id="payment-1">
+                        <label for="payment-1">
+                            <span></span>
+                            Thanh toán khi nhận hàng(COD)
+                        </label>
+                        <div class="caption">
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        </div>
+                    </div>
+                    <div class="input-radio">
+                        <input type="radio" name="payment" id="payment-2">
+                        <label for="payment-2">
+                            <span></span>
+                           Thanh toán qua VnPay
+                        </label>
+                        <div class="caption">
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        </div>
+                    </div>
+                    <div class="input-radio">
+                        <input type="radio" name="payment" id="payment-3">
+                        <label for="payment-3">
+                            <span></span>
+                           Thanh toán qua thẻ ghi nợ
+                        </label>
+                        <div class="caption">
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-checkbox">
+                    <input type="checkbox" id="terms">
+                    <label for="terms">
+                        <span></span>
+                        Tôi đồng ý với <a href="#">điều khoản &amp; điều kiện</a>
+                    </label>
+                </div>
+                <a href="#" class="primary-btn order-submit">Place order</a>
             </div>
         </div>
     </div>
@@ -184,22 +249,60 @@
 
 <script>
 
-    const toggle = document.getElementById('toggle-select-all');
+    var toggle = null;
+    var orderProducts = null;
 
-    // Click "select all"
-    toggle.addEventListener('change', function () {
-        const checkboxes = document.querySelectorAll('#cart-page .cart-item-check');
-        checkboxes.forEach(cb => cb.checked = this.checked);
-    });
+    function renderOrderSummary() {
+        if (!orderProducts) {
+            return;
+        }
 
-    // Click từng checkbox con
+        orderProducts.innerHTML = ""; // clear list cu
+
+        const checkboxes = document.querySelectorAll('#cart-page .cart-item-check:not(#toggle-select-all)');
+
+        checkboxes.forEach((checkbox) => {
+            if (checkbox.checked) {
+                const row = checkbox.closest('tr');
+                if (!row) {
+                    return;
+                }
+
+                const nameEl = row.querySelector('.cart-product-info h4 a');
+                const qtyInput = row.querySelector('.cart-qty-input');
+                const unitPrice = parseFloat(row.getAttribute('data-unit-price') || '0');
+                const qty = qtyInput ? (parseInt(qtyInput.value, 10) || 1) : 1;
+                const name = nameEl ? nameEl.textContent.trim() : '';
+
+                if (!name) {
+                    return;
+                }
+
+                const lineTotal = unitPrice * qty;
+                const div = document.createElement('div');
+                div.className = 'order-col';
+                div.innerHTML = '<div>' + qty + 'x ' + name + '</div><div>' + formatCurrencyVND(lineTotal) + '</div>';
+                orderProducts.appendChild(div);
+            }
+        });
+    }
+
+    // Click tung checkbox con
     document.addEventListener('change', function (e) {
         if (e.target.matches('#cart-page .cart-item-check')) {
             const checkboxes = document.querySelectorAll(
                 '#cart-page .cart-item-check:not(#toggle-select-all)'
-            );            toggle.checked = Array.from(checkboxes).every(cb => cb.checked);
+            );
+
+            if (toggle) {
+                toggle.checked = Array.from(checkboxes).every(cb => cb.checked);
+            }
+
+            updateCartSummaryFromUI();
+            renderOrderSummary();
         }
     });
+
 
     function formatCurrencyVND(value) {
         return new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(value || 0);
@@ -212,6 +315,7 @@
         rows.forEach(function (row) {
             var qtyInput = row.querySelector('.cart-qty-input');
             var lineTotalCell = row.querySelector('.cart-line-total strong');
+            var rowCheckbox = row.querySelector('.cart-item-check');
             var unitPrice = parseFloat(row.getAttribute('data-unit-price') || '0');
             var quantity = parseInt(qtyInput.value, 10);
 
@@ -221,10 +325,13 @@
             }
 
             var lineTotal = unitPrice * quantity;
-            subtotal += lineTotal;
 
             if (lineTotalCell) {
                 lineTotalCell.textContent = formatCurrencyVND(lineTotal);
+            }
+
+            if (rowCheckbox && rowCheckbox.checked) {
+                subtotal += lineTotal;
             }
         });
 
@@ -291,6 +398,19 @@
             return;
         }
 
+        toggle = document.getElementById('toggle-select-all');
+        orderProducts = document.querySelector('.order-products');
+
+        if (toggle) {
+            toggle.addEventListener('change', function () {
+                const checkboxes = document.querySelectorAll('#cart-page .cart-item-check');
+                checkboxes.forEach(cb => cb.checked = this.checked);
+
+                updateCartSummaryFromUI();
+                renderOrderSummary();
+            });
+        }
+
         page.addEventListener('click', function (event) {
             var target = event.target;
             if (!target.classList.contains('cart-qty-btn')) {
@@ -315,6 +435,7 @@
             }
 
             updateCartSummaryFromUI();
+            renderOrderSummary();
         });
 
         page.addEventListener('click', function (event) {
@@ -330,17 +451,20 @@
 
             row.remove();
             updateCartSummaryFromUI();
+            renderOrderSummary();
             syncCartUIState();
         });
 
         page.addEventListener('input', function (event) {
             if (event.target.classList.contains('cart-qty-input')) {
                 updateCartSummaryFromUI();
+                renderOrderSummary();
             }
         });
 
         updateCartSummaryFromUI();
         syncCartUIState();
+        renderOrderSummary();
     });
 </script>
 

@@ -3,11 +3,14 @@ package com.daizuongkk.web.service;
 import com.daizuongkk.web.dto.response.CartItemResponse;
 import com.daizuongkk.web.model.Cart;
 import com.daizuongkk.web.model.CartItem;
-import com.daizuongkk.web.model.User;
+import com.daizuongkk.web.model.Product;
+import com.daizuongkk.web.repository.CartItemRepository;
 import com.daizuongkk.web.repository.CartRepository;
+import com.daizuongkk.web.repository.ProductRepository;
 import com.daizuongkk.web.repository.UserRepository;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CartService {
@@ -15,9 +18,14 @@ public class CartService {
     private CartRepository cartRepository = new CartRepository();
     private  ProductService productService = new ProductService();
     private UserRepository userRepository = new UserRepository();
-    public List<CartItemResponse> getCart(Long userId) {
+    private CartItemRepository cartItemRepository = new CartItemRepository();
+    private ProductRepository productRepository = new ProductRepository();
 
 
+
+
+
+    public List<CartItemResponse> getCartItems(Long userId) {
 
         List<CartItem>  cartItems = cartRepository.findItemsByUserId(userId);
 
@@ -37,16 +45,55 @@ public class CartService {
     }
 
 
-    public void addToCart(Long id, Long productId) {
+    public boolean addToCart(Long id, Long productId) {
+
+        if (id == null) {
+            return false;
+        }
 
         Cart cart = cartRepository.findByUserId(id);
 
-//        CartItem cartItem = c
+        if (cart == null) {
+            return false;
+        }
 
 
+
+
+        if (productId == null) {
+            return false;
+        }
+
+
+        Product product = productRepository.findById(productId);
+
+        if (product == null) {
+            return false;
+        }
+
+        List<CartItem>  cartItems = cartRepository.findItemsByUserId(id);
+        for (CartItem cartItem : cartItems) {
+            if (cartItem.getProductId().equals(productId)) {
+                cartItem.setQuantity(cartItem.getQuantity() + 1);
+                cartItemRepository.update(cartItem);
+                return true;
+            }
+
+        }
 
 
         CartItem cartItem = CartItem.builder().cartId(cart.getId()).productId(productId).quantity(1L).build();
+
+        cartItemRepository.save(cartItem);
+
+
+        return true;
+
+    }
+
+    public void delete(String productIds, Long userId) {
+
+        cartItemRepository.delete(productIds, userId);
 
     }
 }

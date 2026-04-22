@@ -583,11 +583,11 @@ textarea.input {
 }
 
 /* Open cart dropdown when hovering the cart area in header */
-.header-ctn .dropdown:hover > .cart-dropdown,
-.header-ctn .dropdown:focus-within > .cart-dropdown {
-  opacity: 1;
-  visibility: visible;
-}
+/*.header-ctn .dropdown:hover > .cart-dropdown,*/
+/*.header-ctn .dropdown:focus-within > .cart-dropdown {*/
+/*  opacity: 1;*/
+/*  visibility: visible;*/
+/*}*/
 
 .cart-dropdown .cart-list {
   max-height: 180px;
@@ -2205,6 +2205,7 @@ textarea.input {
   border-radius: 6px;
   padding: 24px;
   margin-bottom: 24px;
+  width: 100%;
 }
 
 #cart-page .cart-panel-header {
@@ -2330,12 +2331,26 @@ textarea.input {
 
 #cart-page .cart-coupon {
   display: flex;
-  gap: 10px;
+  width: 360px;
+  max-width: 100%;
+  flex-wrap: nowrap;
+  gap: 0;
   align-items: center;
 }
 
+#cart-page .cart-coupon .primary-btn {
+  border-radius: 0 40px 40px 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 40px;
+  line-height: 40px;
+  padding: 0 16px;
+}
+
 #cart-page .cart-coupon .input {
-  min-width: 220px;
+  flex: 1 1 auto;
+  min-width: 0;
+  border-radius: 40px 0 0 40px;
 }
 
 #cart-page .cart-summary-line {
@@ -2438,11 +2453,12 @@ textarea.input {
   }
 
   #cart-page .cart-coupon {
-    flex-wrap: wrap;
+    width: 100%;
+    flex-wrap: nowrap;
   }
 
   #cart-page .cart-coupon .input {
-    min-width: 100%;
+    min-width: 0;
   }
 }
 

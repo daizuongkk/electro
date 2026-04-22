@@ -72,12 +72,10 @@ public class LoginController extends HttpServlet {
             return;
         }
 
-        List<CartItemResponse> cart = cartService.getCart(res.getId());
+        List<CartItemResponse> cart = cartService.getCartItems(res.getId());
 
         HttpSession session = request.getSession(true);
         session.setAttribute("account", res);
-        session.setAttribute("cart", cart);
-
         writeRememberCookie(response, username.trim(), rememberMe, request.isSecure(), request.getContextPath());
         response.sendRedirect("home");
     }

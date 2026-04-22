@@ -145,7 +145,7 @@
             </div>
         </div>
         <div class="add-to-cart">
-            <button class="add-to-cart-btn" onclick="addToCart(${product.id})"><i class="fa fa-shopping-cart" ></i>Thêm Vào Giỏ</button>
+            <button id="addToCartBtn" class="add-to-cart-btn" onclick="addToCart(${product.id})"><i class="fa fa-shopping-cart" ></i>Thêm Vào Giỏ</button>
         </div>
     </div>
 </a>
