@@ -24,11 +24,10 @@ java -version
 ## 2. Clone project
 
 ```powershell
-git clone <URL_REPOSITORY>
+git clone [<URL_REPOSITORY>](https://github.com/daizuongkk/javawebhaui.git)
 cd web
 ```
 
-> Thay `<URL_REPOSITORY>` bằng URL repository thực tế của bạn.
 
 ## 3. Khởi tạo database từ `electro_db.sql`
 
