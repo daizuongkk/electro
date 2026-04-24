@@ -24,7 +24,7 @@ java -version
 ## 2. Clone project
 
 ```powershell
-git clone [<URL_REPOSITORY>](https://github.com/daizuongkk/javawebhaui.git)
+git clone https://github.com/daizuongkk/javawebhaui.git
 cd web
 ```
 
