@@ -1,10 +1,5 @@
 package com.daizuongkk.web.repository;
 
-import com.daizuongkk.web.dto.request.SearchProductRequest;
-import com.daizuongkk.web.model.Product;
-import com.daizuongkk.web.util.JDBCUtils;
-import org.eclipse.tags.shaded.org.apache.bcel.Repository;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,273 +8,268 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.daizuongkk.web.dto.request.SearchProductRequest;
+import com.daizuongkk.web.model.Product;
+import com.daizuongkk.web.util.JDBCUtils;
 
-public class ProductRepository  {
-    private static final String SQL =
-            "SELECT p.* FROM products p ";
+public class ProductRepository {
+	private static final String SQL = "SELECT p.* FROM products p ";
 
+	public List<Product> findAll() {
+		String sql = SQL + " ORDER BY p.created_at DESC";
+		return findManyBySql(sql, statement -> {
+		});
+	}
 
+	public List<Product> findPage(int page, int size) {
+		int normalizedPage = Math.max(page, 1);
+		int normalizedSize = Math.max(size, 1);
+		int offset = (normalizedPage - 1) * normalizedSize;
 
-    public  List<Product> findAll() {
-        String sql = SQL + " ORDER BY p.created_at DESC";
-        return findManyBySql(sql, statement -> {
-        });
-    }
+		String sql = SQL + " ORDER BY RAND() LIMIT ? OFFSET ?";
+		return findManyBySql(sql, statement -> {
 
-    public  List<Product> findPage(int page, int size) {
-        int normalizedPage = Math.max(page, 1);
-        int normalizedSize = Math.max(size, 1);
-        int offset = (normalizedPage - 1) * normalizedSize;
+			statement.setInt(1, normalizedSize);
+			statement.setInt(2, offset);
+		});
+	}
 
-        String sql = SQL + " ORDER BY RAND() LIMIT ? OFFSET ?";
-        return findManyBySql(sql, statement -> {
+	public List<Product> findByFilter(int page, int size, SearchProductRequest filters) {
+		if (filters == null) {
+			filters = SearchProductRequest.builder().build();
+		}
 
-            statement.setInt(1, normalizedSize);
-            statement.setInt(2, offset);
-        });
-    }
+		int normalizedPage = Math.max(page, 1);
+		int normalizedSize = Math.max(size, 1);
+		int offset = (normalizedPage - 1) * normalizedSize;
 
-    public List<Product> findByFilter(int page, int size, SearchProductRequest filters) {
-        if (filters == null) {
-            filters = SearchProductRequest.builder().build();
-        }
+		StringBuilder sql = new StringBuilder(SQL + " WHERE 1=1");
+		List<Object> params = buildFilterParams(sql, filters);
 
-        int normalizedPage = Math.max(page, 1);
-        int normalizedSize = Math.max(size, 1);
-        int offset = (normalizedPage - 1) * normalizedSize;
+		// Add sorting
+		sql.append(buildOrderClause(filters));
+		sql.append(" LIMIT ? OFFSET ?");
 
-        StringBuilder sql = new StringBuilder(SQL + " WHERE 1=1");
-        List<Object> params = buildFilterParams(sql, filters);
+		return findManyBySql(sql.toString(), statement -> {
+			for (int i = 1; i <= params.size(); i++) {
+				statement.setObject(i, params.get(i - 1));
+			}
 
-        // Add sorting
-        sql.append(buildOrderClause(filters));
-        sql.append(" LIMIT ? OFFSET ?");
+			statement.setInt(params.size() + 1, normalizedSize);
+			statement.setInt(params.size() + 2, offset);
+		});
+	}
 
-        return findManyBySql(sql.toString(), statement -> {
-            for (int i = 1; i <= params.size(); i++) {
-                statement.setObject(i, params.get(i - 1));
-            }
+	public Product findById(Long id) {
+		if (id == null) {
+			return null;
+		}
 
-            statement.setInt(params.size() + 1, normalizedSize);
-            statement.setInt(params.size() + 2, offset);
-        });
-    }
+		String sql = SQL + " WHERE p.id = ? LIMIT 1";
+		try (Connection connection = JDBCUtils.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+			statement.setLong(1, id);
+			try (ResultSet resultSet = statement.executeQuery()) {
+				if (resultSet.next()) {
+					return resultSetToProduct(resultSet);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
-    public  Product findById(Long id) {
-        if (id == null) {
-            return null;
-        }
+	public List<Product> findByCategory(String category) {
+		if (category == null || category.trim().isEmpty()) {
+			return Collections.emptyList();
+		}
 
-        String sql = SQL + " WHERE p.id = ? LIMIT 1";
-        try (Connection connection = JDBCUtils.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setLong(1, id);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSetToProduct(resultSet);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+		String sql = SQL + " WHERE p.category = ? ORDER BY p.created_at DESC";
+		return findManyBySql(sql, statement -> statement.setString(1, category.trim()));
+	}
 
-    public  List<Product> findByCategory(String category) {
-        if (category == null || category.trim().isEmpty()) {
-            return Collections.emptyList();
-        }
+	public List<Product> searchByName(String keyword) {
+		if (keyword == null || keyword.trim().isEmpty()) {
+			return Collections.emptyList();
+		}
 
-        String sql = SQL + " WHERE p.category = ? ORDER BY p.created_at DESC";
-        return findManyBySql(sql, statement -> statement.setString(1, category.trim()));
-    }
+		String sql = SQL + " WHERE p.name LIKE ? ORDER BY p.created_at DESC";
+		return findManyBySql(sql, statement -> statement.setString(1, "%" + keyword.trim() + "%"));
+	}
 
-    public  List<Product> searchByName(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return Collections.emptyList();
-        }
+	public List<Product> findLatest(int limit) {
+		int normalizedLimit = Math.max(limit, 1);
+		String sql = "SELECT * FROM  products ORDER BY created_at DESC LIMIT ?";
+		return findManyBySql(sql, statement -> statement.setInt(1, normalizedLimit));
+	}
 
-        String sql = SQL + " WHERE p.name LIKE ? ORDER BY p.created_at DESC";
-        return findManyBySql(sql, statement -> statement.setString(1, "%" + keyword.trim() + "%"));
-    }
+	public Long countAll() {
+		String sql = "SELECT COUNT(*) FROM products";
+		try (Connection connection = JDBCUtils.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql);
+				ResultSet resultSet = statement.executeQuery()) {
+			if (resultSet.next()) {
+				return resultSet.getLong(1);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0L;
+	}
 
-    public  List<Product> findLatest(int limit) {
-        int normalizedLimit = Math.max(limit, 1);
-        String sql = "SELECT * FROM  products ORDER BY created_at DESC LIMIT ?";
-        return findManyBySql(sql, statement -> statement.setInt(1, normalizedLimit));
-    }
+	public Long countByCategory(String category) {
+		if (category == null || category.trim().isEmpty()) {
+			return 0L;
+		}
+		String sql = "SELECT COUNT(*) FROM products WHERE category = ?";
+		try (Connection connection = JDBCUtils.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql);
+				ResultSet resultSet = statement.executeQuery()) {
 
-    public  Long countAll() {
-        String sql = "SELECT COUNT(*) FROM products";
-        try (Connection connection = JDBCUtils.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet resultSet = statement.executeQuery()) {
-            if (resultSet.next()) {
-                return resultSet.getLong(1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0L;
-    }
+			// set params
+			statement.setString(1, category.trim());
 
+			if (resultSet.next()) {
+				return resultSet.getLong(1);
+			}
 
-    public Long countByCategory(String category) {
-        if (category == null || category.trim().isEmpty()) {
-            return 0L;
-        }
-        String sql = "SELECT COUNT(*) FROM products WHERE category = ?";
-        try (Connection connection = JDBCUtils.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet resultSet = statement.executeQuery()) {
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0L;
 
-            // set params
-            statement.setString(1, category.trim());
+	}
 
-            if (resultSet.next()) {
-                return resultSet.getLong(1);
-            }
+	public Long countByFilter(SearchProductRequest filters) {
+		if (filters == null) {
+			filters = SearchProductRequest.builder().build();
+		}
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0L;
+		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM products p WHERE 1=1 ");
+		List<Object> params = buildFilterParams(sql, filters);
 
-    }
+		// 1. Chỉ khởi tạo PreparedStatement trước
+		try (Connection connection = JDBCUtils.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql.toString())) {
 
-    public Long countByFilter(SearchProductRequest filters) {
-        if (filters == null) {
-            filters = SearchProductRequest.builder().build();
-        }
+			// 2. PHẢI Set params TRƯỚC KHI execute
+			for (int i = 0; i < params.size(); i++) {
+				statement.setObject(i + 1, params.get(i));
+			}
 
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM products p WHERE 1=1 ");
-        List<Object> params = buildFilterParams(sql, filters);
+			// 3. Bây giờ mới thực thi và lấy ResultSet
+			try (ResultSet resultSet = statement.executeQuery()) {
+				if (resultSet.next()) {
+					return resultSet.getLong(1);
+				}
+			}
 
-        // 1. Chỉ khởi tạo PreparedStatement trước
-        try (Connection connection = JDBCUtils.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-            // 2. PHẢI Set params TRƯỚC KHI execute
-            for (int i = 0; i < params.size(); i++) {
-                statement.setObject(i + 1, params.get(i));
-            }
+		return 0L;
+	}
 
-            // 3. Bây giờ mới thực thi và lấy ResultSet
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getLong(1);
-                }
-            }
+	private String buildOrderClause(SearchProductRequest filters) {
+		if (filters == null || filters.getSortBy() == null || filters.getSortBy().isBlank()) {
+			return " ";
+		}
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+		return switch (filters.getSortBy().trim().toLowerCase()) {
+			case "price_asc" -> " ORDER BY p.price ASC";
+			case "price_desc" -> " ORDER BY p.price DESC";
+			case "newest" -> " ORDER BY p.created_at DESC";
+			case "oldest" -> " ORDER BY p.created_at ASC";
+			default -> "";
+		};
+	}
 
-        return 0L;
-    }
+	private List<Object> buildFilterParams(StringBuilder sql, SearchProductRequest filters) {
+		List<Object> params = new ArrayList<>();
 
+		if (filters == null) {
+			return params;
+		}
 
-    private String buildOrderClause(SearchProductRequest filters) {
-        if (filters == null || filters.getSortBy() == null || filters.getSortBy().isBlank()) {
-            return " ";
-        }
+		List<String> categories = filters.getCategories();
 
-        return switch (filters.getSortBy().trim().toLowerCase()) {
-            case "price_asc" -> " ORDER BY p.price ASC";
-            case "price_desc" -> " ORDER BY p.price DESC";
-            case "newest" -> " ORDER BY p.created_at DESC";
-            case "oldest" -> " ORDER BY p.created_at ASC";
-            default -> "";
-        };
-    }
+		String name = filters.getName();
 
-    private List<Object> buildFilterParams(StringBuilder sql, SearchProductRequest filters) {
-        List<Object> params = new ArrayList<>();
+		if (name != null && !name.isBlank()) {
+			sql.append(" AND p.name LIKE ?");
+			params.add("%" + name.trim() + "%");
+		}
 
-        if (filters == null) {
-            return params;
-        }
+		if (categories != null && !categories.isEmpty()) {
+			sql.append(" AND p.category IN (").append(String.join(",", categories.stream().map(c -> "?").toList()))
+					.append(")");
+			params.addAll(categories);
+		}
+		List<String> brands = filters.getBrands();
 
-        List<String> categories = filters.getCategories();
+		if (brands != null && !brands.isEmpty()) {
+			sql.append(" AND p.brand IN (").append(String.join(",", brands.stream().map(b -> "?").toList())).append(")");
+			params.addAll(brands);
+		}
 
-        String name = filters.getName();
+		Double minPrice = filters.getMinPrice();
+		if (minPrice != null) {
+			sql.append(" AND p.price >= ?");
+			params.add(minPrice);
+		}
 
-        if (name != null && !name.isBlank()) {
-            sql.append(" AND p.name LIKE ?");
-            params.add("%" + name.trim() + "%");
-        }
+		Double maxPrice = filters.getMaxPrice();
+		if (maxPrice != null) {
+			sql.append(" AND p.price <= ?");
+			params.add(maxPrice);
+		}
 
-        if (categories != null && !categories.isEmpty()) {
-            sql.append(" AND p.category IN (").append(String.join(",", categories.stream().map(c -> "?").toList())).append(")");
-            params.addAll(categories);
-        }
-        List<String> brands = filters.getBrands();
+		return params;
+	}
 
-        if (brands != null && !brands.isEmpty()) {
-            sql.append(" AND p.brand IN (").append(String.join(",", brands.stream().map(b -> "?").toList())).append(")");
-            params.addAll(brands);
-        }
+	private List<Product> findManyBySql(String sql, StatementBinder binder) {
+		List<Product> products = new ArrayList<>();
+		try (Connection connection = JDBCUtils.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+			binder.bind(statement);
+			try (ResultSet resultSet = statement.executeQuery()) {
+				while (resultSet.next()) {
+					products.add(resultSetToProduct(resultSet));
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return products;
+	}
 
-        Double minPrice = filters.getMinPrice();
-        if (minPrice != null) {
-            sql.append(" AND p.price >= ?");
-            params.add(minPrice);
-        }
+	private Product resultSetToProduct(ResultSet resultSet) throws SQLException {
+		Double price = null;
+		double rawPrice = resultSet.getDouble("price");
+		if (!resultSet.wasNull()) {
+			price = rawPrice;
+		}
 
-        Double maxPrice = filters.getMaxPrice();
-        if (maxPrice != null) {
-            sql.append(" AND p.price <= ?");
-            params.add(maxPrice);
-        }
+		return Product.builder()
+				.id(resultSet.getLong("id"))
+				.name(resultSet.getString("name"))
+				.description(resultSet.getString("description"))
+				.detail(resultSet.getString("detail"))
+				.summary(resultSet.getString("summary"))
+				.category(resultSet.getString("category"))
+				.price(price)
+				.promotion(resultSet.getLong("promotion"))
+				.brand(resultSet.getString("brand"))
+				.createdAt(resultSet.getTimestamp("created_at"))
+				.updatedAt(resultSet.getTimestamp("updated_at"))
+				.build();
+	}
 
-        return params;
-    }
-
-
-
-    private List<Product> findManyBySql(String sql, StatementBinder binder) {
-        List<Product> products = new ArrayList<>();
-        try (Connection connection = JDBCUtils.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            binder.bind(statement);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    products.add(resultSetToProduct(resultSet));
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return products;
-    }
-
-    private Product resultSetToProduct(ResultSet resultSet) throws SQLException {
-        Double price = null;
-        double rawPrice = resultSet.getDouble("price");
-        if (!resultSet.wasNull()) {
-            price = rawPrice;
-        }
-
-        return Product.builder()
-                .id(resultSet.getLong("id"))
-                .name(resultSet.getString("name"))
-                .description(resultSet.getString("description"))
-                .detail(resultSet.getString("detail"))
-                .summary(resultSet.getString("summary"))
-                .category(resultSet.getString("category"))
-                .price(price)
-                .promotion(resultSet.getLong("promotion"))
-                .brand(resultSet.getString("brand"))
-                .createdAt(resultSet.getTimestamp("created_at"))
-                .updatedAt(resultSet.getTimestamp("updated_at"))
-                .build();
-    }
-
-
-    @FunctionalInterface
-    private interface StatementBinder {
-        void bind(PreparedStatement statement) throws SQLException;
-    }
-
+	@FunctionalInterface
+	private interface StatementBinder {
+		void bind(PreparedStatement statement) throws SQLException;
+	}
 
 }
