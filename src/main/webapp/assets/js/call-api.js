@@ -93,17 +93,20 @@
 
 
     window.deleteCartItem = (productIds) => {
-        return $.ajax({
-            url: `api/carts/` + productIds,
-            method: 'DELETE',
-            success: function (res) {
-                alert("Xóa sản phẩm thành công");
-                fetchCart();
-            },
-            error: function () {
-                alert("Có lỗi xảy ra");
-            }
-        });
+        if (confirm("Chắc chắn xóa?")) {
+            return $.ajax({
+                url: `api/carts/` + productIds,
+                method: 'DELETE',
+                success: function (res) {
+                    // alert("Xóa sản phẩm thành công");
+                    fetchCart();
+                },
+                error: function () {
+                    alert("Có lỗi xảy ra");
+                }
+            });
+        }
+
     }
 
 

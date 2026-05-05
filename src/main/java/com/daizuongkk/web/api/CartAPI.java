@@ -115,6 +115,7 @@ public class CartAPI  extends HttpServlet {
             cartService.delete(productIds, user.getId());
             out.write("{\"message\":\"Deleted from cart\"}");
             response.setStatus(HttpServletResponse.SC_OK);
+            session.setAttribute("cart", cartService.getCartItems(user.getId()));
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
