@@ -70,9 +70,10 @@
 
 
     // expose ra ngoài nếu cần
-    window.addToCart = function(productId) {
+    window.addToCart = function(productId, quantity) {
+
         $.ajax({
-            url: `api/carts/` + productId,
+            url: `api/carts/` + productId + `?qty=${quantity}`,
             method: 'POST',
             success: function (res) {
                 fetchCart();

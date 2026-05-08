@@ -158,7 +158,7 @@
                                 <span class="qty-down">-</span>
                             </div>
                         </div>
-                        <button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i>thêm vào giỏ</button>
+                        <button class="add-to-cart-btn" onclick="addToCart(${product.id})"><i class="fa fa-shopping-cart"></i>thêm vào giỏ</button>
                     </div>
 
                     <ul class="product-btns">
@@ -648,6 +648,7 @@
 <script src="assets/js/nouislider.min.js"></script>
 <script src="assets/js/jquery.zoom.min.js"></script>
 <script src="assets/js/main.js"></script>
+<script src="assets/js/call-api.js"></script>
 
 </body>
 </html>

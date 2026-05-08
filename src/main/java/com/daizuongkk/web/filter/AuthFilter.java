@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-
 @WebFilter("/*")
 public class AuthFilter implements Filter {
 
@@ -22,48 +21,44 @@ public class AuthFilter implements Filter {
 
         String uri = req.getRequestURI();
         String contextPath = req.getContextPath();
+        String path = uri.substring(contextPath.length());
 
-        boolean isApi = uri.startsWith(contextPath + "/api/");
+        boolean isPublicPage = path.startsWith("/login") ||
+                path.startsWith("/register") ||
+                path.startsWith("/home") ||
+                path.startsWith("/products") ||
+                path.startsWith("/assets") ||
+                path.contains("404-page.jsp");
 
-        boolean isAdminArea = uri.contains("/admin")
-                || uri.contains("/admin-dashboard.jsp")
-                || uri.contains("/users.jsp")
-                || uri.contains("/inventory.jsp")
-                || uri.contains("/reports.jsp")
-                || uri.contains("/create-product.jsp");
-
-        // các trang KHÔNG cần login
-        if (uri.contains("/login") ||
-                uri.contains("/register") ||
-                uri.contains("/assets") ||
-                uri.contains("/home") ||
-                uri.contains("/shop") ||
-                uri.contains("/products")
-        ) {
+        if (isPublicPage) {
             chain.doFilter(request, response);
             return;
         }
 
         HttpSession session = req.getSession(false);
-        UserResponse account = session == null ? null : (UserResponse) session.getAttribute("account");
+        UserResponse account = (session != null) ? (UserResponse) session.getAttribute("account") : null;
 
+        boolean isAdminArea = path.startsWith("/admin");
         if (isAdminArea) {
             if (account == null || account.getRole() != Role.ADMIN) {
-                res.sendRedirect(contextPath + "/views/pages/error-page.jsp");
+                req.getRequestDispatcher("/views/pages/404-page.jsp").forward(req, res);
                 return;
             }
         }
 
         if (account == null) {
-
-            if (isApi) {
+            if (path.startsWith("/api/")) {
                 res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
+                res.getWriter().write("{\"error\": \"Unauthorized\"}");
+            } else {
+                res.sendRedirect(contextPath + "/login");
             }
-
-            res.sendRedirect(contextPath + "/login");
             return;
         }
+
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        res.setHeader("Pragma", "no-cache");
+        res.setDateHeader("Expires", 0);
 
         chain.doFilter(request, response);
     }

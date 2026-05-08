@@ -35,8 +35,7 @@
                 </a>
             </div>
 
-            <h1 class="display-1 fw-bold text-primary mb-2"><%= statusCode == null ? 404 : statusCode %></h1>
-<%--            <h2 class="card-title h4 mb-3"><%= message %></h2>--%>
+            <h1 class="display-1 fw-bold text-primary mb-2"><%= statusCode == null ? 404 : statusCode %> NOT FOUND</h1>
             <p class="text-muted mb-4">Bạn đã đi vào vùng cấm, hãy thoát ra bằng cách bấm nút bên dưới! </p>
 
             <a href="home" class="btn btn-primary">Chạy ngay đi</a>

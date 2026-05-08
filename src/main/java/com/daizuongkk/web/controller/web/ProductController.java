@@ -17,8 +17,9 @@ import java.util.List;
 
 @WebServlet(name = "Products", value = "/products")
 public class ProductController extends HttpServlet {
-	private ProductService productService ;
+	private ProductService productService;
 	private ReviewService reviewService;
+	private static final int REVIEWS_PER_PAGE = 3;
 
 	@Override
 	public void init() throws ServletException {
@@ -26,57 +27,47 @@ public class ProductController extends HttpServlet {
 		reviewService = new ReviewService();
 	}
 
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String idParam = request.getParameter("id");
+		long productId;
 
-		int currentPage = PaginationUtils.parsePositiveInt(request.getParameter("page"), 1);
-
-		long totalProducts = productService.countProducts();
-		int totalPages = (int) Math.ceil(totalProducts / (double) 3);
-		if (totalPages < 1) {
-			totalPages = 1;
-		}
-
-		if (currentPage > totalPages) {
-			currentPage = totalPages;
-		}
-
-		Long productId = Long.parseLong(request.getParameter("id"));
-
-		if (productId  == null) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-			return;
-		}
-
-		if (productId < 0) {
+		try {
+			if (idParam == null || idParam.isEmpty()) {
+				throw new NumberFormatException("Missing ID");
+			}
+			productId = Long.parseLong(idParam);
+			if (productId < 0) throw new NumberFormatException("Negative ID");
+		} catch (NumberFormatException e) {
 			response.sendRedirect(request.getContextPath() + "/home");
 			return;
 		}
-		ProductResponse product = productService.getProductById(productId);
 
+		ProductResponse product = productService.getProductById(productId);
 		if (product == null) {
 			response.sendRedirect(request.getContextPath() + "/home");
 			return;
 		}
 
-        request.setAttribute("categories", Category.getAlls());
+		long totalReviews = reviewService.countReviewsByProductId(productId);
+		int totalPages = (int) Math.ceil((double) totalReviews / REVIEWS_PER_PAGE);
+		totalPages = Math.max(totalPages, 1);
 
+		int currentPage = PaginationUtils.parsePositiveInt(request.getParameter("page"), 1);
+		if (currentPage > totalPages) currentPage = totalPages;
 
-        List<ReviewResponse>   reviews = reviewService.getReviewsByProductId(productId, currentPage,3);
-
+		List<ReviewResponse> reviews = reviewService.getReviewsByProductId(productId, currentPage, REVIEWS_PER_PAGE);
 		List<ProductResponse> relatedProducts = productService.getProductsByCategory(product.getCategory());
 
 		request.setAttribute("product", product);
+		request.setAttribute("categories", Category.getAlls());
 		request.setAttribute("relatedProducts", relatedProducts);
 		request.setAttribute("reviews", reviews);
 		request.setAttribute("stars", reviewService.countStars(productId));
-		request.setAttribute("totalRv", reviewService.countReviewsByProductId(productId));
+		request.setAttribute("totalRv", totalReviews);
+		request.setAttribute("currentPage", currentPage);
+		request.setAttribute("totalPages", totalPages);
+
 		request.getRequestDispatcher("views/pages/product.jsp").forward(request, response);
 	}
-
-
-	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-	}
-
-
 }

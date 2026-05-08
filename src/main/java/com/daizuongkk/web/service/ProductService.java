@@ -115,12 +115,7 @@ public class ProductService {
 
     public List<ProductResponse> getProductsByFilter(int currentPage, int size, SearchProductRequest filters) {
         List<Product> products = productRepository.findByFilter(currentPage, size, filters);
-        List<ProductResponse> productResponseList = new ArrayList<>();
-
-        for (Product product : products) {
-            productResponseList.add(productToProductResponse(product));
-        }
-        return productResponseList;
+        return products.stream().map(this::productToProductResponse).toList();
 
     }
 }

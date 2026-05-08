@@ -73,6 +73,10 @@ public class CartAPI  extends HttpServlet {
         try {
             Long productId = Long.parseLong(pathInfo.substring(1));
 
+            if (productId <= 0) {
+                throw new NumberFormatException();
+            }
+
             cartService.addToCart(user.getId(), productId);
 
             response.setStatus(HttpServletResponse.SC_OK);

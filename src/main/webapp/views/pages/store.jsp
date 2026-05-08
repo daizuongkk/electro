@@ -491,27 +491,32 @@
     }
 
     function updateFilterURL() {
-        const categoryCheckboxes = document.querySelectorAll('input[name="category"]:checked');
-        const categories = Array.from(categoryCheckboxes).map(cb => cb.value);
+        const categories = $('input[name="category"]:checked')
+            .map(function () {
+                return $(this).val();
+            })
+            .get();
 
-        const brandCheckboxes = document.querySelectorAll('input[name="brand"]:checked');
-        const brands = Array.from(brandCheckboxes).map(cb => cb.value);
+        const brands = $('input[name="brand"]:checked')
+            .map(function () {
+                return $(this).val();
+            })
+            .get();
 
-        const minPriceInput = document.getElementById('price-min');
-        const maxPriceInput = document.getElementById('price-max');
-        const minPrice = minPriceInput ? extractDigitsSafe(minPriceInput.value) : '';
-        const maxPrice = maxPriceInput ? extractDigitsSafe(maxPriceInput.value) : '';
+        const minPrice = $('#price-min').length
+            ? extractDigitsSafe($('#price-min').val())
+            : '';
 
-        const sortSelect = document.querySelector('select[name="sortBy"]');
-        const sortBy = sortSelect ? sortSelect.value : '';
+        const maxPrice = $('#price-max').length
+            ? extractDigitsSafe($('#price-max').val())
+            : '';
 
-        const pageSizeSelect = document.querySelector('select[name="size"]');
-        const pageSize = pageSizeSelect ? pageSizeSelect.value : '9';
-
-        const nameInput = document.querySelector('input[name="name"]');
-        const name = nameInput ? nameInput.value : '';
+        const sortBy = $('select[name="sortBy"]').val() || '';
+        const pageSize = $('select[name="size"]').val() || '9';
+        const name = $('input[name="name"]').val() || '';
 
         const params = new URLSearchParams();
+
         params.set('page', '1');
         params.set('size', pageSize);
 
@@ -526,6 +531,7 @@
         if (minPrice) {
             params.set('minPrice', minPrice);
         }
+
         if (maxPrice) {
             params.set('maxPrice', maxPrice);
         }
@@ -538,7 +544,8 @@
             params.set('name', name);
         }
 
-        window.location.href = '${pageContext.request.contextPath}/shop?' + params.toString();
+        window.location.href =
+            '${pageContext.request.contextPath}/shop?' + params.toString();
     }
 
     function restoreFilterUIFromURL() {
@@ -560,7 +567,6 @@
             priceMaxInput.placeholder = max;
         }
 
-        // noUiSlider may be initialized asynchronously in shared scripts, so retry briefly.
         let retries = 20;
         const applySliderValue = function () {
             if (!priceSlider || !priceSlider.noUiSlider) {

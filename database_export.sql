@@ -18,6 +18,11 @@
 --
 -- Table structure for table `addresses`
 --
+CREATE DATABASE IF NOT EXISTS cellphoneS;
+
+-- 2. Chọn database vừa tạo để làm việc
+USE cellphoneS;
+
 
 DROP TABLE IF EXISTS `addresses`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

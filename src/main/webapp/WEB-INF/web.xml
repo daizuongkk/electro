@@ -7,6 +7,11 @@
     </welcome-file-list>
     <error-page>
         <error-code>404</error-code>
-        <location>/views/pages/error-page.jsp</location>
+        <location>/views/pages/error-pages/404-page.jsp</location>
+
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/views/pages/error-pages/500-page.jsp</location>
     </error-page>
 </web-app>
