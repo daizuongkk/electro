@@ -46,7 +46,7 @@
 
 <!-- Bootstrap JS -->
 
-<%@ include file="../commons/script.jsp" %>
+<%@ include file="../../commons/script.jsp" %>
 
 </body>
 
