@@ -153,6 +153,37 @@ public class ProductImgRepository {
 		}
 	}
 
+	public synchronized boolean deleteById(Long imageId, Long productId) {
+		if (imageId == null || imageId <= 0 || productId == null || productId <= 0) {
+			return false;
+		}
+
+		String sql = "DELETE FROM product_images WHERE id = ? AND product_id = ?";
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
+			statement.setLong(1, imageId);
+			statement.setLong(2, productId);
+			return statement.executeUpdate() > 0;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public synchronized int deleteByIds(Long productId, List<Long> imageIds) {
+		if (productId == null || productId <= 0 || imageIds == null || imageIds.isEmpty()) {
+			return 0;
+		}
+
+		int deleted = 0;
+		for (Long imageId : imageIds) {
+			if (deleteById(imageId, productId)) {
+				deleted++;
+			}
+		}
+		return deleted;
+	}
+
 	public  int replaceAllByProductId(Long productId, List<String> imageUrls) {
 		if (productId == null || productId <= 0) {
 			return 0;

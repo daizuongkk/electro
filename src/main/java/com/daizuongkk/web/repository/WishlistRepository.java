@@ -8,8 +8,11 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class WishlistRepository {
+	private static final Logger LOGGER = Logger.getLogger(WishlistRepository.class.getName());
 
 	public List<Long> findProductIdsByUserId(Long userId) {
 		if (userId == null || userId <= 0) {
@@ -28,7 +31,7 @@ public class WishlistRepository {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Failed to load wishlist product ids", e);
 		}
 
 		return productIds;
@@ -49,7 +52,7 @@ public class WishlistRepository {
 				return resultSet.next();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Failed to check wishlist existence", e);
 		}
 
 		return false;
@@ -72,7 +75,7 @@ public class WishlistRepository {
 			statement.setLong(2, productId);
 			return statement.executeUpdate() > 0;
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Failed to save wishlist item", e);
 		}
 
 		return false;
@@ -91,7 +94,7 @@ public class WishlistRepository {
 			statement.setLong(2, productId);
 			return statement.executeUpdate() > 0;
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Failed to delete wishlist item", e);
 		}
 
 		return false;

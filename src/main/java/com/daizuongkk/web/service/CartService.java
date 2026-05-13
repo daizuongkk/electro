@@ -35,7 +35,7 @@ public class CartService {
 		return cartItemResponses;
 	}
 
-	public boolean addToCart(Long id, Long productId) {
+	public boolean addToCart(Long id, Long productId, Long qty) {
 
 		if (id == null) {
 			return false;
@@ -60,14 +60,14 @@ public class CartService {
 		List<CartItem> cartItems = cartRepository.findItemsByUserId(id);
 		for (CartItem cartItem : cartItems) {
 			if (cartItem.getProductId().equals(productId)) {
-				cartItem.setQuantity(cartItem.getQuantity() + 1);
+				cartItem.setQuantity(cartItem.getQuantity() + (qty == null ? 1 : qty));
 				cartItemRepository.update(cartItem);
 				return true;
 			}
 
 		}
 
-		CartItem cartItem = CartItem.builder().cartId(cart.getId()).productId(productId).quantity(1L).build();
+		CartItem cartItem = CartItem.builder().cartId(cart.getId()).productId(productId).quantity(qty).build();
 
 		cartItemRepository.save(cartItem);
 
@@ -79,5 +79,13 @@ public class CartService {
 
 		cartItemRepository.delete(productIds, userId);
 
+	}
+
+	public boolean updateQuantity(Long userId, Long productId, Long quantity) {
+		if (userId == null || productId == null || quantity == null || quantity <= 0) {
+			return false;
+		}
+
+		return cartItemRepository.updateQuantityByUserAndProduct(userId, productId, quantity);
 	}
 }

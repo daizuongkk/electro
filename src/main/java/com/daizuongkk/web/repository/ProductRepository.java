@@ -4,10 +4,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.daizuongkk.web.dto.request.AdminProductSearchRequest;
 import com.daizuongkk.web.dto.request.SearchProductRequest;
 import com.daizuongkk.web.model.Product;
 import com.daizuongkk.web.util.JDBCUtils;
@@ -104,6 +106,210 @@ public class ProductRepository {
 		return findManyBySql(sql, statement -> statement.setInt(1, normalizedLimit));
 	}
 
+	public List<Product> findAdminPage(AdminProductSearchRequest filters, int page, int size) {
+		int normalizedPage = Math.max(page, 1);
+		int normalizedSize = Math.max(size, 1);
+		int offset = (normalizedPage - 1) * normalizedSize;
+
+		StringBuilder sql = new StringBuilder(SQL + " WHERE 1=1");
+		List<Object> params = buildAdminFilterParams(sql, filters);
+		sql.append(" ORDER BY p.created_at DESC LIMIT ? OFFSET ?");
+
+		return findManyBySql(sql.toString(), statement -> {
+			for (int i = 0; i < params.size(); i++) {
+				statement.setObject(i + 1, params.get(i));
+			}
+			statement.setInt(params.size() + 1, normalizedSize);
+			statement.setInt(params.size() + 2, offset);
+		});
+	}
+
+	public Long countAdmin(AdminProductSearchRequest filters) {
+		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM products p WHERE 1=1");
+		List<Object> params = buildAdminFilterParams(sql, filters);
+
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+			for (int i = 0; i < params.size(); i++) {
+				statement.setObject(i + 1, params.get(i));
+			}
+			try (ResultSet resultSet = statement.executeQuery()) {
+				if (resultSet.next()) {
+					return resultSet.getLong(1);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0L;
+	}
+
+	private List<Object> buildAdminFilterParams(StringBuilder sql, AdminProductSearchRequest filters) {
+		List<Object> params = new ArrayList<>();
+		if (filters == null) {
+			return params;
+		}
+
+		String keyword = filters.getKeyword() == null ? "" : filters.getKeyword().trim();
+		if (!keyword.isEmpty()) {
+			sql.append(" AND (p.name LIKE ? OR p.description LIKE ? OR p.summary LIKE ? OR p.brand LIKE ?)");
+			String like = "%" + keyword + "%";
+			params.add(like);
+			params.add(like);
+			params.add(like);
+			params.add(like);
+		}
+		if (filters.getCategory() != null && !filters.getCategory().isBlank()) {
+			sql.append(" AND p.category = ?");
+			params.add(filters.getCategory().trim());
+		}
+		if (filters.getBrand() != null && !filters.getBrand().isBlank()) {
+			sql.append(" AND p.brand = ?");
+			params.add(filters.getBrand().trim());
+		}
+		if (filters.getMinPrice() != null) {
+			sql.append(" AND p.price >= ?");
+			params.add(filters.getMinPrice());
+		}
+		if (filters.getMaxPrice() != null) {
+			sql.append(" AND p.price <= ?");
+			params.add(filters.getMaxPrice());
+		}
+		if (filters.getMinQuantity() != null) {
+			sql.append(" AND p.quantity >= ?");
+			params.add(filters.getMinQuantity());
+		}
+		if (filters.getMaxQuantity() != null) {
+			sql.append(" AND p.quantity <= ?");
+			params.add(filters.getMaxQuantity());
+		}
+		return params;
+	}
+
+	public List<Product> findLowStock(int limit) {
+		int normalizedLimit = Math.max(limit, 1);
+		String sql = SQL + " ORDER BY p.quantity ASC, p.updated_at DESC LIMIT ?";
+		return findManyBySql(sql, statement -> statement.setInt(1, normalizedLimit));
+	}
+
+	public Product save(Product product) {
+		if (product == null || product.getName() == null || product.getName().trim().isEmpty()) {
+			return null;
+		}
+
+		String sql = "INSERT INTO products (name, description, detail, summary, price, brand, category, promotion, quantity) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+			statement.setString(1, product.getName().trim());
+			statement.setString(2, product.getDescription());
+			statement.setString(3, product.getDetail());
+			statement.setString(4, product.getSummary());
+			if (product.getPrice() == null) {
+				statement.setNull(5, java.sql.Types.DECIMAL);
+			} else {
+				statement.setDouble(5, product.getPrice());
+			}
+			statement.setString(6, product.getBrand());
+			statement.setString(7, product.getCategory());
+			statement.setLong(8, product.getPromotion() == null ? 0L : product.getPromotion());
+			statement.setLong(9, product.getQuantity() == null ? 0L : product.getQuantity());
+
+			if (statement.executeUpdate() == 0) {
+				return null;
+			}
+			try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+				if (generatedKeys.next()) {
+					product.setId(generatedKeys.getLong(1));
+				}
+			}
+			return product;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public boolean update(Product product) {
+		if (product == null || product.getId() == null || product.getId() <= 0
+				|| product.getName() == null || product.getName().trim().isEmpty()) {
+			return false;
+		}
+
+		String sql = "UPDATE products SET name = ?, description = ?, detail = ?, summary = ?, price = ?, brand = ?, "
+				+ "category = ?, promotion = ?, quantity = ? WHERE id = ?";
+
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
+			statement.setString(1, product.getName().trim());
+			statement.setString(2, product.getDescription());
+			statement.setString(3, product.getDetail());
+			statement.setString(4, product.getSummary());
+			if (product.getPrice() == null) {
+				statement.setNull(5, java.sql.Types.DECIMAL);
+			} else {
+				statement.setDouble(5, product.getPrice());
+			}
+			statement.setString(6, product.getBrand());
+			statement.setString(7, product.getCategory());
+			statement.setLong(8, product.getPromotion() == null ? 0L : product.getPromotion());
+			statement.setLong(9, product.getQuantity() == null ? 0L : product.getQuantity());
+			statement.setLong(10, product.getId());
+			return statement.executeUpdate() > 0;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean deleteById(Long id) {
+		if (id == null || id <= 0) {
+			return false;
+		}
+
+		try (Connection connection = JDBCUtils.getConnection()) {
+			boolean autoCommit = connection.getAutoCommit();
+			connection.setAutoCommit(false);
+			try {
+				try (PreparedStatement statement = connection.prepareStatement("DELETE FROM cart_items WHERE product_id = ?")) {
+					statement.setLong(1, id);
+					statement.executeUpdate();
+				}
+				try (PreparedStatement statement = connection.prepareStatement("DELETE FROM wishlists WHERE product_id = ?")) {
+					statement.setLong(1, id);
+					statement.executeUpdate();
+				}
+				try (PreparedStatement statement = connection.prepareStatement("DELETE FROM reviews WHERE product_id = ?")) {
+					statement.setLong(1, id);
+					statement.executeUpdate();
+				}
+				try (PreparedStatement statement = connection.prepareStatement("UPDATE order_items SET product_id = NULL WHERE product_id = ?")) {
+					statement.setLong(1, id);
+					statement.executeUpdate();
+				}
+				try (PreparedStatement statement = connection.prepareStatement("DELETE FROM product_images WHERE product_id = ?")) {
+					statement.setLong(1, id);
+					statement.executeUpdate();
+				}
+				try (PreparedStatement statement = connection.prepareStatement("DELETE FROM products WHERE id = ?")) {
+					statement.setLong(1, id);
+					boolean deleted = statement.executeUpdate() > 0;
+					connection.commit();
+					connection.setAutoCommit(autoCommit);
+					return deleted;
+				}
+			} catch (Exception e) {
+				connection.rollback();
+				connection.setAutoCommit(autoCommit);
+				throw e;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 	public Long countAll() {
 		String sql = "SELECT COUNT(*) FROM products";
 		try (Connection connection = JDBCUtils.getConnection();
@@ -198,8 +404,8 @@ public class ProductRepository {
 		String name = filters.getName();
 
 		if (name != null && !name.isBlank()) {
-			sql.append(" AND p.name LIKE ?");
-			params.add("%" + name.trim() + "%");
+			sql.append(" AND MATCH(p.name, p.description, p.detail, p.summary) AGAINST(? IN NATURAL LANGUAGE MODE)");
+			params.add(name.trim());
 		}
 
 		if (categories != null && !categories.isEmpty()) {
@@ -261,6 +467,7 @@ public class ProductRepository {
 				.category(resultSet.getString("category"))
 				.price(price)
 				.promotion(resultSet.getLong("promotion"))
+				.quantity(resultSet.getLong("quantity"))
 				.brand(resultSet.getString("brand"))
 				.createdAt(resultSet.getTimestamp("created_at"))
 				.updatedAt(resultSet.getTimestamp("updated_at"))

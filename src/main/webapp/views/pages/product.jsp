@@ -5,6 +5,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<c:url var="fallbackProductImage" value="/assets/img/fallback_product_img.jpg"/>
 
 <fmt:setLocale value="vi_VN"/>
 <c:set var="reviewScore" value="${product.reviewScore}"/>
@@ -58,7 +59,7 @@
                     <c:forEach items="${product.imageUrl}" var="imageUrl">
 
                         <div class="product-preview">
-                            <img src="${imageUrl}" alt="">
+                            <img src="${not empty imageUrl ? imageUrl : fallbackProductImage}" alt="">
                         </div>
                     </c:forEach>
 
@@ -73,7 +74,7 @@
                     <c:forEach items="${product.imageUrl}" var="imageUrl">
 
                         <div class="product-preview">
-                            <img src="${imageUrl}" alt="">
+                            <img src="${not empty imageUrl ? imageUrl : fallbackProductImage}" alt="">
                         </div>
                     </c:forEach>
                 </div>
@@ -153,16 +154,31 @@
                         <div class="qty-label">
                             Qty
                             <div class="input-number">
-                                <input type="number" value="1">
+                                <!-- Gán ID động chứa mã sản phẩm -->
+                                <input type="number" id="qty-${product.id}" value="1">
                                 <span class="qty-up">+</span>
                                 <span class="qty-down">-</span>
                             </div>
                         </div>
-                        <button class="add-to-cart-btn" onclick="addToCart(${product.id})"><i class="fa fa-shopping-cart"></i>thêm vào giỏ</button>
+                        <!-- Tìm trực tiếp bằng ID vừa gán -->
+                        <button class="add-to-cart-btn" onclick="addToCart(${product.id}, parseInt(document.getElementById('qty-${product.id}').value))">
+                            <i class="fa fa-shopping-cart"></i>thêm vào giỏ
+                        </button>
                     </div>
 
+                    <c:set var="isWishlisted" value="false"/>
+                    <c:forEach var="wishlistItem" items="${sessionScope.wishlist}">
+                        <c:if test="${wishlistItem.id == product.id}">
+                            <c:set var="isWishlisted" value="true"/>
+                        </c:if>
+                    </c:forEach>
+
                     <ul class="product-btns">
-                        <li><a href="#"><i class="fa fa-heart-o"></i> thêm yêu thích</a></li>
+                        <li>
+                            <a href="#" class="add-to-wishlist ${isWishlisted ? 'is-active' : ''}" data-product-id="${product.id}">
+                                <i class="fa ${isWishlisted ? 'fa-heart' : 'fa-heart-o'}"></i> thêm yêu thích
+                            </a>
+                        </li>
                         <li><a href="#"><i class="fa fa-exchange"></i> thêm so sánh</a></li>
                     </ul>
 

@@ -67,6 +67,25 @@ public class CartItemRepository {
 		return cartItem;
 	}
 
+	public boolean updateQuantityByUserAndProduct(Long userId, Long productId, Long quantity) {
+		if (userId == null || userId <= 0 || productId == null || productId <= 0 || quantity == null || quantity <= 0) {
+			return false;
+		}
+
+		String sql = "UPDATE cart_items ci JOIN carts c ON c.id = ci.cart_id SET ci.quantity = ? WHERE c.user_id = ? AND ci.product_id = ?";
+
+		try (Connection connection = JDBCUtils.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+			statement.setLong(1, quantity);
+			statement.setLong(2, userId);
+			statement.setLong(3, productId);
+			return statement.executeUpdate() > 0;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 	public void delete(String productIds, Long userId) {
 		if (productIds == null || productIds.trim().isEmpty() || userId == null || userId <= 0) {
 			return;

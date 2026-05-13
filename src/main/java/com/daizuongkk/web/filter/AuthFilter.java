@@ -41,7 +41,7 @@ public class AuthFilter implements Filter {
         boolean isAdminArea = path.startsWith("/admin");
         if (isAdminArea) {
             if (account == null || account.getRole() != Role.ADMIN) {
-                req.getRequestDispatcher("/views/pages/404-page.jsp").forward(req, res);
+                req.getRequestDispatcher("/views/pages/403-page.jsp").forward(req, res);
                 return;
             }
         }

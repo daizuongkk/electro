@@ -21,5 +21,6 @@ public class Product {
 	private Date updatedAt;
 	private String category;
 	private Long promotion;
+	private Long quantity;
 
 }

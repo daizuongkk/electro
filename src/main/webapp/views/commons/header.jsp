@@ -6,6 +6,8 @@
 <base href="${pageContext.request.contextPath}/">
 
 <fmt:setLocale value="vi_VN"/>
+<c:set var="cartCount" value="${empty sessionScope.cart ? 0 : fn:length(sessionScope.cart)}"/>
+<c:set var="wishlistCount" value="${empty sessionScope.wishlist ? 0 : fn:length(sessionScope.wishlist)}"/>
 
 <!-- HEADER -->
 <header>
@@ -57,15 +59,41 @@
                 <!-- SEARCH BAR -->
                 <div class="col-md-6">
                     <div class="header-search">
-                        <form>
-                            <select class="input-select">
-                                <option value="0">Tất Cả</option>
-                                <c:forEach var="category" items="${categories}">
-                                    <option value="${category.key}">${category.value}</option>
-                                </c:forEach>
-                            </select>
-                            <input class="input" placeholder="Tìm kếm...">
-                            <button class="search-btn">Tìm Kếm</button>
+                        <form method="get" action="shop">
+<%--                            <select class="input-select" name="category">--%>
+<%--                                <option value="">Tất Cả</option>--%>
+<%--                                <c:forEach var="category" items="${categories}">--%>
+<%--                                    <option value="${category.key}">${category.value}</option>--%>
+<%--                                </c:forEach>--%>
+<%--                            </select>--%>
+                            <form method="get" action="shop">
+<%--                            <select class="input-select" name="category">--%>
+<%--                                <option value="">Tất Cả</option>--%>
+<%--                                <c:forEach var="category" items="${categories}">--%>
+<%--                                    <option value="${category.key}">${category.value}</option>--%>
+<%--                                </c:forEach>--%>
+<%--                            </select>--%>
+                            <c:forEach var="category" items="${paramValues.category}">
+                                <input type="hidden" name="category" value="${fn:escapeXml(category)}">
+                            </c:forEach>
+                            <c:forEach var="brand" items="${paramValues.brand}">
+                                <input type="hidden" name="brand" value="${fn:escapeXml(brand)}">
+                            </c:forEach>
+                            <c:if test="${not empty param.minPrice}">
+                                <input type="hidden" name="minPrice" value="${fn:escapeXml(param.minPrice)}">
+                            </c:if>
+                            <c:if test="${not empty param.maxPrice}">
+                                <input type="hidden" name="maxPrice" value="${fn:escapeXml(param.maxPrice)}">
+                            </c:if>
+                            <c:if test="${not empty param.sortBy}">
+                                <input type="hidden" name="sortBy" value="${fn:escapeXml(param.sortBy)}">
+                            </c:if>
+                            <c:if test="${not empty param.size}">
+                                <input type="hidden" name="size" value="${fn:escapeXml(param.size)}">
+                            </c:if>
+                            <input class="input" name="name" placeholder="Tìm kiếm..." value="${fn:escapeXml(param.name)}">
+                            <button type="submit" class="search-btn">Tìm Kếm</button>
+                        </form>
                         </form>
                     </div>
                 </div>
@@ -75,21 +103,52 @@
                 <div class="col-md-3 clearfix">
                     <div class="header-ctn">
                         <!-- Wishlist -->
-                        <div>
-                            <a href="#">
+                        <div class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 <i class="fa fa-heart-o"></i>
                                 <span>Yêu Thích</span>
-                                <div class="qty">2</div>
+                                <div class="qty wishlist-qty">${wishlistCount}</div>
                             </a>
+                            <div class="wishlist-dropdown">
+                                <div class="wishlist-list">
+                                    <c:choose>
+                                        <c:when test="${empty sessionScope.wishlist}">
+                                            <p class="text-center">Danh sách yêu thích trống</p>
+                                        </c:when>
+<%--                                        <c:otherwise>--%>
+<%--                                            <c:forEach var="item" items="${sessionScope.wishlist}">--%>
+<%--                                                <div class="product-widget">--%>
+<%--                                                    <div class="product-img" onclick="location.href='products?id=${item.id}'">--%>
+<%--                                                        <img src="${empty item.imageUrl ? 'assets/img/product01.png' : item.imageUrl[0]}" alt="${item.name}">--%>
+<%--                                                    </div>--%>
+<%--                                                    <div class="product-body">--%>
+<%--                                                        <h3 class="product-name"><a href="products?id=${item.id}">${item.name}</a></h3>--%>
+<%--                                                        <h4 class="product-price">--%>
+<%--                                                            <fmt:formatNumber value="${item.price}" type="currency" currencySymbol="₫" />--%>
+<%--                                                        </h4>--%>
+<%--                                                    </div>--%>
+<%--                                                    <button class="delete" type="button" onclick="deleteWishlistItem(${item.id})"><i class="fa fa-close"></i></button>--%>
+<%--                                                </div>--%>
+<%--                                            </c:forEach>--%>
+<%--                                        </c:otherwise>--%>
+                                    </c:choose>
+                                </div>
+                                <div class="wishlist-summary">
+                                    <p><small>${wishlistCount} sản phẩm</small></p>
+                                </div>
+                                <div class="wishlist-btns">
+                                    <a href="shop">Tiếp tục mua sắm <i class="fa fa-shopping-bag"></i></a>
+                                </div>
+                            </div>
                         </div>
                         <!-- /Wishlist -->
 
                         <!-- Cart -->
                         <div class="dropdown">
-                            <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" >
+                            <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 <i class="fa fa-shopping-cart"></i>
                                 <span>Giỏ Hàng</span>
-                                <div class="qty"> ${fn:length(cart)}</div>
+                                <div class="qty cart-qty">${cartCount}</div>
                             </a>
                             <div class="cart-dropdown">
                                 <div class="cart-list">

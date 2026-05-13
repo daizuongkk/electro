@@ -1,6 +1,6 @@
 package com.daizuongkk.web.model;
 
-public class WhiteList {
+public class WhishList {
     private Long id;
     private String url;
 

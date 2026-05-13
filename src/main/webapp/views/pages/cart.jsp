@@ -11,7 +11,7 @@
 <fmt:setLocale value="vi_VN"/>
 <c:set var="cartItems" value="${sessionScope.cart}"/>
 <c:set var="cartCount" value="${empty cartItems ? 0 : cartItems.size()}"/>
-<c:url var="fallbackProductImage" value="/assets/img/product01.png"/>
+<c:url var="fallbackProductImage" value="/assets/img/fallback_product_img.jpg"/>
 
 <%@ include file="../commons/header.jsp" %>
 
@@ -69,7 +69,7 @@
                                         <c:set var="lineTotal" value="${item.product.price * item.quantity}"/>
                                         <c:set var="subtotal" value="${subtotal + lineTotal}"/>
 
-                                        <tr class="cart-row" data-unit-price="${item.product.price}">
+                                        <tr class="cart-row" data-product-id="${item.product.id}" data-unit-price="${item.product.price}">
                                             <td class="text-center cart-select-col">
                                                 <input type="checkbox" class="cart-item-check" checked aria-label="Chọn sản phẩm ${item.product.name}" value="${item.product.id}"/>
                                             </td>
@@ -89,7 +89,7 @@
                                             <td class="text-center">
                                                 <div class="cart-qty-control">
                                                     <button type="button" class="cart-qty-btn cart-qty-down" aria-label="Giảm số lượng">-</button>
-                                                    <input type="number" class="cart-qty-input" min="1" value="${item.quantity}">
+                                                    <input type="number" class="cart-qty-input" min="1" value="${item.quantity}" data-saved-value="${item.quantity}">
                                                     <button type="button" class="cart-qty-btn cart-qty-up" aria-label="Tăng số lượng">+</button>
                                                 </div>
                                             </td>
@@ -99,7 +99,7 @@
                                                 </strong>
                                             </td>
                                             <td class="text-center cart-action-col">
-                                                <button type="button" class="cart-remove-btn" aria-label="Xóa sản phẩm ${item.product.name}">
+                                                <button type="button" class="cart-remove-btn" aria-label="Xóa sản phẩm ${item.product.name}" onclick="deleteCartItem(${item.product.id})">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
                                             </td>
@@ -251,6 +251,8 @@
 
     var toggle = null;
     var orderProducts = null;
+    var cartQuantitySyncs = {};
+    var CART_QTY_SYNC_DELAY = 450;
 
     function renderOrderSummary() {
         if (!orderProducts) {
@@ -392,6 +394,107 @@
         }
     }
 
+    function getNormalizedQuantity(input) {
+        var quantity = parseInt(input.value, 10);
+        if (isNaN(quantity) || quantity < 1) {
+            quantity = 1;
+        }
+        input.value = String(quantity);
+        return quantity;
+    }
+
+    function setRowQuantitySaving(row, saving) {
+        var buttons = row.querySelectorAll('.cart-qty-btn');
+        buttons.forEach(function (button) {
+            button.disabled = saving;
+        });
+    }
+
+    function scheduleCartQuantitySync(row) {
+        if (!row) {
+            return;
+        }
+
+        var productId = row.getAttribute('data-product-id');
+        var input = row.querySelector('.cart-qty-input');
+        if (!productId || !input) {
+            return;
+        }
+
+        var quantity = getNormalizedQuantity(input);
+        var sync = cartQuantitySyncs[productId];
+        if (!sync) {
+            sync = {
+                timer: null,
+                inFlight: false,
+                queued: false,
+                lastSentQuantity: null
+            };
+            cartQuantitySyncs[productId] = sync;
+        }
+
+        sync.queuedQuantity = quantity;
+
+        if (sync.timer) {
+            clearTimeout(sync.timer);
+        }
+
+        sync.timer = setTimeout(function () {
+            flushCartQuantitySync(row);
+        }, CART_QTY_SYNC_DELAY);
+    }
+
+    function flushCartQuantitySync(row) {
+        var productId = row.getAttribute('data-product-id');
+        var input = row.querySelector('.cart-qty-input');
+        var sync = cartQuantitySyncs[productId];
+
+        if (!productId || !input || !sync) {
+            return;
+        }
+
+        sync.timer = null;
+        if (sync.inFlight) {
+            sync.queued = true;
+            return;
+        }
+
+        var quantity = getNormalizedQuantity(input);
+        if (String(sync.lastSentQuantity) === String(quantity)) {
+            return;
+        }
+
+        sync.inFlight = true;
+        setRowQuantitySaving(row, true);
+
+        fetch('${pageContext.request.contextPath}/api/carts/' + encodeURIComponent(productId) + '?qty=' + encodeURIComponent(quantity), {
+            method: 'PUT'
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Update cart quantity failed');
+                }
+                input.setAttribute('data-saved-value', String(quantity));
+                sync.lastSentQuantity = quantity;
+            })
+            .catch(function () {
+                input.value = input.getAttribute('data-saved-value') || '1';
+                sync.lastSentQuantity = getNormalizedQuantity(input);
+                updateCartSummaryFromUI();
+                renderOrderSummary();
+            })
+            .finally(function () {
+                sync.inFlight = false;
+                setRowQuantitySaving(row, false);
+
+                var latestQuantity = getNormalizedQuantity(input);
+                if (sync.queued || String(sync.lastSentQuantity) !== String(latestQuantity)) {
+                    sync.queued = false;
+                    scheduleCartQuantitySync(row);
+                }
+            });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         var page = document.getElementById('cart-page');
         if (!page) {
@@ -436,6 +539,7 @@
 
             updateCartSummaryFromUI();
             renderOrderSummary();
+            scheduleCartQuantitySync(row);
         });
 
         page.addEventListener('click', function (event) {
@@ -459,6 +563,7 @@
             if (event.target.classList.contains('cart-qty-input')) {
                 updateCartSummaryFromUI();
                 renderOrderSummary();
+                scheduleCartQuantitySync(event.target.closest('.cart-row'));
             }
         });
 

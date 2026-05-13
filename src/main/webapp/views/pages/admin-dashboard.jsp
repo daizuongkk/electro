@@ -1,5 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <base href="${pageContext.request.contextPath}/">
@@ -11,6 +13,8 @@
 </head>
 
 <body>
+<fmt:setLocale value="vi_VN"/>
+<c:url var="fallbackProductImage" value="/assets/img/fallback_product_img.jpg"/>
 <div id="overlay" class="overlay"></div>
 <!-- TOPBAR -->
 <%@include file="../commons/admin-header.jsp"%>
@@ -23,7 +27,7 @@
             <div class="col-12">
                 <div class="mb-6">
                     <h1 class="fs-3 mb-1">Dashboard</h1>
-                    <p>Your main content goes here…</p>
+                    <p>Tổng quan dữ liệu bán hàng và kho hiện tại.</p>
                 </div>
             </div>
         </div>
@@ -37,9 +41,9 @@
                             <i class="ti ti-report-analytics fs-4"></i>
                         </div>
                         <div>
-                            <h2 class="mb-3 fs-6">Total Sales</h2>
-                            <h3 class="fw-bold mb-0">$25,000</h3>
-                            <p class="text-primary mb-0 small">+5% since last month</p>
+                            <h2 class="mb-3 fs-6">Doanh thu</h2>
+                            <h3 class="fw-bold mb-0"><fmt:formatNumber value="${totalRevenue}" type="currency" currencySymbol="₫"/></h3>
+                            <p class="text-primary mb-0 small">Đơn đã thanh toán/giao/hoàn tất</p>
                         </div>
                     </div>
                 </div>
@@ -55,9 +59,9 @@
                             <i class="ti ti-repeat fs-4"></i>
                         </div>
                         <div>
-                            <h2 class="mb-3 fs-6">Total Purchase</h2>
-                            <h3 class="fw-bold mb-0">$18,000</h3>
-                            <p class="text-success mb-0 small">+22% since last month</p>
+                            <h2 class="mb-3 fs-6">Đơn hàng</h2>
+                            <h3 class="fw-bold mb-0">${totalOrders}</h3>
+                            <p class="text-success mb-0 small">${completedOrders} đơn hoàn tất</p>
                         </div>
                     </div>
                 </div>
@@ -73,9 +77,9 @@
                             <i class="ti ti-currency-dollar fs-4"></i>
                         </div>
                         <div>
-                            <h2 class="mb-3 fs-6">Total Expenses</h2>
-                            <h3 class="fw-bold mb-0">$9,000</h3>
-                            <p class="text-info mb-0 small">+10% since last month</p>
+                            <h2 class="mb-3 fs-6">Sản phẩm</h2>
+                            <h3 class="fw-bold mb-0">${totalProducts}</h3>
+                            <p class="text-info mb-0 small">Đang quản lý trong kho</p>
                         </div>
                     </div>
                 </div>
@@ -91,9 +95,9 @@
                             <i class="ti ti-notes fs-4"></i>
                         </div>
                         <div>
-                            <h2 class="mb-3 fs-6">Invoice Due</h2>
-                            <h3 class="fw-bold mb-0">$25,000</h3>
-                            <p class="text-warning mb-0 small">+35% since last month</p>
+                            <h2 class="mb-3 fs-6">Khách hàng</h2>
+                            <h3 class="fw-bold mb-0">${totalUsers}</h3>
+                            <p class="text-warning mb-0 small">${pendingOrders} đơn đang chờ</p>
                         </div>
                     </div>
                 </div>
@@ -249,86 +253,33 @@
         </div>
         <div class="row g-3">
 
-            <!-- CARD 1 — Top Selling Products -->
+            <!-- CARD 1 — Latest Products -->
             <div class="col-lg-4">
                 <div class="card  h-100">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center px-4 py-3">
-                        <h4 class="mb-0 h5">Top Selling Products</h4>
-                        <button class="btn btn-sm btn-outline-secondary">
-                            <i class="ti ti-calendar"></i> Today
-                        </button>
+                        <h4 class="mb-0 h5">Sản phẩm mới</h4>
+                        <a href="admin/products" class="small text-primary text-decoration-underline">Xem tất cả</a>
                     </div>
 
                     <ul class="list-group list-group-flush">
-
-                        <!-- item -->
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-2.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">Wireless Earphones</p>
-                                <div class="d-flex align-items-center gap-2 text-muted">
-                                    <small class="fw-semibold">$89 </small>
-                                    <small>•</small>
-                                    <small>1,250 Units</small>
+                        <c:forEach var="product" items="${latestProducts}">
+                            <li class="list-group-item d-flex align-items-center gap-3">
+                                <img src="${not empty product.imageUrl ? product.imageUrl[0] : fallbackProductImage}"
+                                     class="rounded" width="48" height="48" alt="${fn:escapeXml(product.name)}">
+                                <div class="flex-grow-1">
+                                    <p class="mb-1">${product.name}</p>
+                                    <div class="d-flex align-items-center gap-2 text-muted">
+                                        <small class="fw-semibold"><fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫"/></small>
+                                        <small>•</small>
+                                        <small>${product.quantity} tồn kho</small>
+                                    </div>
                                 </div>
-                            </div>
-                            <span class="badge bg-danger-subtle text-danger border border-danger">18%</span>
-                        </li>
-
-                        <!-- repeat -->
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-1.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">Gaming Joy Stick</p>
-                                <div class="d-flex align-items-center gap-2 text-muted">
-                                    <small class="fw-semibold">$49 </small>
-                                    <small>•</small>
-                                    <small>5,420 Units</small>
-                                </div>
-
-                            </div>
-                            <span class="badge bg-primary-subtle text-primary border border-primary">32%</span>
-                        </li>
-
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-3.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">Smart Watch Pro</p>
-                                <div class="d-flex align-items-center gap-2 text-muted">
-                                    <small class="fw-semibold">$98 </small>
-                                    <small>•</small>
-                                    <small>862 Units</small>
-                                </div>
-
-                            </div>
-                            <span class="badge bg-info-subtle text-info border border-info">22%</span>
-                        </li>
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-4.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">USB-C Fast Charger</p>
-                                <div class="d-flex align-items-center gap-2 text-muted">
-                                    <small class="fw-semibold">$35 </small>
-                                    <small>•</small>
-                                    <small>3,200 Units</small>
-                                </div>
-
-                            </div>
-                            <span class="badge bg-success-subtle text-success border border-success">28%</span>
-                        </li>
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-5.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">Portable Bluetooth Speaker</p>
-                                <div class="d-flex align-items-center gap-2 text-muted">
-                                    <small class="fw-semibold">$65 </small>
-                                    <small>•</small>
-                                    <small>2,890 Units</small>
-                                </div>
-
-                            </div>
-                            <span class="badge bg-warning-subtle text-warning border border-warning">25%</span>
-                        </li>
+                                <span class="badge bg-primary-subtle text-primary border border-primary">${product.category}</span>
+                            </li>
+                        </c:forEach>
+                        <c:if test="${empty latestProducts}">
+                            <li class="list-group-item text-center text-secondary py-4">Chưa có sản phẩm.</li>
+                        </c:if>
                     </ul>
                 </div>
             </div>
@@ -339,153 +290,65 @@
                     <div class="card-header bg-white d-flex justify-content-between align-items-center px-4 py-3">
                         <div class="d-flex align-items-center">
 
-                            <h4 class="mb-0 h5">Low Stock Products</h4>
+                            <h4 class="mb-0 h5">Sản phẩm sắp hết</h4>
                         </div>
-                        <a href="#" class="small text-primary text-decoration-underline">View All</a>
+                        <a href="admin/products" class="small text-primary text-decoration-underline">Xem tất cả</a>
                     </div>
 
                     <ul class="list-group list-group-flush">
-
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-8.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">Wireless Headphones</p>
-                                <small>ID: #554433</small>
-                            </div>
-                            <div class="d-flex flex-column gap-0 align-items-center">
-                                <span class="fw-semibold text-primary">06</span>
-                                <small class="text-muted">In Stock</small>
-                            </div>
-                        </li>
-
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-4.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">USB-C Cable Pack</p>
-                                <small>ID: #887766</small>
-                            </div>
-                            <div class="d-flex flex-column gap-0 align-items-center">
-                                <span class="fw-semibold text-primary">09</span>
-                                <small class="text-muted">In Stock</small>
-                            </div>
-                        </li>
-
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-10.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">Phone Screen Protector</p>
-                                <small>ID: #332211</small>
-                            </div>
-                            <div class="d-flex flex-column gap-0 align-items-center">
-                                <span class="fw-semibold text-primary">03</span>
-                                <small class="text-muted">In Stock</small>
-                            </div>
-                        </li>
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-4.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">Portable Charger 20000mAh</p>
-                                <small>ID: #998877</small>
-                            </div>
-                            <div class="d-flex flex-column gap-0 align-items-center">
-                                <span class="fw-semibold text-primary">07</span>
-                                <small class="text-muted">In Stock</small>
-                            </div>
-                        </li>
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-6.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">Mechanical Keyboard RGB</p>
-                                <small>ID: #665544</small>
-                            </div>
-                            <div class="d-flex flex-column gap-0 align-items-center">
-                                <span class="fw-semibold text-primary">02</span>
-                                <small class="text-muted">In Stock</small>
-                            </div>
-                        </li>
+                        <c:forEach var="product" items="${lowStockProducts}">
+                            <li class="list-group-item d-flex align-items-center gap-3">
+                                <img src="${not empty product.imageUrl ? product.imageUrl[0] : fallbackProductImage}"
+                                     class="rounded" width="48" height="48" alt="${fn:escapeXml(product.name)}">
+                                <div class="flex-grow-1">
+                                    <p class="mb-1">${product.name}</p>
+                                    <small>ID: #${product.id}</small>
+                                </div>
+                                <div class="d-flex flex-column gap-0 align-items-center">
+                                    <span class="fw-semibold ${product.quantity <= 10 ? 'text-danger' : 'text-primary'}">${product.quantity}</span>
+                                    <small class="text-muted">Tồn kho</small>
+                                </div>
+                            </li>
+                        </c:forEach>
+                        <c:if test="${empty lowStockProducts}">
+                            <li class="list-group-item text-center text-secondary py-4">Chưa có dữ liệu tồn kho.</li>
+                        </c:if>
                     </ul>
                 </div>
             </div>
 
-            <!-- CARD 3 — Recent Sales -->
+            <!-- CARD 3 — Recent Orders -->
             <div class="col-lg-4">
                 <div class="card  h-100">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center px-4 py-3">
-                        <h4 class="mb-0 h5">Recent Sales</h4>
-                        <button class="btn btn-sm btn-outline-secondary">
-                            <i class="ti ti-calendar-event"></i> Weekly
-                        </button>
+                        <h4 class="mb-0 h5">Đơn hàng mới</h4>
+                        <span class="btn btn-sm btn-outline-secondary">
+                            <i class="ti ti-calendar-event"></i> Gần nhất
+                        </span>
                     </div>
 
                     <ul class="list-group list-group-flush">
-
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-7.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">MacBook Pro 16"</p>
-                                <div class="d-flex align-items-center gap-2 text-muted">
-                                    <small class="fw-semibold">Computers </small>
-                                    <small>•</small>
-                                    <small>2,$2,499</small>
+                        <c:forEach var="order" items="${recentOrders}">
+                            <li class="list-group-item d-flex align-items-center gap-3">
+                                <div class="icon-shape icon-md bg-primary bg-opacity-10 text-primary rounded-2">
+                                    <i class="ti ti-receipt"></i>
                                 </div>
-
-                            </div>
-                            <span class="badge bg-success-subtle text-success">Completed</span>
-                        </li>
-
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-9.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">AirPods Pro Max</p>
-                                <div class="d-flex align-items-center gap-2 text-muted">
-                                    <small class="fw-semibold">Audio </small>
-                                    <small>•</small>
-                                    <small>$549</small>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1">#${order.id} - ${order.recipientName}</p>
+                                    <div class="d-flex align-items-center gap-2 text-muted">
+                                        <small class="fw-semibold"><fmt:formatNumber value="${order.totalPrice}" type="currency" currencySymbol="₫"/></small>
+                                        <small>•</small>
+                                        <small>${order.phone}</small>
+                                    </div>
                                 </div>
-
-                            </div>
-                            <span class="badge bg-primary-subtle text-primary">Processing</span>
-                        </li>
-
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-8.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">iPad Air 11"</p>
-                                <div class="d-flex align-items-center gap-2 text-muted">
-                                    <small class="fw-semibold">Tablets </small>
-                                    <small>•</small>
-                                    <small>$799</small>
-                                </div>
-                            </div>
-                            <span class="badge bg-success-subtle text-success">Completed</span>
-                        </li>
-
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-3.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">Apple Watch Ultra</p>
-                                <div class="d-flex align-items-center gap-2 text-muted">
-                                    <small class="fw-semibold">Wearables </small>
-                                    <small>•</small>
-                                    <small>$799</small>
-                                </div>
-                            </div>
-                            <span class="badge bg-warning-subtle text-warning">Pending</span>
-                        </li>
-
-                        <li class="list-group-item d-flex align-items-center gap-3">
-                            <img src="./assets/img/product-6.png" class="rounded" width="48">
-                            <div class="flex-grow-1">
-                                <p class="mb-1">Magic Keyboard</p>
-                                <div class="d-flex align-items-center gap-2 text-muted">
-                                    <small class="fw-semibold">Accessories </small>
-                                    <small>•</small>
-                                    <small>$299</small>
-                                </div>
-
-                            </div>
-                            <span class="badge bg-danger-subtle text-danger">Cancelled</span>
-                        </li>
+                                <span class="badge ${order.status == 'COMPLETED' ? 'bg-success-subtle text-success' : (order.status == 'CANCELLED' ? 'bg-danger-subtle text-danger' : 'bg-warning-subtle text-warning')}">
+                                        ${order.status}
+                                </span>
+                            </li>
+                        </c:forEach>
+                        <c:if test="${empty recentOrders}">
+                            <li class="list-group-item text-center text-secondary py-4">Chưa có đơn hàng.</li>
+                        </c:if>
                     </ul>
                 </div>
             </div>

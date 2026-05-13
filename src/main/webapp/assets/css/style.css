@@ -560,11 +560,17 @@ textarea.input {
   background-color: #D10024;
 }
 
+.add-to-wishlist.is-active,
+.add-to-wishlist.is-active i {
+  color: #D10024;
+}
+
 .header-ctn .menu-toggle {
   display: none;
 }
 
-.cart-dropdown {
+.cart-dropdown,
+.wishlist-dropdown {
   position: absolute;
   width: 300px;
   background: #FFF;
@@ -577,7 +583,10 @@ textarea.input {
   visibility: hidden;
 }
 
-.dropdown.open>.cart-dropdown {
+.dropdown.open>.cart-dropdown,
+.dropdown.open>.wishlist-dropdown,
+.dropdown.show>.cart-dropdown,
+.dropdown.show>.wishlist-dropdown {
   opacity: 1;
   visibility: visible;
 }
@@ -589,36 +598,43 @@ textarea.input {
 /*  visibility: visible;*/
 /*}*/
 
-.cart-dropdown .cart-list {
+.cart-dropdown .cart-list,
+.wishlist-dropdown .wishlist-list {
   max-height: 180px;
   overflow-y: scroll;
   margin-bottom: 15px;
 }
 
-.cart-dropdown .cart-list .product-widget {
+.cart-dropdown .cart-list .product-widget,
+.wishlist-dropdown .wishlist-list .product-widget {
   padding: 0px;
   -webkit-box-shadow: none;
   box-shadow: none;
 }
 
-.cart-dropdown .cart-list .product-widget:last-child {
+.cart-dropdown .cart-list .product-widget:last-child,
+.wishlist-dropdown .wishlist-list .product-widget:last-child {
   margin-bottom: 0px;
 }
 
-.cart-dropdown .cart-list .product-widget .product-img {
+.cart-dropdown .cart-list .product-widget .product-img,
+.wishlist-dropdown .wishlist-list .product-widget .product-img {
   left: 0px;
   top: 0px;
 }
 
-.cart-dropdown .cart-list .product-widget .product-body .product-price {
+.cart-dropdown .cart-list .product-widget .product-body .product-price,
+.wishlist-dropdown .wishlist-list .product-widget .product-body .product-price {
   color: #2B2D42;
 }
 
-.cart-dropdown .cart-btns {
+.cart-dropdown .cart-btns,
+.wishlist-dropdown .wishlist-btns {
   margin: 0px -17px -17px;
 }
 
-.cart-dropdown .cart-btns>a {
+.cart-dropdown .cart-btns>a,
+.wishlist-dropdown .wishlist-btns>a {
   display: inline-block;
   width: calc(100% - 0px);
   padding: 12px;
@@ -630,16 +646,19 @@ textarea.input {
   transition: 0.2s all;
 }
 
-.cart-dropdown .cart-btns>a:first-child {
+.cart-dropdown .cart-btns>a:first-child,
+.wishlist-dropdown .wishlist-btns>a:first-child {
   /*margin-right: -4px;*/
   background-color: #1e1f29;
 }
 
-.cart-dropdown .cart-btns>a:hover {
+.cart-dropdown .cart-btns>a:hover,
+.wishlist-dropdown .wishlist-btns>a:hover {
   opacity: 0.9;
 }
 
-.cart-dropdown .cart-summary {
+.cart-dropdown .cart-summary,
+.wishlist-dropdown .wishlist-summary {
   border-top: 1px solid #E4E7ED;
   padding-top: 15px;
   padding-bottom: 15px;

@@ -1,9 +1,11 @@
 package com.daizuongkk.web.service;
 
+import com.daizuongkk.web.dto.request.AdminProductSearchRequest;
 import com.daizuongkk.web.dto.request.SearchProductRequest;
 import com.daizuongkk.web.dto.response.ProductResponse;
 import com.daizuongkk.web.model.Category;
 import com.daizuongkk.web.model.Product;
+import com.daizuongkk.web.model.ProductImg;
 import com.daizuongkk.web.repository.ProductImgRepository;
 import com.daizuongkk.web.repository.ProductRepository;
 import com.daizuongkk.web.repository.ReviewRepository;
@@ -54,6 +56,65 @@ public class ProductService {
             productResponseList.add(productToProductResponse(product));
         }
         return productResponseList;
+    }
+
+    public List<ProductResponse> getAdminProducts(AdminProductSearchRequest filters, int page, int size) {
+        return productRepository.findAdminPage(filters, page, size)
+                .stream()
+                .map(this::productToProductResponse)
+                .toList();
+    }
+
+    public Long countAdminProducts(AdminProductSearchRequest filters) {
+        return productRepository.countAdmin(filters);
+    }
+
+    public List<ProductResponse> getLowStockProducts(int limit) {
+        return productRepository.findLowStock(limit)
+                .stream()
+                .map(this::productToProductResponse)
+                .toList();
+    }
+
+    public ProductResponse createProduct(Product product, List<String> imageUrls) {
+        Product created = productRepository.save(product);
+        if (created == null) {
+            return null;
+        }
+        productImgRepository.createBatch(created.getId(), imageUrls);
+        return productToProductResponse(created);
+    }
+
+    public boolean updateProduct(Product product, List<String> imageUrls) {
+        boolean updated = productRepository.update(product);
+        if (updated) {
+            productImgRepository.createBatch(product.getId(), imageUrls);
+        }
+        return updated;
+    }
+
+    public Product getProductModelById(Long id) {
+        return productRepository.findById(id);
+    }
+
+    public List<String> getProductImageUrls(Long productId) {
+        return productImgRepository.findUrlsByProductId(productId);
+    }
+
+    public List<ProductImg> getProductImages(Long productId) {
+        return productImgRepository.findByProductId(productId);
+    }
+
+    public int addProductImages(Long productId, List<String> imageUrls) {
+        return productImgRepository.createBatch(productId, imageUrls);
+    }
+
+    public int deleteProductImages(Long productId, List<Long> imageIds) {
+        return productImgRepository.deleteByIds(productId, imageIds);
+    }
+
+    public boolean deleteProduct(Long id) {
+        return productRepository.deleteById(id);
     }
 
     public ProductResponse getProductById(Long id) {

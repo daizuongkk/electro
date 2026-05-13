@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
-<c:url var="fallbackProductImage" value="/assets/img/product01.png"/>
+<c:url var="fallbackProductImage" value="/assets/img/fallback_product_img.jpg"/>
 <jsp:useBean id="now" class="java.util.Date" />
 <fmt:setLocale value="vi_VN"/>
 
@@ -74,7 +74,7 @@
 </style>
 
 <!-- product -->
-<a href="${pageContext.request.contextPath}/products?id=${product.id}" class="product-link">
+<div class="product-link">
     <div class="product">
         <div class="product-img">
             <img src="${not empty product.imageUrl ? product.imageUrl[0] : fallbackProductImage}" alt="${product.name}">
@@ -134,8 +134,15 @@
 
 
             </div>
+            <c:set var="isWishlisted" value="false"/>
+            <c:forEach var="wishlistItem" items="${sessionScope.wishlist}">
+                <c:if test="${wishlistItem.id == product.id}">
+                    <c:set var="isWishlisted" value="true"/>
+                </c:if>
+            </c:forEach>
             <div class="product-btns">
-                <button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span
+                <button type="button" class="add-to-wishlist ${isWishlisted ? 'is-active' : ''}" data-product-id="${product.id}">
+                    <i class="fa ${isWishlisted ? 'fa-heart' : 'fa-heart-o'}"></i><span
                         class="tooltipp">thêm yêu thích</span>
                 </button>
                 <button class="add-to-compare"><i class="fa fa-exchange"></i><span
@@ -145,10 +152,10 @@
             </div>
         </div>
         <div class="add-to-cart">
-            <button id="addToCartBtn" class="add-to-cart-btn" onclick="addToCart(${product.id})"><i class="fa fa-shopping-cart" ></i>Thêm Vào Giỏ</button>
+            <button id="addToCartBtn" type="button" class="add-to-cart-btn" onclick="addToCart(${product.id}, 1)"><i class="fa fa-shopping-cart" ></i>Thêm Vào Giỏ</button>
         </div>
     </div>
-</a>
+</div>
 
 
 

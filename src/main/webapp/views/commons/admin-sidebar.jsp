@@ -21,19 +21,24 @@
         <li class="px-4 py-2"><small class="nav-text">Main</small></li>
         <li><a class="nav-link active" href="admin"><i class="ti ti-home"></i><span
                 class="nav-text">Thống Kê</span></a></li>
-        <li><a class="nav-link" href="<c:url value='admin?page=inventory'/>"><i class="ti ti-box-seam"></i><span
+        <li><a class="nav-link" href="<c:url value='/admin/products'/>"><i class="ti ti-box-seam"></i><span
                 class="nav-text">Kho</span></a></li>
-        <li><a class="nav-link" href="<c:url value='admin?page=create-product'/>"><i class="ti ti-plus"></i><span class="nav-text">Thêm Sản Phẩm</span></a>
-        </li>
-        <li><a class="nav-link" href="<c:url value='admin?page=reports'/>"><i class="ti ti-receipt"></i><span class="nav-text">Báo Cáo</span></a>
+        <li><a class="nav-link" href="<c:url value='/admin/products/form'/>"><i class="ti ti-plus"></i><span class="nav-text">Thêm Sản Phẩm</span></a>
         </li>
 
       <li class="px-4 py-2"><small class="nav-text">Account</small></li>
 
         <li>
-            <a class="nav-link" href="admin?page=users">
+            <a class="nav-link" href="<c:url value='/admin/users'/>">
                 <i class="fa fa-users"></i>
                 <span class="nav-text">Người Dùng</span>
+            </a>
+        </li>
+
+        <li>
+            <a class="nav-link" href="<c:url value='/admin/users/form'/>">
+                <i class="ti ti-user-plus"></i>
+                <span class="nav-text">Thêm Người Dùng</span>
             </a>
         </li>
 
