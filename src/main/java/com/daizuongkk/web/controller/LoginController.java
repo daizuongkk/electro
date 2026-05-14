@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.daizuongkk.web.dto.response.CartItemResponse;
 import com.daizuongkk.web.dto.response.UserResponse;
+import com.daizuongkk.web.model.Order;
 import com.daizuongkk.web.service.AuthService;
 import com.daizuongkk.web.service.CartService;
 import com.daizuongkk.web.service.OrderService;
@@ -66,6 +67,7 @@ public class LoginController extends HttpServlet {
 		}
 
 		UserResponse res = authService.login(username, password);
+
 		if (res == null) {
 			request.setAttribute("loginError", "Tên đăng nhập hoặc mật khẩu không hợp lệ.");
 			request.setAttribute("submittedUsername", username.trim());
@@ -75,12 +77,15 @@ public class LoginController extends HttpServlet {
 		}
 
 		List<CartItemResponse> cart = cartService.getCartItems(res.getId());
+		List<Order> allOrders = orderService.findOrdersByUserId(res.getId());
 
 		HttpSession session = request.getSession(true);
 		session.setAttribute("account", res);
 		session.setAttribute("cart", cart);
 		session.setAttribute("orderCount", getOrderService().countOrdersByUserId(res.getId()));
+
 		writeRememberCookie(response, username.trim(), rememberMe, request.isSecure(), request.getContextPath());
+
 		response.sendRedirect("home");
 	}
 
@@ -123,4 +128,5 @@ public class LoginController extends HttpServlet {
 
 		response.addCookie(cookie);
 	}
+
 }

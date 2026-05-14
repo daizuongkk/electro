@@ -18,6 +18,7 @@ public class UserResponse {
     private  String phone;
     private String email;
     private Boolean verified;
+    private Boolean phoneVerified;
     private String status;
 
 }

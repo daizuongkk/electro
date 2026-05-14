@@ -59,11 +59,12 @@ public class AuthService {
 				.lastName(user.getLastName())
 				.role(user.getRole())
 				.avtUrl(user.getAvtUrl())
-				.phone(user.getPhone())
-				.email(user.getEmail())
-				.verified(user.getVerified())
-				.status(user.getStatus())
-				.build();
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .verified(user.getVerified())
+                .phoneVerified(user.getPhoneVerified())
+                .status(user.getStatus())
+                .build();
 	}
 
 	public RegisterStatus register(String username, String email, String password) {

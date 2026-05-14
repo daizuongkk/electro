@@ -18,7 +18,7 @@ import java.util.List;
 @WebServlet(name = "Shop", value = "/shop")
 public class ShopController extends HttpServlet {
 
-    private ProductService productService = new ProductService();
+    private final ProductService productService = new ProductService();
 
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

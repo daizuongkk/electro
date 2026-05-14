@@ -45,10 +45,22 @@
             <div class="js-popup-message hidden" data-type="danger" data-message="Không thể hủy đơn hàng ở trạng thái hiện tại."></div>
         </c:if>
 
+        <div class="orders-tabs" role="tablist" aria-label="Lọc đơn hàng">
+            <a class="orders-tab ${activeOrderTab == 'active' ? 'active' : ''}" href="orders?tab=active" role="tab">
+                Đang thực hiện <span>${activeOrderCount}</span>
+            </a>
+            <a class="orders-tab ${activeOrderTab == 'completed' ? 'active' : ''}" href="orders?tab=completed" role="tab">
+                Đã hoàn thành <span>${completedOrderCount}</span>
+            </a>
+            <a class="orders-tab ${activeOrderTab == 'cancelled' ? 'active' : ''}" href="orders?tab=cancelled" role="tab">
+                Đã hủy <span>${cancelledOrderCount}</span>
+            </a>
+        </div>
+
         <c:choose>
 
             <%-- Empty state --%>
-            <c:when test="${empty orders}">
+            <c:when test="${activeOrderCount + completedOrderCount + cancelledOrderCount == 0}">
                 <div class="orders-empty-state">
                     <i class="fa fa-list-alt"></i>
                     <h3>Bạn chưa có đơn hàng nào</h3>
@@ -63,6 +75,13 @@
 
                         <%-- ── Left: danh sách đơn ── --%>
                     <div class="orders-list">
+                        <c:if test="${empty orders}">
+                            <div class="orders-empty-tab">
+                                <i class="fa fa-inbox"></i>
+                                <h4>Không có đơn hàng trong tab này</h4>
+                                <p>Chọn tab khác để xem các đơn hàng còn lại.</p>
+                            </div>
+                        </c:if>
                         <c:forEach var="order" items="${orders}">
                             <c:set var="isSelected" value="${not empty selectedOrder and selectedOrder.id == order.id}"/>
                             <article class="order-card ${isSelected ? 'active' : ''}">
@@ -115,7 +134,7 @@
 
                                     <%-- Action --%>
                                 <div class="order-card-actions">
-                                    <a href="orders?id=${order.id}" class="primary-btn">
+                                    <a href="orders?tab=${activeOrderTab}&id=${order.id}" class="primary-btn">
                                         <i class="fa fa-eye"></i>Xem chi tiết
                                     </a>
                                 </div>
@@ -194,6 +213,7 @@
                                           data-confirm-text="Hủy đơn">
                                         <input type="hidden" name="id" value="${selectedOrder.id}">
                                         <input type="hidden" name="action" value="cancel">
+                                        <input type="hidden" name="tab" value="${activeOrderTab}">
                                         <button type="submit" class="order-cancel-btn">Hủy đơn hàng</button>
                                     </form>
                                 </c:if>

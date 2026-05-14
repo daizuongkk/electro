@@ -65,17 +65,17 @@ public class CheckoutController extends HttpServlet {
                 selectedProductIds
         );
 
-        if (result.getStatus() == OrderService.CheckoutStatus.SUCCESS) {
+        if (result.status() == OrderService.CheckoutStatus.SUCCESS) {
             request.getSession().removeAttribute("checkoutProductIds");
             request.getSession().setAttribute("cart", cartService.getCartItems(account.getId()));
             request.getSession().setAttribute("orderCount", orderService.countOrdersByUserId(account.getId()));
-            response.sendRedirect(request.getContextPath() + "/orders?placed=" + result.getOrder().getId());
+            response.sendRedirect(request.getContextPath() + "/orders?placed=" + result.order().getId());
             return;
         }
 
         List<CartItemResponse> cartItems = cartService.getCartItems(account.getId(), selectedProductIds);
         request.setAttribute("cartItems", cartItems);
-        request.setAttribute("checkoutError", getErrorMessage(result.getStatus()));
+        request.setAttribute("checkoutError", getErrorMessage(result.status()));
         request.setAttribute("submittedRecipientName", trim(request.getParameter("recipientName")));
         request.setAttribute("submittedPhone", trim(request.getParameter("phone")));
         request.setAttribute("submittedEmail", trim(request.getParameter("email")));

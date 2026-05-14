@@ -21,22 +21,7 @@ public class OrderService {
         FAILED
     }
 
-    public static class CheckoutResult {
-        private final CheckoutStatus status;
-        private final Order order;
-
-        public CheckoutResult(CheckoutStatus status, Order order) {
-            this.status = status;
-            this.order = order;
-        }
-
-        public CheckoutStatus getStatus() {
-            return status;
-        }
-
-        public Order getOrder() {
-            return order;
-        }
+    public record CheckoutResult(CheckoutStatus status, Order order) {
     }
 
     public List<Order> findOrdersByUserId(Long userId) {

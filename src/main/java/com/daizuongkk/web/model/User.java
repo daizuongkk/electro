@@ -21,6 +21,7 @@ public class User {
 	private String email;
 	private String status;
 	private Boolean verified;
+	private Boolean phoneVerified;
 	private Date lastLogin;
 	private Date createdAt;
 	private Date updatedAt;

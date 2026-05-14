@@ -9,7 +9,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.util.List;
 
 public class UserService {
-	private UserRepository userRepository = new UserRepository();
+	private final UserRepository userRepository = new UserRepository();
 
 	public enum UpdateProfileStatus {
 		SUCCESS,
@@ -21,6 +21,7 @@ public class UserService {
 		PASSWORD_MISMATCH,
 		USERNAME_EXISTS,
 		EMAIL_EXISTS,
+		EMAIL_ALREADY_VERIFIED,
 		FAILED
 	}
 
@@ -70,7 +71,7 @@ public class UserService {
 			String lastName,
 			String phone,
 			String avtUrl) {
-		if (userId == null || userId <= 0 || username == null || email == null) {
+		if (userId == null || userId <= 0 || email == null) {
 			return UpdateProfileStatus.INVALID_INPUT;
 		}
 
@@ -79,24 +80,19 @@ public class UserService {
 			return UpdateProfileStatus.INVALID_INPUT;
 		}
 
-		String normalizedUsername = username.trim();
-		String normalizedEmail = email.trim().toLowerCase();
-		if (normalizedUsername.isEmpty() || normalizedEmail.isEmpty()) {
+		String normalizedEmail = Boolean.TRUE.equals(user.getVerified())
+				? user.getEmail()
+				: email.trim().toLowerCase();
+		if (normalizedEmail.isEmpty()) {
 			return UpdateProfileStatus.INVALID_INPUT;
 		}
 
-		if (!AuthService.isValidUsernameFormat(normalizedUsername)) {
-			return UpdateProfileStatus.INVALID_USERNAME_FORMAT;
+		if (Boolean.TRUE.equals(user.getVerified()) && !user.getEmail().equalsIgnoreCase(email.trim())) {
+			return UpdateProfileStatus.EMAIL_ALREADY_VERIFIED;
 		}
 
 		if (!AuthService.isValidEmailFormat(normalizedEmail)) {
 			return UpdateProfileStatus.INVALID_EMAIL_FORMAT;
-		}
-
-		User userWithUsername = userRepository.findByUsernameOrEmail(normalizedUsername);
-		if (userWithUsername != null && !userWithUsername.getId().equals(userId)
-				&& normalizedUsername.equalsIgnoreCase(userWithUsername.getUsername())) {
-			return UpdateProfileStatus.USERNAME_EXISTS;
 		}
 
 		User userWithEmail = userRepository.findByUsernameOrEmail(normalizedEmail);
@@ -105,7 +101,7 @@ public class UserService {
 			return UpdateProfileStatus.EMAIL_EXISTS;
 		}
 
-		user.setUsername(normalizedUsername);
+		user.setUsername(user.getUsername());
 		user.setEmail(normalizedEmail);
 		user.setFirstName(normalizeOptional(firstName));
 		user.setLastName(normalizeOptional(lastName));
@@ -205,6 +201,7 @@ public class UserService {
 				.phone(user.getPhone())
 				.email(user.getEmail())
 				.verified(user.getVerified())
+				.phoneVerified(user.getPhoneVerified())
 				.status(user.getStatus())
 				.build();
 	}

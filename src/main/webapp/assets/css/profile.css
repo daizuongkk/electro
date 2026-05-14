@@ -273,6 +273,91 @@ body#profile-page {
   cursor: not-allowed;
 }
 
+#profile-page .profile-form .input[readonly] {
+  background-color: #f7f8fa;
+  color: #8d99ae;
+  cursor: not-allowed;
+}
+
+#profile-page .verification-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+#profile-page .verification-badge {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 0 11px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#profile-page .verification-badge.verified {
+  background: #eefbf3;
+  color: #167a3c;
+}
+
+#profile-page .verification-request-btn {
+  min-height: 30px;
+  border: 1px solid #e4e7ed;
+  border-radius: 999px;
+  background: #fff;
+  color: #2b2d42;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+#profile-page .verification-request-btn:hover {
+  border-color: #d10024;
+  color: #d10024;
+}
+
+#profile-page .otp-inline-box {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px dashed #e4e7ed;
+  border-radius: 6px;
+  background: #fbfbfc;
+}
+
+#profile-page .otp-inline-box label {
+  margin-bottom: 7px;
+}
+
+#profile-page .otp-target {
+  color: #8d99ae;
+  font-size: 12px;
+  margin: -2px 0 8px;
+  word-break: break-all;
+}
+
+#profile-page .otp-control {
+  display: flex;
+  gap: 8px;
+}
+
+#profile-page .otp-control .input {
+  max-width: 140px;
+  text-align: center;
+  letter-spacing: 0;
+}
+
+#profile-page .otp-control .primary-btn {
+  height: 40px;
+  border: none;
+  white-space: nowrap;
+}
+
 #profile-page .profile-password-modal .modal-content {
   border: none;
   border-radius: 6px;
@@ -342,6 +427,14 @@ body#profile-page {
     text-align: center;
     justify-content: center;
     width: 100%;
+  }
+
+  #profile-page .otp-control {
+    flex-direction: column;
+  }
+
+  #profile-page .otp-control .input {
+    max-width: 100%;
   }
 
   #profile-page .profile-modal-actions {

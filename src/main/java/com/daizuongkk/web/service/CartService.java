@@ -14,10 +14,10 @@ import com.daizuongkk.web.repository.ProductRepository;
 
 public class CartService {
 
-	private CartRepository cartRepository = new CartRepository();
-	private ProductService productService = new ProductService();
-	private CartItemRepository cartItemRepository = new CartItemRepository();
-	private ProductRepository productRepository = new ProductRepository();
+	private final CartRepository cartRepository = new CartRepository();
+	private final ProductService productService = new ProductService();
+	private final CartItemRepository cartItemRepository = new CartItemRepository();
+	private final ProductRepository productRepository = new ProductRepository();
 
 	public List<CartItemResponse> getCartItems(Long userId) {
 

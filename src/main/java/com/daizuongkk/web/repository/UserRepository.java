@@ -10,12 +10,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class UserRepository   {
+    private static volatile boolean verificationSchemaReady = false;
 
+    public UserRepository() {
+        ensureVerificationSchema();
+    }
 
     public  User findByUsernameOrEmail(String username) {
         if (username == null || username.trim().isEmpty()) {
@@ -53,6 +59,7 @@ public class UserRepository   {
         user.setEmail(resultSet.getString("email"));
         user.setStatus(resultSet.getString("status"));
         user.setVerified(resultSet.getBoolean("verified"));
+        user.setPhoneVerified(resultSet.getBoolean("phone_verified"));
         user.setLastLogin(resultSet.getTimestamp("last_login"));
         user.setCreatedAt(resultSet.getTimestamp("created_at"));
         user.setUpdatedAt(resultSet.getTimestamp("updated_at"));
@@ -298,23 +305,75 @@ public class UserRepository   {
 
         boolean updatePassword = passwordHash != null && !passwordHash.isBlank();
         String sql = updatePassword
-                ? "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone = ?, avt_url = ?, password = ? WHERE id = ?"
-                : "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone = ?, avt_url = ? WHERE id = ?";
+                ? "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone = ?, avt_url = ?, verified = ?, phone_verified = ?, password = ? WHERE id = ?"
+                : "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone = ?, avt_url = ?, verified = ?, phone_verified = ? WHERE id = ?";
 
         try (Connection connection = JDBCUtils.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
+            User currentUser = findById(user.getId());
+            boolean emailVerified = currentUser != null
+                    && Boolean.TRUE.equals(currentUser.getVerified())
+                    && equalsNullable(currentUser.getEmail(), user.getEmail());
+            boolean phoneVerified = currentUser != null
+                    && Boolean.TRUE.equals(currentUser.getPhoneVerified())
+                    && equalsNullable(currentUser.getPhone(), user.getPhone());
+
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getEmail());
             statement.setString(3, user.getFirstName());
             statement.setString(4, user.getLastName());
             statement.setString(5, user.getPhone());
             statement.setString(6, user.getAvtUrl());
+            statement.setBoolean(7, emailVerified);
+            statement.setBoolean(8, phoneVerified);
             if (updatePassword) {
-                statement.setString(7, passwordHash);
-                statement.setLong(8, user.getId());
+                statement.setString(9, passwordHash);
+                statement.setLong(10, user.getId());
             } else {
-                statement.setLong(7, user.getId());
+                statement.setLong(9, user.getId());
             }
+            return statement.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateEmailVerified(Long userId, boolean verified) {
+        return updateBooleanColumn(userId, "verified", verified);
+    }
+
+    public boolean updateEmailAndVerified(Long userId, String email) {
+        if (userId == null || userId <= 0 || email == null || email.trim().isEmpty()) {
+            return false;
+        }
+
+        String sql = "UPDATE users SET email = ?, verified = 1 WHERE id = ?";
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, email.trim().toLowerCase());
+            statement.setLong(2, userId);
+            return statement.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updatePhoneVerified(Long userId, boolean verified) {
+        return updateBooleanColumn(userId, "phone_verified", verified);
+    }
+
+    public boolean updatePhoneAndVerified(Long userId, String phone) {
+        if (userId == null || userId <= 0 || phone == null || phone.trim().isEmpty()) {
+            return false;
+        }
+
+        String sql = "UPDATE users SET phone = ?, phone_verified = 1 WHERE id = ?";
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, phone.trim());
+            statement.setLong(2, userId);
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -336,6 +395,84 @@ public class UserRepository   {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    private boolean updateBooleanColumn(Long userId, String column, boolean value) {
+        if (userId == null || userId <= 0) {
+            return false;
+        }
+
+        String sql = "UPDATE users SET " + column + " = ? WHERE id = ?";
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setBoolean(1, value);
+            statement.setLong(2, userId);
+            return statement.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean equalsNullable(String first, String second) {
+        String normalizedFirst = first == null ? "" : first.trim();
+        String normalizedSecond = second == null ? "" : second.trim();
+        return normalizedFirst.equalsIgnoreCase(normalizedSecond);
+    }
+
+    private void ensureVerificationSchema() {
+        if (verificationSchemaReady) {
+            return;
+        }
+
+        synchronized (UserRepository.class) {
+            if (verificationSchemaReady) {
+                return;
+            }
+
+            try (Connection connection = JDBCUtils.getConnection();
+                 Statement statement = connection.createStatement()) {
+                if (!columnExists(connection, "users", "phone_verified")) {
+                    statement.executeUpdate("ALTER TABLE users ADD COLUMN phone_verified TINYINT(1) DEFAULT 0 AFTER verified");
+                }
+                statement.executeUpdate("""
+                        CREATE TABLE IF NOT EXISTS verification_otps (
+                            id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                            user_id BIGINT NOT NULL,
+                            channel VARCHAR(20) NOT NULL,
+                            target_value VARCHAR(150) NOT NULL,
+                            otp_hash VARCHAR(100) NOT NULL,
+                            expires_at DATETIME NOT NULL,
+                            consumed TINYINT(1) DEFAULT 0,
+                            attempts INT DEFAULT 0,
+                            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            INDEX idx_verification_otps_lookup (user_id, channel, consumed, expires_at),
+                            CONSTRAINT fk_verification_otps_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                        )
+                        """);
+                verificationSchemaReady = true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private boolean columnExists(Connection connection, String table, String column) throws SQLException {
+        String sql = """
+                SELECT 1
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = ?
+                  AND COLUMN_NAME = ?
+                LIMIT 1
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, table);
+            statement.setString(2, column);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
         }
     }
 
