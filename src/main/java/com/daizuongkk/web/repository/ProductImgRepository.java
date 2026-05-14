@@ -14,8 +14,7 @@ import java.util.List;
 
 public class ProductImgRepository {
 
-
-	public synchronized List<ProductImg> findByProductId(Long productId) {
+	public List<ProductImg> findByProductId(Long productId) {
 		if (productId == null || productId <= 0) {
 			return Collections.emptyList();
 		}
@@ -24,7 +23,7 @@ public class ProductImgRepository {
 		List<ProductImg> images = new ArrayList<>();
 
 		try (Connection connection = JDBCUtils.getConnection();
-			 PreparedStatement statement = connection.prepareStatement(sql)) {
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				while (resultSet.next()) {
@@ -38,7 +37,7 @@ public class ProductImgRepository {
 		return images;
 	}
 
-	public synchronized List<String> findUrlsByProductId(Long productId) {
+	public List<String> findUrlsByProductId(Long productId) {
 		if (productId == null || productId <= 0) {
 			return Collections.emptyList();
 		}
@@ -47,7 +46,7 @@ public class ProductImgRepository {
 		List<String> urls = new ArrayList<>();
 
 		try (Connection connection = JDBCUtils.getConnection();
-			 PreparedStatement statement = connection.prepareStatement(sql)) {
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				while (resultSet.next()) {
@@ -61,14 +60,14 @@ public class ProductImgRepository {
 		return urls;
 	}
 
-	public synchronized String findPrimaryUrlByProductId(Long productId) {
+	public String findPrimaryUrlByProductId(Long productId) {
 		if (productId == null || productId <= 0) {
 			return null;
 		}
 
 		String sql = "SELECT image_url FROM product_images WHERE product_id = ? ORDER BY id ASC LIMIT 1";
 		try (Connection connection = JDBCUtils.getConnection();
-			 PreparedStatement statement = connection.prepareStatement(sql)) {
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				if (resultSet.next()) {
@@ -81,7 +80,7 @@ public class ProductImgRepository {
 		return null;
 	}
 
-	public synchronized boolean create(Long productId, String imageUrl) {
+	public boolean create(Long productId, String imageUrl) {
 		if (productId == null || productId <= 0) {
 			return false;
 		}
@@ -93,7 +92,7 @@ public class ProductImgRepository {
 
 		String sql = "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)";
 		try (Connection connection = JDBCUtils.getConnection();
-			 PreparedStatement statement = connection.prepareStatement(sql)) {
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			statement.setString(2, normalizedUrl);
 			return statement.executeUpdate() > 0;
@@ -103,7 +102,7 @@ public class ProductImgRepository {
 		}
 	}
 
-	public synchronized int createBatch(Long productId, List<String> imageUrls) {
+	public int createBatch(Long productId, List<String> imageUrls) {
 		if (productId == null || productId <= 0 || imageUrls == null || imageUrls.isEmpty()) {
 			return 0;
 		}
@@ -115,7 +114,7 @@ public class ProductImgRepository {
 
 		String sql = "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)";
 		try (Connection connection = JDBCUtils.getConnection();
-			 PreparedStatement statement = connection.prepareStatement(sql)) {
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 			for (String normalizedUrl : normalizedUrls) {
 				statement.setLong(1, productId);
 				statement.setString(2, normalizedUrl);
@@ -143,7 +142,7 @@ public class ProductImgRepository {
 
 		String sql = "DELETE FROM product_images WHERE product_id = ?";
 		try (Connection connection = JDBCUtils.getConnection();
-			 PreparedStatement statement = connection.prepareStatement(sql)) {
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, productId);
 			statement.executeUpdate();
 			return true;
@@ -160,7 +159,7 @@ public class ProductImgRepository {
 
 		String sql = "DELETE FROM product_images WHERE id = ? AND product_id = ?";
 		try (Connection connection = JDBCUtils.getConnection();
-			 PreparedStatement statement = connection.prepareStatement(sql)) {
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, imageId);
 			statement.setLong(2, productId);
 			return statement.executeUpdate() > 0;
@@ -184,7 +183,7 @@ public class ProductImgRepository {
 		return deleted;
 	}
 
-	public  int replaceAllByProductId(Long productId, List<String> imageUrls) {
+	public int replaceAllByProductId(Long productId, List<String> imageUrls) {
 		if (productId == null || productId <= 0) {
 			return 0;
 		}
@@ -197,14 +196,16 @@ public class ProductImgRepository {
 			autoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
-			try (PreparedStatement deleteStatement = conn.prepareStatement("DELETE FROM product_images WHERE product_id = ?")) {
+			try (PreparedStatement deleteStatement = conn
+					.prepareStatement("DELETE FROM product_images WHERE product_id = ?")) {
 				deleteStatement.setLong(1, productId);
 				deleteStatement.executeUpdate();
 			}
 
 			int inserted = 0;
 			if (!normalizedUrls.isEmpty()) {
-				try (PreparedStatement insertStatement = conn.prepareStatement("INSERT INTO product_images (product_id, image_url) VALUES (?, ?)")) {
+				try (PreparedStatement insertStatement = conn
+						.prepareStatement("INSERT INTO product_images (product_id, image_url) VALUES (?, ?)")) {
 					for (String normalizedUrl : normalizedUrls) {
 						insertStatement.setLong(1, productId);
 						insertStatement.setString(2, normalizedUrl);
@@ -265,6 +266,5 @@ public class ProductImgRepository {
 		String normalized = imageUrl.trim();
 		return normalized.isEmpty() ? null : normalized;
 	}
-
 
 }
