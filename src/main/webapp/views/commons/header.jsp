@@ -8,6 +8,7 @@
 <fmt:setLocale value="vi_VN"/>
 <c:set var="cartCount" value="${empty sessionScope.cart ? 0 : fn:length(sessionScope.cart)}"/>
 <c:set var="wishlistCount" value="${empty sessionScope.wishlist ? 0 : fn:length(sessionScope.wishlist)}"/>
+<c:set var="orderCount" value="${empty sessionScope.orderCount ? 0 : sessionScope.orderCount}"/>
 
 <!-- HEADER -->
 <header>
@@ -27,7 +28,17 @@
                 </c:choose>
                 <c:choose>
                     <c:when test="${sessionScope.account != null}">
-                        <li><a href="#"><i class="fa fa-user-o"></i>${sessionScope.account.firstName} ${sessionScope.account.lastName}</a></li>
+                        <li>
+                            <a href="profile">
+                                <i class="fa fa-user-o"></i>
+                                <c:choose>
+                                    <c:when test="${not empty sessionScope.account.firstName or not empty sessionScope.account.lastName}">
+                                        ${sessionScope.account.firstName} ${sessionScope.account.lastName}
+                                    </c:when>
+                                    <c:otherwise>${sessionScope.account.username}</c:otherwise>
+                                </c:choose>
+                            </a>
+                        </li>
                         <li><a href="logout"><i class="fa fa-sign-out"></i>Đăng Xuất</a></li>
                     </c:when>
                     <c:otherwise>
@@ -59,7 +70,6 @@
                 <!-- SEARCH BAR -->
                 <div class="col-md-6">
                     <div class="header-search">
-                        <form method="get" action="shop">
 <%--                            <select class="input-select" name="category">--%>
 <%--                                <option value="">Tất Cả</option>--%>
 <%--                                <c:forEach var="category" items="${categories}">--%>
@@ -93,7 +103,6 @@
                             </c:if>
                             <input class="input" name="name" placeholder="Tìm kiếm..." value="${fn:escapeXml(param.name)}">
                             <button type="submit" class="search-btn">Tìm Kếm</button>
-                        </form>
                         </form>
                     </div>
                 </div>
@@ -200,11 +209,22 @@
                                 </div>
                                 <div class="cart-btns">
                                     <a href="cart">Xem Giỏ Hàng <i class="fa fa-shopping-cart"></i></a>
+                                    <a href="checkout">Thanh Toán <i class="fa fa-arrow-circle-right"></i></a>
                                 </div>
                             </div>
                         </div>
                         <!-- /Cart -->
 
+   <!-- Orders -->
+                        <div>
+                            <a href="orders">
+                                <i class="fa fa-list-alt"></i>
+                                <span>Đơn Hàng</span>
+                                <div class="qty">${orderCount}</div>
+                            </a>
+                        </div>
+												
+                        <!-- /Orders -->
                         <!-- Menu Toogle -->
                         <div class="menu-toggle">
                             <a href="#">

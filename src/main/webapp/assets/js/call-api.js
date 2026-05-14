@@ -184,9 +184,13 @@
             },
             error: function (xhr) {
                 if (xhr.status === 401) {
-                    if (confirm("Bạn cần đăng nhập để quản lý danh sách yêu thích. Bạn có muốn đăng nhập ngay bây giờ?")) {
-                        window.location.href = "login";
-                    }
+                    showElectroConfirm("Bạn cần đăng nhập để quản lý danh sách yêu thích. Bạn có muốn đăng nhập ngay bây giờ?", {
+                        confirmText: "Đăng nhập"
+                    }).then(function (confirmed) {
+                        if (confirmed) {
+                            window.location.href = "login";
+                        }
+                    });
                     return;
                 }
 
@@ -209,9 +213,13 @@
             },
             error: function (res) {
                 if (res.status === 401) {
-                    if (confirm("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng. Bạn có muốn đăng nhập ngay bây giờ?")) {
-                        window.location.href = "login";
-                    }
+                    showElectroConfirm("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng. Bạn có muốn đăng nhập ngay bây giờ?", {
+                        confirmText: "Đăng nhập"
+                    }).then(function (confirmed) {
+                        if (confirmed) {
+                            window.location.href = "login";
+                        }
+                    });
                     return;
                 }
                 alert("Lỗi xảy ra khi thêm sản phẩm");
@@ -221,7 +229,12 @@
     };
 
     window.deleteWishlistItem = (productId) => {
-        if (confirm("Chắc chắn xóa khỏi danh sách yêu thích?")) {
+        return showElectroConfirm("Chắc chắn xóa khỏi danh sách yêu thích?", {
+            confirmText: "Xóa"
+        }).then(function (confirmed) {
+            if (!confirmed) {
+                return null;
+            }
             return $.ajax({
                 url: `api/whishlist/` + productId,
                 method: 'DELETE',
@@ -233,12 +246,17 @@
                     alert("Có lỗi xảy ra");
                 }
             });
-        }
+        });
     };
 
 
     window.deleteCartItem = (productIds) => {
-        if (confirm("Chắc chắn xóa?")) {
+        return showElectroConfirm("Chắc chắn xóa sản phẩm đã chọn?", {
+            confirmText: "Xóa"
+        }).then(function (confirmed) {
+            if (!confirmed) {
+                return null;
+            }
             return $.ajax({
                 url: `api/carts/` + productIds,
                 method: 'DELETE',
@@ -250,8 +268,7 @@
                     alert("Có lỗi xảy ra");
                 }
             });
-        }
-
+        });
     }
 
 
@@ -269,8 +286,12 @@
             return;
         }
 
-        deleteCartItem(productIds.join(",")).done(function () {
-            window.location.reload();
+        deleteCartItem(productIds.join(",")).then(function (request) {
+            if (request && request.done) {
+                request.done(function () {
+                    window.location.reload();
+                });
+            }
         })
 
     })

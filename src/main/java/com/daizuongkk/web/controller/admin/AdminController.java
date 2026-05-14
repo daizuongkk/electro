@@ -48,6 +48,9 @@ public class AdminController extends BaseAdminServlet {
             case "users":
                 response.sendRedirect(request.getContextPath() + "/admin/users");
                 return;
+            case "orders":
+                response.sendRedirect(request.getContextPath() + "/admin/orders");
+                return;
             case "create-user":
                 response.sendRedirect(request.getContextPath() + "/admin/users/form");
                 return;

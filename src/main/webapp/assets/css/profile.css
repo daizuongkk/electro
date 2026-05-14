@@ -1,0 +1,356 @@
+/* =====================================================
+          PROFILE PAGE — Electro Design System
+          Colors  : #D10024 primary | #2B2D42 headings
+                    #8D99AE muted   | #E4E7ED border
+                    #FBFBFC bg      | #15161D dark
+          Font    : Montserrat (inherited)
+          Panels  : white, 1px #E4E7ED border, radius 6px
+          Buttons : .primary-btn pill (red) — site-wide class
+       ===================================================== */
+
+body#profile-page {
+  background-color: #fbfbfc;
+}
+
+/* ── Section ── */
+#profile-page .profile-section {
+  padding-top: 10px;
+  padding-bottom: 40px;
+}
+
+/* ── Sidebar card ── */
+#profile-page .profile-sidebar {
+  background-color: #fff;
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  padding: 28px 22px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+#profile-page .profile-avatar {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background-color: #f0f2f6;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px #e4e7ed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d10024;
+}
+#profile-page .profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+#profile-page .profile-avatar i {
+  font-size: 42px;
+}
+#profile-page .avatar-upload-trigger {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 34px;
+  height: 34px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #d10024;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
+}
+#profile-page .avatar-upload-trigger i {
+  font-size: 14px;
+}
+#profile-page .avatar-upload-trigger:hover {
+  background: #b0001e;
+  transform: translateY(-1px);
+}
+#profile-page #avatarFile {
+  display: none;
+}
+
+#profile-page .sidebar-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2b2d42;
+  text-transform: uppercase;
+  margin: 0 0 5px;
+  word-break: break-word;
+}
+#profile-page .sidebar-email {
+  font-size: 12px;
+  color: #8d99ae;
+  margin-bottom: 20px;
+  word-break: break-all;
+}
+
+#profile-page .sidebar-divider {
+  border-color: #e4e7ed;
+  margin: 0 0 18px;
+}
+
+#profile-page .sidebar-cart-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #2b2d42;
+  transition: color 0.2s;
+  text-decoration: none;
+}
+#profile-page .sidebar-cart-link i {
+  color: #d10024;
+}
+#profile-page .sidebar-cart-link:hover {
+  color: #d10024;
+  text-decoration: none;
+}
+
+/* ── Main panel (mirrors .cart-panel) ── */
+#profile-page .profile-panel {
+  background-color: #fff;
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+/* ── Panel header (mirrors .cart-panel-header) ── */
+#profile-page .panel-header {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e4e7ed;
+}
+#profile-page .panel-header h3 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  text-transform: uppercase;
+  color: #2b2d42;
+}
+#profile-page .panel-header p {
+  margin: 0;
+  font-size: 12px;
+  color: #8d99ae;
+}
+
+/* ── Alerts ── */
+#profile-page .alert {
+  border-radius: 4px;
+  font-size: 13px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  border: none;
+}
+#profile-page .alert i {
+  margin-right: 6px;
+}
+#profile-page .alert-success {
+  background: #f0fdf4;
+  color: #166534;
+  border-left: 3px solid #16a34a;
+}
+#profile-page .alert-danger {
+  background: #fff1f2;
+  color: #9f1239;
+  border-left: 3px solid #d10024;
+}
+
+/* ── Field-group divider label ── */
+#profile-page .form-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8d99ae;
+  margin: 22px 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#profile-page .form-section-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e4e7ed;
+}
+
+/* ── Labels ── */
+#profile-page .profile-form label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #2b2d42;
+  margin-bottom: 7px;
+}
+
+/* ── Inputs — reuse .input from site, add focus ring ── */
+#profile-page .profile-form .input {
+  height: 40px;
+  padding: 0 15px;
+  border: 1px solid #e4e7ed;
+  background-color: #fff;
+  width: 100%;
+  font-family: inherit;
+  font-size: 13px;
+  color: #333;
+  border-radius: 3px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  outline: none;
+}
+#profile-page .profile-form .input:focus {
+  border-color: #d10024;
+  box-shadow: 0 0 0 2px rgba(209, 0, 36, 0.08);
+}
+#profile-page .profile-form .input::placeholder {
+  color: #b9babc;
+}
+
+/* ── Actions row ── */
+#profile-page .profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e4e7ed;
+  flex-wrap: wrap;
+}
+#profile-page .profile-actions .primary-btn {
+  border: none;
+}
+#profile-page .profile-actions .primary-btn i {
+  margin-right: 6px;
+}
+
+#profile-page .password-action-group {
+  display: flex;
+  flex-direction: column;
+}
+
+#profile-page .profile-secondary-btn {
+  height: 40px;
+  border: 1px solid #d10024;
+  border-radius: 40px;
+  background: #fff;
+  color: #d10024;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 18px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+#profile-page .profile-secondary-btn:hover {
+  background: #d10024;
+  color: #fff;
+}
+
+#profile-page .profile-form .input:disabled {
+  background-color: #f7f8fa;
+  color: #8d99ae;
+  cursor: not-allowed;
+}
+
+#profile-page .profile-password-modal .modal-content {
+  border: none;
+  border-radius: 6px;
+  padding: 30px 26px 24px;
+}
+
+#profile-page .profile-password-form {
+  margin-top: 18px;
+  text-align: left;
+}
+
+#profile-page .profile-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e4e7ed;
+}
+
+#profile-page .profile-modal-cancel {
+  height: 40px;
+  border: 1px solid #e4e7ed;
+  border-radius: 40px;
+  background: #fff;
+  color: #2b2d42;
+  font-weight: 700;
+  padding: 0 18px;
+  text-transform: uppercase;
+}
+
+#profile-page .profile-modal-cancel:hover {
+  border-color: #d10024;
+  color: #d10024;
+}
+
+/* Cancel — pill outline, matches site style */
+#profile-page .btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 20px;
+  border: 1px solid #e4e7ed;
+  border-radius: 40px;
+  color: #2b2d42;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  background: #fff;
+  text-decoration: none;
+  transition: 0.2s all;
+}
+#profile-page .btn-cancel:hover {
+  border-color: #d10024;
+  color: #d10024;
+  text-decoration: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 767px) {
+  #profile-page .profile-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #profile-page .profile-actions .primary-btn,
+  #profile-page .btn-cancel {
+    text-align: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  #profile-page .profile-modal-actions {
+    flex-direction: column;
+  }
+
+  #profile-page .profile-modal-actions .primary-btn,
+  #profile-page .profile-modal-cancel {
+    width: 100%;
+    justify-content: center;
+  }
+}

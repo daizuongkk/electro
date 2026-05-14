@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -68,18 +69,47 @@ public class UserRepository   {
 
     public  boolean create(User user) {
         String sql = "INSERT INTO users (username, email, password, first_name, last_name, phone, role, status, verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection connection = JDBCUtils.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getPassword());
-            statement.setString(4, user.getFirstName());
-            statement.setString(5, user.getLastName());
-            statement.setString(6, user.getPhone());
-            statement.setString(7, user.getRole().name());
-            statement.setString(8, user.getStatus() == null ? "ACTIVE" : user.getStatus());
-            statement.setBoolean(9, user.getVerified() != null && user.getVerified());
-            return statement.executeUpdate() > 0;
+        String cartSql = "INSERT INTO carts (user_id) VALUES (?)";
+
+        try (Connection connection = JDBCUtils.getConnection()) {
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                statement.setString(1, user.getUsername());
+                statement.setString(2, user.getEmail());
+                statement.setString(3, user.getPassword());
+                statement.setString(4, user.getFirstName());
+                statement.setString(5, user.getLastName());
+                statement.setString(6, user.getPhone());
+                statement.setString(7, user.getRole().name());
+                statement.setString(8, user.getStatus() == null ? "ACTIVE" : user.getStatus());
+                statement.setBoolean(9, user.getVerified() != null && user.getVerified());
+                if (statement.executeUpdate() == 0) {
+                    connection.rollback();
+                    return false;
+                }
+
+                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                    if (!generatedKeys.next()) {
+                        connection.rollback();
+                        return false;
+                    }
+
+                    Long userId = generatedKeys.getLong(1);
+                    user.setId(userId);
+
+                    try (PreparedStatement cartStatement = connection.prepareStatement(cartSql)) {
+                        cartStatement.setLong(1, userId);
+                        if (cartStatement.executeUpdate() == 0) {
+                            connection.rollback();
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            connection.commit();
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -254,6 +284,54 @@ public class UserRepository   {
             } else {
                 statement.setLong(9, user.getId());
             }
+            return statement.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateProfile(User user, String passwordHash) {
+        if (user == null || user.getId() == null || user.getId() <= 0) {
+            return false;
+        }
+
+        boolean updatePassword = passwordHash != null && !passwordHash.isBlank();
+        String sql = updatePassword
+                ? "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone = ?, avt_url = ?, password = ? WHERE id = ?"
+                : "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone = ?, avt_url = ? WHERE id = ?";
+
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, user.getUsername());
+            statement.setString(2, user.getEmail());
+            statement.setString(3, user.getFirstName());
+            statement.setString(4, user.getLastName());
+            statement.setString(5, user.getPhone());
+            statement.setString(6, user.getAvtUrl());
+            if (updatePassword) {
+                statement.setString(7, passwordHash);
+                statement.setLong(8, user.getId());
+            } else {
+                statement.setLong(7, user.getId());
+            }
+            return statement.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updatePassword(Long userId, String passwordHash) {
+        if (userId == null || userId <= 0 || passwordHash == null || passwordHash.isBlank()) {
+            return false;
+        }
+
+        String sql = "UPDATE users SET password = ? WHERE id = ?";
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, passwordHash);
+            statement.setLong(2, userId);
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();

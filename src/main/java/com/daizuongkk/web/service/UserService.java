@@ -11,6 +11,19 @@ import java.util.List;
 public class UserService {
 	private UserRepository userRepository = new UserRepository();
 
+	public enum UpdateProfileStatus {
+		SUCCESS,
+		INVALID_INPUT,
+		INVALID_USERNAME_FORMAT,
+		INVALID_EMAIL_FORMAT,
+		INVALID_CURRENT_PASSWORD,
+		INVALID_NEW_PASSWORD_FORMAT,
+		PASSWORD_MISMATCH,
+		USERNAME_EXISTS,
+		EMAIL_EXISTS,
+		FAILED
+	}
+
 	public UserResponse findById(Long id) {
 
 		return userToUserResponse(userRepository.findById(id));
@@ -50,6 +63,88 @@ public class UserService {
 		return userRepository.update(user, updatePassword);
 	}
 
+	public UpdateProfileStatus updateProfile(Long userId,
+			String username,
+			String email,
+			String firstName,
+			String lastName,
+			String phone,
+			String avtUrl) {
+		if (userId == null || userId <= 0 || username == null || email == null) {
+			return UpdateProfileStatus.INVALID_INPUT;
+		}
+
+		User user = userRepository.findById(userId);
+		if (user == null) {
+			return UpdateProfileStatus.INVALID_INPUT;
+		}
+
+		String normalizedUsername = username.trim();
+		String normalizedEmail = email.trim().toLowerCase();
+		if (normalizedUsername.isEmpty() || normalizedEmail.isEmpty()) {
+			return UpdateProfileStatus.INVALID_INPUT;
+		}
+
+		if (!AuthService.isValidUsernameFormat(normalizedUsername)) {
+			return UpdateProfileStatus.INVALID_USERNAME_FORMAT;
+		}
+
+		if (!AuthService.isValidEmailFormat(normalizedEmail)) {
+			return UpdateProfileStatus.INVALID_EMAIL_FORMAT;
+		}
+
+		User userWithUsername = userRepository.findByUsernameOrEmail(normalizedUsername);
+		if (userWithUsername != null && !userWithUsername.getId().equals(userId)
+				&& normalizedUsername.equalsIgnoreCase(userWithUsername.getUsername())) {
+			return UpdateProfileStatus.USERNAME_EXISTS;
+		}
+
+		User userWithEmail = userRepository.findByUsernameOrEmail(normalizedEmail);
+		if (userWithEmail != null && !userWithEmail.getId().equals(userId)
+				&& normalizedEmail.equalsIgnoreCase(userWithEmail.getEmail())) {
+			return UpdateProfileStatus.EMAIL_EXISTS;
+		}
+
+		user.setUsername(normalizedUsername);
+		user.setEmail(normalizedEmail);
+		user.setFirstName(normalizeOptional(firstName));
+		user.setLastName(normalizeOptional(lastName));
+		user.setPhone(normalizeOptional(phone));
+		user.setAvtUrl(normalizeOptional(avtUrl));
+
+		return userRepository.updateProfile(user, null) ? UpdateProfileStatus.SUCCESS : UpdateProfileStatus.FAILED;
+	}
+
+	public UpdateProfileStatus changePassword(Long userId,
+			String currentPassword,
+			String newPassword,
+			String confirmPassword) {
+		if (userId == null || userId <= 0) {
+			return UpdateProfileStatus.INVALID_INPUT;
+		}
+
+		User user = userRepository.findById(userId);
+		if (user == null) {
+			return UpdateProfileStatus.INVALID_INPUT;
+		}
+
+		if (!hasText(currentPassword) || !matchesPassword(currentPassword, user.getPassword())) {
+			return UpdateProfileStatus.INVALID_CURRENT_PASSWORD;
+		}
+
+		if (!AuthService.isValidPasswordFormat(newPassword)) {
+			return UpdateProfileStatus.INVALID_NEW_PASSWORD_FORMAT;
+		}
+
+		if (!newPassword.equals(confirmPassword)) {
+			return UpdateProfileStatus.PASSWORD_MISMATCH;
+		}
+
+		return userRepository.updatePassword(userId, hashPassword(newPassword))
+				? UpdateProfileStatus.SUCCESS
+				: UpdateProfileStatus.FAILED;
+	}
+
 	public User getUserModelById(Long id) {
 		return userRepository.findById(id);
 	}
@@ -62,8 +157,37 @@ public class UserService {
 		return userRepository.existsByEmail(email);
 	}
 
+	public UserResponse toUserResponse(User user) {
+		return userToUserResponse(user);
+	}
+
 	private String hashPassword(String rawPassword) {
 		return BCrypt.hashpw(rawPassword, BCrypt.gensalt(12));
+	}
+
+	private boolean matchesPassword(String rawPassword, String storedPassword) {
+		if (storedPassword == null) {
+			return false;
+		}
+
+		if (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2b$") || storedPassword.startsWith("$2y$")) {
+			return BCrypt.checkpw(rawPassword, storedPassword);
+		}
+
+		return storedPassword.equals(rawPassword);
+	}
+
+	private boolean hasText(String value) {
+		return value != null && !value.trim().isEmpty();
+	}
+
+	private String normalizeOptional(String value) {
+		if (value == null) {
+			return null;
+		}
+
+		String trimmed = value.trim();
+		return trimmed.isEmpty() ? null : trimmed;
 	}
 
 	private UserResponse userToUserResponse(User user) {

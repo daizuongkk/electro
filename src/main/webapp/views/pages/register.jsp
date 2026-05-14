@@ -76,7 +76,7 @@
                                 </div>
 
                                 <c:if test="${not empty registerError}">
-                                    <div class="alert alert-danger text-center" role="alert">${registerError}</div>
+                                    <div class="js-popup-message hidden" data-type="danger"><c:out value="${registerError}"/></div>
                                 </c:if>
 
                                 <form class="comfort-form" id="loginForm" novalidate action="register" method="post">

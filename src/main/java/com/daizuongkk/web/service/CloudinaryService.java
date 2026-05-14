@@ -31,9 +31,12 @@ public class CloudinaryService {
 			return null;
 		}
 
-		String folder = getConfig("CLOUDINARY_FOLDER");
-		if (folder == null || folder.isBlank()) {
-			folder = "electro/products";
+		return uploadImage(filePart, getUploadFolder("electro/products"));
+	}
+
+	public String uploadImage(Part filePart, String folder) throws IOException {
+		if (filePart == null || filePart.getSize() <= 0) {
+			return null;
 		}
 
 		byte[] fileBytes;
@@ -54,6 +57,11 @@ public class CloudinaryService {
 		}
 
 		return secureUrl.toString();
+	}
+
+	private String getUploadFolder(String defaultFolder) {
+		String folder = getConfig("CLOUDINARY_FOLDER");
+		return folder == null || folder.isBlank() ? defaultFolder : folder;
 	}
 
 	private String getRequiredConfig(String key) {

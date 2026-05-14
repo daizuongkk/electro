@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,21 +54,62 @@ public class CartRepository {
 		}
 
 		String sql = "SELECT * FROM carts WHERE user_id = ?";
-		Cart cart = new Cart();
 
 		try (Connection connection = JDBCUtils.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, userId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				if (resultSet.next()) {
+					Cart cart = new Cart();
 					cart.setId(resultSet.getLong("id"));
 					cart.setUserId(resultSet.getLong("user_id"));
+					return cart;
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return cart;
+		return null;
+	}
+
+	public Cart createForUser(Long userId) {
+		if (userId == null || userId <= 0) {
+			return null;
+		}
+
+		String sql = "INSERT INTO carts (user_id) VALUES (?)";
+
+		try (Connection connection = JDBCUtils.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+			statement.setLong(1, userId);
+
+			int affectedRows = statement.executeUpdate();
+			if (affectedRows == 0) {
+				return null;
+			}
+
+			try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+				if (generatedKeys.next()) {
+					Cart cart = new Cart();
+					cart.setId(generatedKeys.getLong(1));
+					cart.setUserId(userId);
+					return cart;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	public Cart findOrCreateByUserId(Long userId) {
+		Cart cart = findByUserId(userId);
+		if (cart != null) {
+			return cart;
+		}
+
+		return createForUser(userId);
 	}
 }

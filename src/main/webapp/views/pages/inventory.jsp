@@ -138,7 +138,8 @@
                                         <i class="ti ti-edit"></i>
                                     </a>
                                     <form method="post" action="admin/products" class="d-inline"
-                                          onsubmit="return confirm('Xóa sản phẩm này?');">
+                                          data-confirm-message="Xóa sản phẩm này?"
+                                          data-confirm-text="Xóa">
                                         <input type="hidden" name="action" value="delete-product">
                                         <input type="hidden" name="id" value="${product.id}">
                                         <button type="submit" class="btn btn-link link-danger p-0">

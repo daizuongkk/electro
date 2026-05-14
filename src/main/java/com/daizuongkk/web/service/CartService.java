@@ -2,6 +2,7 @@ package com.daizuongkk.web.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.daizuongkk.web.dto.response.CartItemResponse;
 import com.daizuongkk.web.model.Cart;
@@ -35,13 +36,24 @@ public class CartService {
 		return cartItemResponses;
 	}
 
+	public List<CartItemResponse> getCartItems(Long userId, Set<Long> productIds) {
+		List<CartItemResponse> cartItems = getCartItems(userId);
+		if (productIds == null || productIds.isEmpty()) {
+			return new ArrayList<>();
+		}
+
+		return cartItems.stream()
+				.filter(item -> item.getProduct() != null && productIds.contains(item.getProduct().getId()))
+				.toList();
+	}
+
 	public boolean addToCart(Long id, Long productId, Long qty) {
 
 		if (id == null) {
 			return false;
 		}
 
-		Cart cart = cartRepository.findByUserId(id);
+		Cart cart = cartRepository.findOrCreateByUserId(id);
 
 		if (cart == null) {
 			return false;
@@ -67,7 +79,11 @@ public class CartService {
 
 		}
 
-		CartItem cartItem = CartItem.builder().cartId(cart.getId()).productId(productId).quantity(qty).build();
+		CartItem cartItem = CartItem.builder()
+				.cartId(cart.getId())
+				.productId(productId)
+				.quantity(qty == null ? 1 : qty)
+				.build();
 
 		cartItemRepository.save(cartItem);
 

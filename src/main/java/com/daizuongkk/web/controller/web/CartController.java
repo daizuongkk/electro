@@ -28,6 +28,11 @@ public class CartController extends HttpServlet {
 
     }
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        UserResponse user = session == null ? null : (UserResponse) session.getAttribute("account");
+        if (user != null) {
+            session.setAttribute("cart", cartService.getCartItems(user.getId()));
+        }
         request.getRequestDispatcher("views/pages/cart.jsp").forward(request, response);
     }
 

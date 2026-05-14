@@ -30,6 +30,9 @@
 
 <div class="section">
     <div class="cart-container">
+        <c:if test="${param.checkoutError == 'emptySelection'}">
+            <div class="js-popup-message hidden" data-type="warning" data-message="Vui lòng chọn ít nhất một sản phẩm để đặt hàng."></div>
+        </c:if>
         <div class="row">
             <div class="col-md-8">
                 <div class="cart-panel">
@@ -99,7 +102,7 @@
                                                 </strong>
                                             </td>
                                             <td class="text-center cart-action-col">
-                                                <button type="button" class="cart-remove-btn" aria-label="Xóa sản phẩm ${item.product.name}" onclick="deleteCartItem(${item.product.id})">
+                                                <button type="button" class="cart-remove-btn" aria-label="Xóa sản phẩm ${item.product.name}">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
                                             </td>
@@ -177,46 +180,11 @@
                         </strong>
                     </div>
                 </div>
-                <div class="payment-method">
-                    <div class="input-radio">
-                        <input type="radio" name="payment" id="payment-1">
-                        <label for="payment-1">
-                            <span></span>
-                            Thanh toán khi nhận hàng(COD)
-                        </label>
-                        <div class="caption">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                        </div>
-                    </div>
-                    <div class="input-radio">
-                        <input type="radio" name="payment" id="payment-2">
-                        <label for="payment-2">
-                            <span></span>
-                           Thanh toán qua VnPay
-                        </label>
-                        <div class="caption">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                        </div>
-                    </div>
-                    <div class="input-radio">
-                        <input type="radio" name="payment" id="payment-3">
-                        <label for="payment-3">
-                            <span></span>
-                           Thanh toán qua thẻ ghi nợ
-                        </label>
-                        <div class="caption">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="input-checkbox">
-                    <input type="checkbox" id="terms">
-                    <label for="terms">
-                        <span></span>
-                        Tôi đồng ý với <a href="#">điều khoản &amp; điều kiện</a>
-                    </label>
-                </div>
-                <a href="#" class="primary-btn order-submit">Place order</a>
+                <form id="cart-checkout-form" method="post" action="checkout">
+                    <input type="hidden" name="action" value="prepare">
+                    <div id="selected-checkout-products"></div>
+                    <button id="checkout-btn" type="submit" class="primary-btn order-submit">Tiến hành thanh toán</button>
+                </form>
             </div>
         </div>
     </div>
@@ -302,6 +270,7 @@
 
             updateCartSummaryFromUI();
             renderOrderSummary();
+            syncCheckoutButton();
         }
     });
 
@@ -378,7 +347,7 @@
                 actionsPanel.style.display = '';
             }
             if (checkoutBtn) {
-                checkoutBtn.disabled = false;
+                syncCheckoutButton();
             }
             return;
         }
@@ -408,6 +377,23 @@
         buttons.forEach(function (button) {
             button.disabled = saving;
         });
+    }
+
+    function getSelectedProductIds() {
+        return Array.from(document.querySelectorAll('#cart-page .cart-item-check:not(#toggle-select-all)'))
+            .filter(function (checkbox) {
+                return checkbox.checked;
+            })
+            .map(function (checkbox) {
+                return checkbox.value;
+            });
+    }
+
+    function syncCheckoutButton() {
+        var checkoutBtn = document.getElementById('checkout-btn');
+        if (checkoutBtn) {
+            checkoutBtn.disabled = getSelectedProductIds().length === 0;
+        }
     }
 
     function scheduleCartQuantitySync(row) {
@@ -511,6 +497,7 @@
 
                 updateCartSummaryFromUI();
                 renderOrderSummary();
+                syncCheckoutButton();
             });
         }
 
@@ -553,10 +540,18 @@
                 return;
             }
 
-            row.remove();
-            updateCartSummaryFromUI();
-            renderOrderSummary();
-            syncCartUIState();
+            var productId = row.getAttribute('data-product-id');
+            deleteCartItem(productId).then(function (request) {
+                if (request && request.done) {
+                    request.done(function () {
+                        row.remove();
+                        updateCartSummaryFromUI();
+                        renderOrderSummary();
+                        syncCartUIState();
+                        syncCheckoutButton();
+                    });
+                }
+            });
         });
 
         page.addEventListener('input', function (event) {
@@ -567,9 +562,32 @@
             }
         });
 
+        var checkoutForm = document.getElementById('cart-checkout-form');
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', function (event) {
+                var productIds = getSelectedProductIds();
+                if (productIds.length === 0) {
+                    event.preventDefault();
+                    alert('Vui lòng chọn ít nhất một sản phẩm để đặt hàng.');
+                    return;
+                }
+
+                var container = document.getElementById('selected-checkout-products');
+                container.innerHTML = '';
+                productIds.forEach(function (productId) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'productIds';
+                    input.value = productId;
+                    container.appendChild(input);
+                });
+            });
+        }
+
         updateCartSummaryFromUI();
         syncCartUIState();
         renderOrderSummary();
+        syncCheckoutButton();
     });
 </script>
 

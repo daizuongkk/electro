@@ -26,6 +26,13 @@
         <li><a class="nav-link" href="<c:url value='/admin/products/form'/>"><i class="ti ti-plus"></i><span class="nav-text">Thêm Sản Phẩm</span></a>
         </li>
 
+        <li>
+            <a class="nav-link" href="<c:url value='/admin/orders'/>">
+                <i class="ti ti-receipt"></i>
+                <span class="nav-text">Đơn Hàng</span>
+            </a>
+        </li>
+
       <li class="px-4 py-2"><small class="nav-text">Account</small></li>
 
         <li>

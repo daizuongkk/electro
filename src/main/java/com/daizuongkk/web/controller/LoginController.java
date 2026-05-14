@@ -7,6 +7,7 @@ import com.daizuongkk.web.dto.response.CartItemResponse;
 import com.daizuongkk.web.dto.response.UserResponse;
 import com.daizuongkk.web.service.AuthService;
 import com.daizuongkk.web.service.CartService;
+import com.daizuongkk.web.service.OrderService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,11 +22,13 @@ public class LoginController extends HttpServlet {
 
 	private AuthService authService;
 	private CartService cartService;
+	private OrderService orderService;
 
 	@Override
 	public void init() {
 		this.authService = new AuthService();
 		this.cartService = new CartService();
+		this.orderService = new OrderService();
 	}
 
 	@Override
@@ -75,8 +78,17 @@ public class LoginController extends HttpServlet {
 
 		HttpSession session = request.getSession(true);
 		session.setAttribute("account", res);
+		session.setAttribute("cart", cart);
+		session.setAttribute("orderCount", getOrderService().countOrdersByUserId(res.getId()));
 		writeRememberCookie(response, username.trim(), rememberMe, request.isSecure(), request.getContextPath());
 		response.sendRedirect("home");
+	}
+
+	private OrderService getOrderService() {
+		if (orderService == null) {
+			orderService = new OrderService();
+		}
+		return orderService;
 	}
 
 	private String extractRememberedUsername(HttpServletRequest request) {

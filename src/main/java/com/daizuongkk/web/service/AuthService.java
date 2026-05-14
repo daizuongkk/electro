@@ -9,131 +9,132 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.util.regex.Pattern;
 
 public class AuthService {
-    private final UserRepository userRepository;
-    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9._]{6,31}$");
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
-    private static final Pattern PASSWORD_PATTERN =
-            Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,32}$");
-    public enum RegisterStatus {
-        SUCCESS,
-        INVALID_INPUT,
-        INVALID_USERNAME_FORMAT,
-        INVALID_EMAIL_FORMAT,
-        INVALID_PASSWORD_FORMAT,
-        USERNAME_EXISTS,
-        EMAIL_EXISTS,
-        FAILED
-    }
+	private final UserRepository userRepository;
+	private static final Pattern USERNAME_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9._]{5,31}$");
+	private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+	private static final Pattern PASSWORD_PATTERN = Pattern
+			.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,32}$");
 
-    public AuthService() {
-        this.userRepository = new UserRepository();
-    }
+	public enum RegisterStatus {
+		SUCCESS,
+		INVALID_INPUT,
+		INVALID_USERNAME_FORMAT,
+		INVALID_EMAIL_FORMAT,
+		INVALID_PASSWORD_FORMAT,
+		USERNAME_EXISTS,
+		EMAIL_EXISTS,
+		FAILED
+	}
 
-    public AuthService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+	public AuthService() {
+		this.userRepository = new UserRepository();
+	}
 
-    public UserResponse login(String username, String password) {
-        if (username == null || password == null) {
-            return null;
-        }
+	public AuthService(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
 
-        String normalizedUsername = username.trim();
-        if (normalizedUsername.isEmpty() || password.isEmpty()) {
-            return null;
-        }
+	public UserResponse login(String username, String password) {
+		if (username == null || password == null) {
+			return null;
+		}
 
-        User user = userRepository.findByUsernameOrEmail(normalizedUsername);
-        if (user == null) {
-            return null;
-        }
-        if (!matchesPassword(password, user.getPassword())) {
-            return null;
-        }
+		String normalizedUsername = username.trim();
+		if (normalizedUsername.isEmpty() || password.isEmpty()) {
+			return null;
+		}
 
-        return UserResponse.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .role(user.getRole())
-                .avtUrl(user.getAvtUrl())
-                .phone(user.getPhone())
-                .email(user.getEmail())
-                .verified(user.getVerified())
-                .status(user.getStatus())
-                .build();
-    }
+		User user = userRepository.findByUsernameOrEmail(normalizedUsername);
+		if (user == null) {
+			return null;
+		}
+		if (!matchesPassword(password, user.getPassword())) {
+			return null;
+		}
 
-    public RegisterStatus register(String username, String email, String password) {
-        if (username == null || email == null || password == null) {
-            return RegisterStatus.INVALID_INPUT;
-        }
+		return UserResponse.builder()
+				.id(user.getId())
+				.username(user.getUsername())
+				.firstName(user.getFirstName())
+				.lastName(user.getLastName())
+				.role(user.getRole())
+				.avtUrl(user.getAvtUrl())
+				.phone(user.getPhone())
+				.email(user.getEmail())
+				.verified(user.getVerified())
+				.status(user.getStatus())
+				.build();
+	}
 
-        String normalizedUsername = username.trim();
-        String normalizedEmail = email.trim().toLowerCase();
+	public RegisterStatus register(String username, String email, String password) {
+		if (username == null || email == null || password == null) {
+			return RegisterStatus.INVALID_INPUT;
+		}
 
-        if (normalizedUsername.isEmpty() || normalizedEmail.isEmpty() || password.isEmpty()) {
-            return RegisterStatus.INVALID_INPUT;
-        }
+		String normalizedUsername = username.trim();
+		String normalizedEmail = email.trim().toLowerCase();
 
-        if (!isValidUsernameFormat(normalizedUsername)) {
-            return RegisterStatus.INVALID_USERNAME_FORMAT;
-        }
+		if (normalizedUsername.isEmpty() || normalizedEmail.isEmpty() || password.isEmpty()) {
+			return RegisterStatus.INVALID_INPUT;
+		}
 
-        if (!isValidEmailFormat(normalizedEmail)) {
-            return RegisterStatus.INVALID_EMAIL_FORMAT;
-        }
+		if (!isValidUsernameFormat(normalizedUsername)) {
+			return RegisterStatus.INVALID_USERNAME_FORMAT;
+		}
 
-        if (!isValidPasswordFormat(password)) {
-            return RegisterStatus.INVALID_PASSWORD_FORMAT;
-        }
+		if (!isValidEmailFormat(normalizedEmail)) {
+			return RegisterStatus.INVALID_EMAIL_FORMAT;
+		}
 
-        if (userRepository.existsByUsername(normalizedUsername)) {
-            return RegisterStatus.USERNAME_EXISTS;
-        }
+		if (!isValidPasswordFormat(password)) {
+			return RegisterStatus.INVALID_PASSWORD_FORMAT;
+		}
 
-        if (userRepository.existsByEmail(normalizedEmail)) {
-            return RegisterStatus.EMAIL_EXISTS;
-        }
+		if (userRepository.existsByUsername(normalizedUsername)) {
+			return RegisterStatus.USERNAME_EXISTS;
+		}
 
-        User user = User.builder()
-                .username(normalizedUsername)
-                .email(normalizedEmail)
-                .password(hashPassword(password))
-                .role(Role.CUSTOMER)
-                .build();
+		if (userRepository.existsByEmail(normalizedEmail)) {
+			return RegisterStatus.EMAIL_EXISTS;
+		}
 
-        return userRepository.create(user) ? RegisterStatus.SUCCESS : RegisterStatus.FAILED;
-    }
+		User user = User.builder()
+				.username(normalizedUsername)
+				.email(normalizedEmail)
+				.password(hashPassword(password))
+				.role(Role.CUSTOMER)
+				.build();
 
-    public static boolean isValidUsernameFormat(String username) {
-        return username != null && USERNAME_PATTERN.matcher(username).matches();
-    }
+		return userRepository.create(user) ? RegisterStatus.SUCCESS : RegisterStatus.FAILED;
+	}
 
-    public static boolean isValidEmailFormat(String email) {
-        return email != null && EMAIL_PATTERN.matcher(email).matches();
-    }
+	public static boolean isValidUsernameFormat(String username) {
+		return username != null && USERNAME_PATTERN.matcher(username).matches();
+	}
 
-    public static boolean isValidPasswordFormat(String password) {
-        return password != null && PASSWORD_PATTERN.matcher(password).matches();
-    }
+	public static boolean isValidEmailFormat(String email) {
+		return email != null && EMAIL_PATTERN.matcher(email).matches();
+	}
 
-    private boolean matchesPassword(String rawPassword, String storedPassword) {
-        if (storedPassword == null) {
-            return false;
-        }
+	public static boolean isValidPasswordFormat(String password) {
+		return password != null && PASSWORD_PATTERN.matcher(password).matches();
+	}
 
-        if (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2b$") || storedPassword.startsWith("$2y$")) {
+	private boolean matchesPassword(String rawPassword, String storedPassword) {
+		if (storedPassword == null) {
+			return false;
+		}
 
-            return BCrypt.checkpw(rawPassword, storedPassword);
-        }
+		if (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2b$") || storedPassword.startsWith("$2y$")) {
 
-        return storedPassword.equals(rawPassword);
-    }
+			return BCrypt.checkpw(rawPassword, storedPassword);
+		}
 
-    private String hashPassword(String rawPassword) {
-        return BCrypt.hashpw(rawPassword, BCrypt.gensalt(12));
-    }
+		return storedPassword.equals(rawPassword);
+	}
+
+	private String hashPassword(String rawPassword) {
+		return BCrypt.hashpw(rawPassword, BCrypt.gensalt(12));
+	}
 
 }

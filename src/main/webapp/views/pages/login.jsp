@@ -76,7 +76,7 @@
                                     <p class="gentle-subtitle">Vào thế giới số, hốt trọn ưu đãi độc quyền.!</p>
                                 </div>
                                 <c:if test="${not empty loginError}">
-                                    <div class="alert alert-danger text-center" role="alert">${loginError}</div>
+                                    <div class="js-popup-message hidden" data-type="danger"><c:out value="${loginError}"/></div>
                                 </c:if>
                                 <form class="comfort-form" id="loginForm" novalidate action="login" method="post">
                                     <div class="soft-field">
