@@ -7,9 +7,11 @@ import com.daizuongkk.web.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class UserService {
 	private final UserRepository userRepository = new UserRepository();
+	private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9+() .-]{9,20}$");
 
 	public enum UpdateProfileStatus {
 		SUCCESS,
@@ -22,6 +24,21 @@ public class UserService {
 		USERNAME_EXISTS,
 		EMAIL_EXISTS,
 		EMAIL_ALREADY_VERIFIED,
+		FAILED
+	}
+
+	public enum AdminUserSaveStatus {
+		SUCCESS,
+		INVALID_INPUT,
+		INVALID_ID,
+		INVALID_USERNAME_FORMAT,
+		INVALID_EMAIL_FORMAT,
+		INVALID_PHONE_FORMAT,
+		INVALID_PASSWORD_FORMAT,
+		INVALID_ROLE,
+		INVALID_STATUS,
+		USERNAME_EXISTS,
+		EMAIL_EXISTS,
 		FAILED
 	}
 
@@ -62,6 +79,73 @@ public class UserService {
 			user.setPassword(hashPassword(rawPassword));
 		}
 		return userRepository.update(user, updatePassword);
+	}
+
+	public AdminUserSaveStatus saveAdminUser(User user, String rawPassword) {
+		if (user == null) {
+			return AdminUserSaveStatus.INVALID_INPUT;
+		}
+
+		boolean creating = user.getId() == null;
+		if (!creating && user.getId() <= 0) {
+			return AdminUserSaveStatus.INVALID_ID;
+		}
+
+		String username = normalizeOptional(user.getUsername());
+		String email = normalizeEmail(user.getEmail());
+		String phone = normalizeOptional(user.getPhone());
+		String status = normalizeStatus(user.getStatus());
+
+		if (!hasText(username) || !hasText(email)) {
+			return AdminUserSaveStatus.INVALID_INPUT;
+		}
+		if (!AuthService.isValidUsernameFormat(username)) {
+			return AdminUserSaveStatus.INVALID_USERNAME_FORMAT;
+		}
+		if (!AuthService.isValidEmailFormat(email)) {
+			return AdminUserSaveStatus.INVALID_EMAIL_FORMAT;
+		}
+		if (hasText(phone) && !PHONE_PATTERN.matcher(phone).matches()) {
+			return AdminUserSaveStatus.INVALID_PHONE_FORMAT;
+		}
+		if (user.getRole() == null) {
+			return AdminUserSaveStatus.INVALID_ROLE;
+		}
+		if (status == null) {
+			return AdminUserSaveStatus.INVALID_STATUS;
+		}
+
+		boolean updatePassword = hasText(rawPassword);
+		if (creating && !updatePassword) {
+			return AdminUserSaveStatus.INVALID_PASSWORD_FORMAT;
+		}
+		if (updatePassword && !AuthService.isValidPasswordFormat(rawPassword)) {
+			return AdminUserSaveStatus.INVALID_PASSWORD_FORMAT;
+		}
+
+		if (creating ? userRepository.existsByUsername(username) : userRepository.existsByUsernameExceptId(username, user.getId())) {
+			return AdminUserSaveStatus.USERNAME_EXISTS;
+		}
+		if (creating ? userRepository.existsByEmail(email) : userRepository.existsByEmailExceptId(email, user.getId())) {
+			return AdminUserSaveStatus.EMAIL_EXISTS;
+		}
+
+		user.setUsername(username);
+		user.setEmail(email);
+		user.setFirstName(normalizeOptional(user.getFirstName()));
+		user.setLastName(normalizeOptional(user.getLastName()));
+		user.setPhone(phone);
+		user.setStatus(status);
+		user.setVerified(user.getVerified() != null && user.getVerified());
+		if (updatePassword) {
+			user.setPassword(hashPassword(rawPassword));
+		}
+
+		boolean saved = creating
+				? userRepository.create(user)
+				: userRepository.update(user, updatePassword);
+
+		return saved ? AdminUserSaveStatus.SUCCESS : AdminUserSaveStatus.FAILED;
 	}
 
 	public boolean deleteUser(Long id) {
@@ -192,6 +276,16 @@ public class UserService {
 
 		String trimmed = value.trim();
 		return trimmed.isEmpty() ? null : trimmed;
+	}
+
+	private String normalizeEmail(String value) {
+		String normalized = normalizeOptional(value);
+		return normalized == null ? null : normalized.toLowerCase();
+	}
+
+	private String normalizeStatus(String value) {
+		String status = value == null ? "" : value.trim().toUpperCase();
+		return status.equals("ACTIVE") || status.equals("INACTIVE") || status.equals("BANNED") ? status : null;
 	}
 
 	private UserResponse userToUserResponse(User user) {

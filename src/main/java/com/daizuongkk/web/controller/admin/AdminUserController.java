@@ -129,13 +129,10 @@ public class AdminUserController extends BaseAdminServlet {
                 .build();
 
         String password = request.getParameter("password");
-        boolean ok = id == null
-                ? userService.createUser(user, password)
-                : userService.updateUser(user, password);
+        UserService.AdminUserSaveStatus saveStatus = userService.saveAdminUser(user, password);
 
-        if (!ok) {
-            forwardUserFormError(request, response, user, id != null,
-                    "Không thể lưu người dùng. Kiểm tra username/email/password và thử lại.");
+        if (saveStatus != UserService.AdminUserSaveStatus.SUCCESS) {
+            forwardUserFormError(request, response, user, id != null, getAdminUserSaveMessage(saveStatus));
             return;
         }
 
@@ -269,5 +266,22 @@ public class AdminUserController extends BaseAdminServlet {
             return null;
         }
         return "true".equalsIgnoreCase(value) || "1".equals(value);
+    }
+
+    private String getAdminUserSaveMessage(UserService.AdminUserSaveStatus status) {
+        return switch (status) {
+            case INVALID_INPUT -> "Vui lòng nhập đầy đủ username và email.";
+            case INVALID_ID -> "Người dùng cần cập nhật không hợp lệ.";
+            case INVALID_USERNAME_FORMAT -> "Username phải bắt đầu bằng chữ cái, chỉ gồm chữ, số, dấu . hoặc _ và dài 6-32 ký tự.";
+            case INVALID_EMAIL_FORMAT -> "Email không hợp lệ.";
+            case INVALID_PHONE_FORMAT -> "Số điện thoại không hợp lệ. Chỉ dùng số, dấu +, khoảng trắng, dấu ngoặc, dấu chấm hoặc gạch ngang.";
+            case INVALID_PASSWORD_FORMAT -> "Mật khẩu phải dài 8-32 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.";
+            case INVALID_ROLE -> "Vai trò người dùng không hợp lệ.";
+            case INVALID_STATUS -> "Trạng thái người dùng không hợp lệ.";
+            case USERNAME_EXISTS -> "Username đã được sử dụng.";
+            case EMAIL_EXISTS -> "Email đã được sử dụng.";
+            case FAILED -> "Không thể lưu người dùng. Vui lòng thử lại sau.";
+            case SUCCESS -> "";
+        };
     }
 }

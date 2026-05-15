@@ -75,6 +75,14 @@ public class UserRepository   {
         return exists("SELECT 1 FROM users WHERE email = ? LIMIT 1", email);
     }
 
+    public boolean existsByUsernameExceptId(String username, Long excludedId) {
+        return existsExceptId("SELECT 1 FROM users WHERE username = ? AND id <> ? LIMIT 1", username, excludedId);
+    }
+
+    public boolean existsByEmailExceptId(String email, Long excludedId) {
+        return existsExceptId("SELECT 1 FROM users WHERE email = ? AND id <> ? LIMIT 1", email, excludedId);
+    }
+
     public  boolean create(User user) {
         String sql = "INSERT INTO users (username, email, password, first_name, last_name, phone, avt_url, role, status, verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String cartSql = "INSERT INTO carts (user_id) VALUES (?)";
@@ -289,6 +297,27 @@ public class UserRepository   {
             statement.setString(1, normalizedStatus);
             statement.setLong(2, id);
             return statement.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean existsExceptId(String sql, String value, Long excludedId) {
+        if (value == null || value.trim().isEmpty()) {
+            return false;
+        }
+        if (excludedId == null || excludedId <= 0) {
+            return exists(sql.replace(" AND id <> ?", ""), value);
+        }
+
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, value.trim());
+            statement.setLong(2, excludedId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return false;

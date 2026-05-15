@@ -106,69 +106,7 @@
             </div>
 
         </div>
-        <div class="row g-3 mb-3">
-            <div class="col-lg-4 col-12">
-                <div class="card">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between border-bottom pb-5 mb-3">
-                            <div>
-                                <h3 class="fw-bold h4">$25,458</h3>
-                                <span>Total Profit</span>
-                            </div>
-                            <div>
-                                <i class="ti ti-layers-subtract fs-1 text-primary"></i>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center small">
-                            <div class="text-muted"><span class="text-success">+35%</span> vs Last Month</div>
-                            <div><a href="#" class="link-primary text-decoration-underline">View</a></div>
-                        </div>
-                    </div>
-                </div>
 
-            </div>
-            <div class="col-lg-4 col-12">
-                <div class="card">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between border-bottom pb-5 mb-3">
-                            <div>
-                                <h3 class="fw-bold h4">$45,458</h3>
-                                <span>Total Payment Returns</span>
-                            </div>
-                            <div>
-                                <i class="ti ti-credit-card fs-1 text-danger"></i>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center small">
-                            <div class="text-muted"><span class="text-danger">-20%</span> vs Last Month</div>
-                            <div><a href="#" class="link-primary text-decoration-underline">View</a></div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-            <div class="col-lg-4 col-12">
-                <div class="card">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between border-bottom pb-5 mb-3">
-                            <div>
-                                <h3 class="fw-bold h4">$34,458</h3>
-                                <span>Total Expenses</span>
-                            </div>
-                            <div>
-                                <i class="ti ti-cash-banknote fs-1 text-warning"></i>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center small">
-                            <div class="text-muted"><span class="text-warning">-20%</span> vs Last Month</div>
-                            <div><a href="#" class="link-primary text-decoration-underline">View</a></div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
         <div class="row g-3 mb-3">
             <div class="col-12 col-lg-6">
                 <div class="card">

@@ -149,12 +149,16 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="username" class="form-label">Username</label>
                                     <input type="text" class="form-control" id="username" name="username"
-                                           value="${fn:escapeXml(userForm.username)}" required>
+                                           value="${fn:escapeXml(userForm.username)}"
+                                           pattern="[A-Za-z][A-Za-z0-9._]{5,31}" minlength="6" maxlength="32"
+                                           title="Bắt đầu bằng chữ cái, chỉ dùng chữ, số, dấu . hoặc _, dài 6-32 ký tự."
+                                           required>
+                                    <small class="text-secondary">6-32 ký tự, bắt đầu bằng chữ cái; dùng chữ, số, dấu . hoặc _.</small>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="email" class="form-label">Email</label>
                                     <input type="email" class="form-control" id="email" name="email"
-                                           value="${fn:escapeXml(userForm.email)}" required>
+                                           value="${fn:escapeXml(userForm.email)}" maxlength="150" required>
                                 </div>
                             </div>
 
@@ -162,24 +166,26 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="firstName" class="form-label">Tên</label>
                                     <input type="text" class="form-control" id="firstName" name="firstName"
-                                           value="${fn:escapeXml(userForm.firstName)}">
+                                           value="${fn:escapeXml(userForm.firstName)}" maxlength="80">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="lastName" class="form-label">Họ</label>
                                     <input type="text" class="form-control" id="lastName" name="lastName"
-                                           value="${fn:escapeXml(userForm.lastName)}">
+                                           value="${fn:escapeXml(userForm.lastName)}" maxlength="80">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="phone" class="form-label">Số điện thoại</label>
                                     <input type="text" class="form-control" id="phone" name="phone"
-                                           value="${fn:escapeXml(userForm.phone)}">
+                                           value="${fn:escapeXml(userForm.phone)}"
+                                           pattern="[0-9+() .-]{9,20}" maxlength="20"
+                                           title="Số điện thoại 9-20 ký tự, chỉ dùng số, dấu +, khoảng trắng, dấu ngoặc, dấu chấm hoặc gạch ngang.">
                                 </div>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label for="role" class="form-label">Vai trò</label>
-                                    <select class="form-select" id="role" name="role">
+                                    <select class="form-select" id="role" name="role" required>
                                         <c:forEach var="role" items="${roles}">
                                             <option value="${role}" ${userForm.role == role ? 'selected' : ''}>${role}</option>
                                         </c:forEach>
@@ -187,7 +193,7 @@
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="status" class="form-label">Trạng thái</label>
-                                    <select class="form-select" id="status" name="status">
+                                    <select class="form-select" id="status" name="status" required>
                                         <option value="ACTIVE" ${userForm.status == 'ACTIVE' or empty userForm.status ? 'selected' : ''}>ACTIVE</option>
                                         <option value="INACTIVE" ${userForm.status == 'INACTIVE' ? 'selected' : ''}>INACTIVE</option>
                                         <option value="BANNED" ${userForm.status == 'BANNED' ? 'selected' : ''}>BANNED</option>
@@ -195,7 +201,7 @@
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="verified" class="form-label">Xác thực</label>
-                                    <select class="form-select" id="verified" name="verified">
+                                    <select class="form-select" id="verified" name="verified" required>
                                         <option value="true" ${userForm.verified ? 'selected' : ''}>Đã xác thực</option>
                                         <option value="false" ${not userForm.verified ? 'selected' : ''}>Chưa xác thực</option>
                                     </select>
@@ -206,7 +212,11 @@
                                 <label for="password" class="form-label">${editMode ? 'Mật khẩu mới' : 'Mật khẩu'}</label>
                                 <input type="password" class="form-control" id="password" name="password"
                                        ${editMode ? '' : 'required'}
+                                       pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,32}"
+                                       minlength="8" maxlength="32"
+                                       title="8-32 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt."
                                        placeholder="${editMode ? 'Bỏ trống nếu không đổi mật khẩu' : 'Nhập mật khẩu'}">
+                                <small class="text-secondary">${editMode ? 'Nếu nhập mật khẩu mới, mật khẩu phải' : 'Mật khẩu phải'} có chữ hoa, chữ thường, số và ký tự đặc biệt.</small>
                             </div>
 
                             <div class="d-flex gap-2">
@@ -248,6 +258,49 @@
             return true;
         }
 
+        function validateAdminUserForm() {
+            if (!form) {
+                return true;
+            }
+
+            var username = document.getElementById('username');
+            var email = document.getElementById('email');
+            var phone = document.getElementById('phone');
+            var password = document.getElementById('password');
+            var usernamePattern = /^[A-Za-z][A-Za-z0-9._]{5,31}$/;
+            var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            var phonePattern = /^[0-9+() .-]{9,20}$/;
+            var passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,32}$/;
+
+            if (!username.value.trim() || !usernamePattern.test(username.value.trim())) {
+                alert('Username phải bắt đầu bằng chữ cái, chỉ gồm chữ, số, dấu . hoặc _ và dài 6-32 ký tự.');
+                username.focus();
+                return false;
+            }
+            if (!email.value.trim() || !emailPattern.test(email.value.trim())) {
+                alert('Email không hợp lệ.');
+                email.focus();
+                return false;
+            }
+            if (phone.value.trim() && !phonePattern.test(phone.value.trim())) {
+                alert('Số điện thoại không hợp lệ.');
+                phone.focus();
+                return false;
+            }
+            if (password.required || password.value.trim()) {
+                if (!passwordPattern.test(password.value)) {
+                    alert('Mật khẩu phải dài 8-32 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.');
+                    password.focus();
+                    return false;
+                }
+            }
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return false;
+            }
+            return true;
+        }
+
         input.addEventListener('change', function () {
             var file = input.files && input.files[0];
             if (!file) {
@@ -267,6 +320,10 @@
         if (form) {
             form.addEventListener('submit', function (event) {
                 var file = input.files && input.files[0];
+                if (!validateAdminUserForm()) {
+                    event.preventDefault();
+                    return;
+                }
                 if (!validateAvatarFile(file)) {
                     input.value = '';
                     event.preventDefault();
