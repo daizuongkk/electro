@@ -33,8 +33,11 @@ public class CheckoutController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         UserResponse account = getAccount(request);
-        Set<Long> selectedProductIds = getSelectedProductIds(request.getSession(false));
-        List<CartItemResponse> cartItems = cartService.getCartItems(account.getId(), selectedProductIds);
+        HttpSession session = request.getSession(false);
+        Set<Long> selectedProductIds = getSelectedProductIds(session);
+        List<CartItemResponse> cartItems = hasCheckoutSelection(session)
+                ? cartService.getCartItems(account.getId(), selectedProductIds)
+                : cartService.getCartItems(account.getId());
         request.setAttribute("cartItems", cartItems);
         FlashUtils.consume(request,
                 "checkoutError",
@@ -74,7 +77,7 @@ public class CheckoutController extends HttpServlet {
                 request.getParameter("recipientName"),
                 request.getParameter("phone"),
                 buildAddress(request),
-                request.getParameter("paymentMethod"),
+                buildPaymentRequest(request),
                 selectedProductIds
         );
 
@@ -87,7 +90,7 @@ public class CheckoutController extends HttpServlet {
         }
 
         FlashUtils.putAll(request, Map.of(
-                "checkoutError", getErrorMessage(result.status()),
+                "checkoutError", getErrorMessage(result),
                 "submittedRecipientName", trim(request.getParameter("recipientName")),
                 "submittedPhone", trim(request.getParameter("phone")),
                 "submittedEmail", trim(request.getParameter("email")),
@@ -106,11 +109,16 @@ public class CheckoutController extends HttpServlet {
         return (UserResponse) session.getAttribute("account");
     }
 
-    private String getErrorMessage(OrderService.CheckoutStatus status) {
-        return switch (status) {
+    private String getErrorMessage(OrderService.CheckoutResult result) {
+        if (result != null && result.message() != null && !result.message().isBlank()) {
+            return result.message();
+        }
+
+        return switch (result == null ? OrderService.CheckoutStatus.FAILED : result.status()) {
             case EMPTY_CART -> "Giỏ hàng đang trống. Vui lòng thêm sản phẩm trước khi đặt hàng.";
             case INVALID_INPUT -> "Vui lòng nhập đầy đủ thông tin giao hàng và chọn phương thức thanh toán.";
-            case PAYMENT_FAILED -> "Thanh toán mock thất bại. Vui lòng chọn phương thức khác hoặc thử lại.";
+            case PAYMENT_FAILED, PAYMENT_DECLINED -> "Thanh toán không thành công. Vui lòng chọn phương thức khác hoặc thử lại.";
+            case PAYMENT_REQUIRES_RETRY -> "Thanh toán cần thử lại. Vui lòng kiểm tra thông tin và xác nhận lại.";
             case FAILED -> "Không thể tạo đơn hàng. Vui lòng thử lại sau.";
             case SUCCESS -> "";
         };
@@ -137,6 +145,17 @@ public class CheckoutController extends HttpServlet {
         return address.toString();
     }
 
+    private OrderService.PaymentRequest buildPaymentRequest(HttpServletRequest request) {
+        return new OrderService.PaymentRequest(
+                request.getParameter("paymentMethod"),
+                request.getParameter("cardName"),
+                request.getParameter("cardNumber"),
+                request.getParameter("cardExpiry"),
+                request.getParameter("cardCvv"),
+                request.getParameter("bankTransferContent")
+        );
+    }
+
     private void appendAddressPart(StringBuilder address, String value) {
         if (!value.isBlank()) {
             if (!address.isEmpty()) {
@@ -157,6 +176,10 @@ public class CheckoutController extends HttpServlet {
             return (Set<Long>) value;
         }
         return Set.of();
+    }
+
+    private boolean hasCheckoutSelection(HttpSession session) {
+        return session != null && session.getAttribute("checkoutProductIds") instanceof Set<?>;
     }
 
     private Set<Long> parseProductIds(String[] values) {
