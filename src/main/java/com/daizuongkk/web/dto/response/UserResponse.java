@@ -3,6 +3,9 @@ package com.daizuongkk.web.dto.response;
 import com.daizuongkk.web.model.Role;
 import lombok.*;
 
+import java.sql.Timestamp;
+import java.util.Date;
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,6 +22,9 @@ public class UserResponse {
     private String email;
     private Boolean verified;
     private Boolean phoneVerified;
+    private Boolean deleted;
     private String status;
+    private Date createdAt;
+    private Date updatedAt;
 
 }

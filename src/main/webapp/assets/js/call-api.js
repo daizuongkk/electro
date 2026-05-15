@@ -13,6 +13,14 @@
     const fallbackProductImage = "assets/img/fallback_product_img.jpg";
     const wishlistState = new Set();
 
+    const confirmAction = (message, options) => {
+        if (typeof window.showElectroConfirm === "function") {
+            return window.showElectroConfirm(message, options);
+        }
+
+        return Promise.resolve(window.confirm(message || "Bạn có chắc chắn muốn tiếp tục?"));
+    };
+
     const getFirstImage = (item) => {
         if (item && item.imageUrl && item.imageUrl.length > 0) {
             return item.imageUrl[0];
@@ -184,7 +192,7 @@
             },
             error: function (xhr) {
                 if (xhr.status === 401) {
-                    showElectroConfirm("Bạn cần đăng nhập để quản lý danh sách yêu thích. Bạn có muốn đăng nhập ngay bây giờ?", {
+                    confirmAction("Bạn cần đăng nhập để quản lý danh sách yêu thích. Bạn có muốn đăng nhập ngay bây giờ?", {
                         confirmText: "Đăng nhập"
                     }).then(function (confirmed) {
                         if (confirmed) {
@@ -213,7 +221,7 @@
             },
             error: function (res) {
                 if (res.status === 401) {
-                    showElectroConfirm("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng. Bạn có muốn đăng nhập ngay bây giờ?", {
+                    confirmAction("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng. Bạn có muốn đăng nhập ngay bây giờ?", {
                         confirmText: "Đăng nhập"
                     }).then(function (confirmed) {
                         if (confirmed) {
@@ -229,7 +237,7 @@
     };
 
     window.deleteWishlistItem = (productId) => {
-        return showElectroConfirm("Chắc chắn xóa khỏi danh sách yêu thích?", {
+        return confirmAction("Chắc chắn xóa khỏi danh sách yêu thích?", {
             confirmText: "Xóa"
         }).then(function (confirmed) {
             if (!confirmed) {
@@ -251,7 +259,7 @@
 
 
     window.deleteCartItem = (productIds) => {
-        return showElectroConfirm("Chắc chắn xóa sản phẩm đã chọn?", {
+        return confirmAction("Chắc chắn xóa sản phẩm đã chọn?", {
             confirmText: "Xóa"
         }).then(function (confirmed) {
             if (!confirmed) {

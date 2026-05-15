@@ -33,7 +33,7 @@ public class DashboardService {
     public DashboardResponse getDashboard() {
         return DashboardResponse.builder()
                 .totalProducts(productService.countProducts())
-                .totalUsers(userService.countUsers(AdminUserSearchRequest.builder().build()))
+                .totalUsers(userService.countUsers(AdminUserSearchRequest.builder().deleted("active").build()))
                 .totalOrders(dashboardRepository.countOrders())
                 .totalRevenue(dashboardRepository.sumValidOrderRevenue())
                 .pendingOrders(dashboardRepository.countOrdersByStatus("PENDING"))

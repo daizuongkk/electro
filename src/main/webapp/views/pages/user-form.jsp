@@ -8,8 +8,81 @@
 <head>
     <c:set var="pageTitle" value="${editMode ? 'Admin - Chỉnh Sửa Người Dùng' : 'Admin - Thêm Người Dùng'}"/>
     <%@include file="../commons/admin-head.jsp" %>
+    <style>
+        .admin-avatar-editor {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .admin-avatar-preview {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #dee2e6;
+            background: #f8f9fa;
+            flex: 0 0 auto;
+        }
+
+        .admin-avatar-placeholder {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            border: 1px solid #dee2e6;
+            background: #f8f9fa;
+            color: #6c757d;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex: 0 0 auto;
+        }
+
+        .admin-submit-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(248, 249, 250, 0.72);
+            backdrop-filter: blur(2px);
+        }
+
+        .admin-submit-overlay.is-active {
+            display: flex;
+        }
+
+        .admin-submit-box {
+            min-width: 220px;
+            padding: 18px 22px;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .admin-submit-box .spinner-border {
+            width: 1.35rem;
+            height: 1.35rem;
+            margin-right: 10px;
+            vertical-align: -0.2rem;
+        }
+    </style>
 </head>
 <body>
+<div id="adminSubmitOverlay" class="admin-submit-overlay">
+    <div class="admin-submit-box">
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        Đang lưu...
+    </div>
+</div>
 <div id="overlay" class="overlay"></div>
 <%@include file="../commons/admin-header.jsp" %>
 <%@include file="../commons/admin-sidebar.jsp" %>
@@ -35,11 +108,42 @@
                         <c:if test="${not empty error}">
                             <div class="alert alert-danger">${fn:escapeXml(error)}</div>
                         </c:if>
+                        <c:if test="${editMode and userForm.deleted}">
+                            <div class="alert alert-warning">
+                                Người dùng này đang ở trạng thái đã xóa. Lưu thay đổi để kích hoạt lại tài khoản.
+                            </div>
+                        </c:if>
 
-                        <form method="post" action="admin/users">
+                        <form method="post" action="admin/users" enctype="multipart/form-data">
                             <c:if test="${editMode}">
                                 <input type="hidden" name="id" value="${userForm.id}">
                             </c:if>
+                            <input type="hidden" name="avatarUrl" value="${fn:escapeXml(userForm.avtUrl)}">
+
+                            <div class="mb-4">
+                                <label for="avatarFile" class="form-label">Ảnh đại diện</label>
+                                <div class="admin-avatar-editor">
+                                    <c:choose>
+                                        <c:when test="${not empty userForm.avtUrl}">
+                                            <img id="adminAvatarPreview" src="${fn:escapeXml(userForm.avtUrl)}"
+                                                 alt="${fn:escapeXml(userForm.username)}" class="admin-avatar-preview">
+                                            <span id="adminAvatarPlaceholder" class="admin-avatar-placeholder d-none">
+                                                <i class="ti ti-user"></i>
+                                            </span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <img id="adminAvatarPreview" src="" alt="" class="admin-avatar-preview d-none">
+                                            <span id="adminAvatarPlaceholder" class="admin-avatar-placeholder">
+                                                <i class="ti ti-user"></i>
+                                            </span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <div class="flex-grow-1">
+                                        <input type="file" class="form-control" id="avatarFile" name="avatarFile" accept="image/*">
+                                        <small class="text-secondary">Chọn 1 ảnh đại diện, tối đa 10MB. Bỏ trống nếu không muốn thay đổi.</small>
+                                    </div>
+                                </div>
+                            </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
@@ -116,5 +220,70 @@
         </div>
     </div>
 </main>
+<script>
+    (function () {
+        var input = document.getElementById('avatarFile');
+        var preview = document.getElementById('adminAvatarPreview');
+        var placeholder = document.getElementById('adminAvatarPlaceholder');
+        var form = input ? input.closest('form') : null;
+        var overlay = document.getElementById('adminSubmitOverlay');
+        var maxAvatarSize = 10 * 1024 * 1024;
+
+        if (!input || !preview || !placeholder) {
+            return;
+        }
+
+        function validateAvatarFile(file) {
+            if (!file) {
+                return true;
+            }
+            if (!file.type || !file.type.startsWith('image/')) {
+                alert('Vui lòng chọn một file ảnh hợp lệ.');
+                return false;
+            }
+            if (file.size > maxAvatarSize) {
+                alert('Ảnh đại diện tối đa 10MB. Vui lòng chọn ảnh nhẹ hơn.');
+                return false;
+            }
+            return true;
+        }
+
+        input.addEventListener('change', function () {
+            var file = input.files && input.files[0];
+            if (!file) {
+                return;
+            }
+
+            if (!validateAvatarFile(file)) {
+                input.value = '';
+                return;
+            }
+
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove('d-none');
+            placeholder.classList.add('d-none');
+        });
+
+        if (form) {
+            form.addEventListener('submit', function (event) {
+                var file = input.files && input.files[0];
+                if (!validateAvatarFile(file)) {
+                    input.value = '';
+                    event.preventDefault();
+                    return;
+                }
+
+                form.querySelectorAll('button[type="submit"]').forEach(function (button) {
+                    button.disabled = true;
+                    button.dataset.originalText = button.textContent;
+                    button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Đang lưu...';
+                });
+                if (overlay) {
+                    overlay.classList.add('is-active');
+                }
+            });
+        }
+    })();
+</script>
 </body>
 </html>

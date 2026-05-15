@@ -25,5 +25,6 @@ public class ProductResponse {
     private Long quantity;
     private Double reviewScore;
     private Date createdAt;
+    private Boolean deleted;
 
 }

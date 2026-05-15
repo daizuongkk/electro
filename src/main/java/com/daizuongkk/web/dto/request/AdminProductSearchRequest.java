@@ -15,4 +15,6 @@ public class AdminProductSearchRequest {
     private Double maxPrice;
     private Long minQuantity;
     private Long maxQuantity;
+    private String deleted;
+    private String sortBy;
 }

@@ -4,6 +4,7 @@ import com.daizuongkk.web.dto.response.CartItemResponse;
 import com.daizuongkk.web.dto.response.UserResponse;
 import com.daizuongkk.web.service.CartService;
 import com.daizuongkk.web.service.OrderService;
+import com.daizuongkk.web.util.FlashUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @WebServlet(name = "Checkout", value = "/checkout")
@@ -34,6 +36,17 @@ public class CheckoutController extends HttpServlet {
         Set<Long> selectedProductIds = getSelectedProductIds(request.getSession(false));
         List<CartItemResponse> cartItems = cartService.getCartItems(account.getId(), selectedProductIds);
         request.setAttribute("cartItems", cartItems);
+        FlashUtils.consume(request,
+                "checkoutError",
+                "submittedRecipientName",
+                "submittedPhone",
+                "submittedEmail",
+                "submittedProvince",
+                "submittedDistrict",
+                "submittedWard",
+                "submittedAddressLine",
+                "submittedNote",
+                "submittedPaymentMethod");
         request.getRequestDispatcher("/views/pages/checkout.jsp").forward(request, response);
     }
 
@@ -73,19 +86,19 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        List<CartItemResponse> cartItems = cartService.getCartItems(account.getId(), selectedProductIds);
-        request.setAttribute("cartItems", cartItems);
-        request.setAttribute("checkoutError", getErrorMessage(result.status()));
-        request.setAttribute("submittedRecipientName", trim(request.getParameter("recipientName")));
-        request.setAttribute("submittedPhone", trim(request.getParameter("phone")));
-        request.setAttribute("submittedEmail", trim(request.getParameter("email")));
-        request.setAttribute("submittedProvince", trim(request.getParameter("province")));
-        request.setAttribute("submittedDistrict", trim(request.getParameter("district")));
-        request.setAttribute("submittedWard", trim(request.getParameter("ward")));
-        request.setAttribute("submittedAddressLine", trim(request.getParameter("addressLine")));
-        request.setAttribute("submittedNote", trim(request.getParameter("note")));
-        request.setAttribute("submittedPaymentMethod", trim(request.getParameter("paymentMethod")));
-        request.getRequestDispatcher("/views/pages/checkout.jsp").forward(request, response);
+        FlashUtils.putAll(request, Map.of(
+                "checkoutError", getErrorMessage(result.status()),
+                "submittedRecipientName", trim(request.getParameter("recipientName")),
+                "submittedPhone", trim(request.getParameter("phone")),
+                "submittedEmail", trim(request.getParameter("email")),
+                "submittedProvince", trim(request.getParameter("province")),
+                "submittedDistrict", trim(request.getParameter("district")),
+                "submittedWard", trim(request.getParameter("ward")),
+                "submittedAddressLine", trim(request.getParameter("addressLine")),
+                "submittedNote", trim(request.getParameter("note")),
+                "submittedPaymentMethod", trim(request.getParameter("paymentMethod"))
+        ));
+        response.sendRedirect(request.getContextPath() + "/checkout");
     }
 
     private UserResponse getAccount(HttpServletRequest request) {

@@ -61,9 +61,47 @@
         .admin-product-image-item.is-removed {
             display: none;
         }
+
+        .admin-submit-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(248, 249, 250, 0.72);
+            backdrop-filter: blur(2px);
+        }
+
+        .admin-submit-overlay.is-active {
+            display: flex;
+        }
+
+        .admin-submit-box {
+            min-width: 220px;
+            padding: 18px 22px;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .admin-submit-box .spinner-border {
+            width: 1.35rem;
+            height: 1.35rem;
+            margin-right: 10px;
+            vertical-align: -0.2rem;
+        }
     </style>
 </head>
 <body>
+<div id="adminSubmitOverlay" class="admin-submit-overlay">
+    <div class="admin-submit-box">
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        Đang lưu...
+    </div>
+</div>
 <div id="overlay" class="overlay"></div>
 <%@include file="../commons/admin-header.jsp" %>
 <%@include file="../commons/admin-sidebar.jsp" %>
@@ -88,6 +126,11 @@
                     <div class="card-body p-4">
                         <c:if test="${not empty error}">
                             <div class="alert alert-danger">${fn:escapeXml(error)}</div>
+                        </c:if>
+                        <c:if test="${editMode and productForm.deleted}">
+                            <div class="alert alert-warning">
+                                Sản phẩm này đang ở trạng thái đã xóa. Lưu thay đổi để kích hoạt lại sản phẩm.
+                            </div>
                         </c:if>
 
                         <form method="post" action="admin/products" enctype="multipart/form-data">
@@ -172,7 +215,7 @@
                                 </div>
                                 <input type="file" id="productImageFiles" name="imageFiles" accept="image/*" multiple hidden>
                                 <small class="text-secondary d-block mt-2">
-                                    Bấm dấu + để chọn ảnh từ thiết bị. Ảnh mới sẽ upload lên Cloudinary khi lưu.
+                                    Bấm dấu + để chọn ảnh từ thiết bị. Mỗi ảnh tối đa 10MB, tổng ảnh mới tối đa 60MB.
                                 </small>
                             </div>
 
@@ -191,12 +234,16 @@
     (function () {
         var fileInput = document.getElementById('productImageFiles');
         var imageList = document.getElementById('productImageList');
+        var form = fileInput ? fileInput.closest('form') : null;
+        var overlay = document.getElementById('adminSubmitOverlay');
         if (!fileInput || !imageList) {
             return;
         }
 
         var selectedFiles = new DataTransfer();
         var addButton = imageList.querySelector('.admin-product-image-add');
+        var maxImageSize = 10 * 1024 * 1024;
+        var maxRequestImageSize = 60 * 1024 * 1024;
 
         imageList.addEventListener('click', function (event) {
             var removeButton = event.target.closest('.admin-product-image-remove');
@@ -228,12 +275,61 @@
         });
 
         fileInput.addEventListener('change', function () {
-            Array.from(fileInput.files || []).forEach(function (file) {
+            var incomingFiles = Array.from(fileInput.files || []);
+            if (!validateImageFiles(incomingFiles, selectedFiles.files)) {
+                fileInput.value = '';
+                return;
+            }
+
+            incomingFiles.forEach(function (file) {
                 selectedFiles.items.add(file);
             });
             fileInput.files = selectedFiles.files;
             renderSelectedFiles();
         });
+
+        if (form) {
+            form.addEventListener('submit', function (event) {
+                if (!validateImageFiles([], selectedFiles.files)) {
+                    event.preventDefault();
+                    return;
+                }
+
+                form.querySelectorAll('button[type="submit"]').forEach(function (button) {
+                    button.disabled = true;
+                    button.dataset.originalHtml = button.innerHTML;
+                    button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Đang lưu...';
+                });
+                if (overlay) {
+                    overlay.classList.add('is-active');
+                }
+            });
+        }
+
+        function validateImageFiles(incomingFiles, existingFiles) {
+            var allFiles = Array.from(existingFiles || []).concat(incomingFiles || []);
+            var totalSize = 0;
+
+            for (var i = 0; i < allFiles.length; i++) {
+                var file = allFiles[i];
+                totalSize += file.size || 0;
+                if (!file.type || !file.type.startsWith('image/')) {
+                    alert('Vui lòng chỉ chọn file ảnh.');
+                    return false;
+                }
+                if (file.size > maxImageSize) {
+                    alert('Mỗi ảnh sản phẩm tối đa 10MB. Vui lòng chọn ảnh nhẹ hơn.');
+                    return false;
+                }
+            }
+
+            if (totalSize > maxRequestImageSize) {
+                alert('Tổng dung lượng ảnh mới tối đa 60MB. Vui lòng giảm số lượng hoặc dung lượng ảnh.');
+                return false;
+            }
+
+            return true;
+        }
 
         function removeSelectedFile(index) {
             var nextFiles = new DataTransfer();

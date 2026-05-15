@@ -1,5 +1,6 @@
 package com.daizuongkk.web.repository;
 
+import com.daizuongkk.web.dto.request.AdminOrderSearchRequest;
 import com.daizuongkk.web.model.Order;
 import com.daizuongkk.web.model.OrderItem;
 import com.daizuongkk.web.util.JDBCUtils;
@@ -9,6 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -124,6 +127,123 @@ public class OrderRepository {
         }
 
         return orders;
+    }
+
+    public List<Order> findAdminPage(AdminOrderSearchRequest filters, int page, int size) {
+        int normalizedPage = Math.max(page, 1);
+        int normalizedSize = Math.max(size, 1);
+        int offset = (normalizedPage - 1) * normalizedSize;
+
+        StringBuilder sql = new StringBuilder("SELECT o.* FROM orders o WHERE 1=1");
+        List<Object> params = buildAdminFilterParams(sql, filters);
+        sql.append(buildAdminOrderClause(filters));
+        sql.append(" LIMIT ? OFFSET ?");
+
+        List<Order> orders = new ArrayList<>();
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+            statement.setInt(params.size() + 1, normalizedSize);
+            statement.setInt(params.size() + 2, offset);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Order order = resultSetToOrder(resultSet);
+                    order.setItems(findItemsByOrderId(connection, order.getId()));
+                    orders.add(order);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+
+        return orders;
+    }
+
+    public long countAdmin(AdminOrderSearchRequest filters) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM orders o WHERE 1=1");
+        List<Object> params = buildAdminFilterParams(sql, filters);
+
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getLong(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0L;
+    }
+
+    private List<Object> buildAdminFilterParams(StringBuilder sql, AdminOrderSearchRequest filters) {
+        List<Object> params = new ArrayList<>();
+        if (filters == null) {
+            return params;
+        }
+
+        String keyword = filters.getKeyword() == null ? "" : filters.getKeyword().trim();
+        if (!keyword.isEmpty()) {
+            sql.append("""
+                    AND (CAST(o.id AS CHAR) LIKE ?
+                         OR o.recipient_name LIKE ?
+                         OR o.phone LIKE ?
+                         OR o.address LIKE ?
+                         OR EXISTS (
+                             SELECT 1
+                             FROM order_items oi
+                             JOIN products p ON p.id = oi.product_id
+                             WHERE oi.order_id = o.id AND p.name LIKE ?
+                         ))
+                    """);
+            String like = "%" + keyword + "%";
+            params.add(like);
+            params.add(like);
+            params.add(like);
+            params.add(like);
+            params.add(like);
+        }
+        if (filters.getStatus() != null && !filters.getStatus().isBlank()) {
+            sql.append(" AND o.status = ?");
+            params.add(filters.getStatus().trim().toUpperCase());
+        }
+        if (filters.getMinTotal() != null) {
+            sql.append(" AND o.total_price >= ?");
+            params.add(filters.getMinTotal());
+        }
+        if (filters.getMaxTotal() != null) {
+            sql.append(" AND o.total_price <= ?");
+            params.add(filters.getMaxTotal());
+        }
+        if (filters.getFromDate() != null) {
+            sql.append(" AND o.created_at >= ?");
+            params.add(Timestamp.valueOf(filters.getFromDate().atStartOfDay()));
+        }
+        if (filters.getToDate() != null) {
+            sql.append(" AND o.created_at <= ?");
+            params.add(Timestamp.valueOf(filters.getToDate().atTime(LocalTime.MAX)));
+        }
+        return params;
+    }
+
+    private String buildAdminOrderClause(AdminOrderSearchRequest filters) {
+        String sortBy = filters == null || filters.getSortBy() == null ? "" : filters.getSortBy().trim().toLowerCase();
+
+        return switch (sortBy) {
+            case "created_asc" -> " ORDER BY o.created_at ASC, o.id ASC";
+            case "total_asc" -> " ORDER BY o.total_price ASC, o.created_at DESC, o.id DESC";
+            case "total_desc" -> " ORDER BY o.total_price DESC, o.created_at DESC, o.id DESC";
+            case "status_asc" -> " ORDER BY o.status ASC, o.created_at DESC, o.id DESC";
+            case "created_desc" -> " ORDER BY o.created_at DESC, o.id DESC";
+            default -> " ORDER BY o.created_at DESC, o.id DESC";
+        };
     }
 
     public long countByUserId(Long userId) {

@@ -28,7 +28,7 @@ public class UserRepository   {
             return null;
         }
 
-        String sql = "SELECT * FROM users WHERE username = ? OR email = ?";
+        String sql = "SELECT * FROM users WHERE deleted = 0 AND (username = ? OR email = ?)";
         try (Connection connection = JDBCUtils.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, username.trim());
@@ -60,6 +60,7 @@ public class UserRepository   {
         user.setStatus(resultSet.getString("status"));
         user.setVerified(resultSet.getBoolean("verified"));
         user.setPhoneVerified(resultSet.getBoolean("phone_verified"));
+        user.setDeleted(resultSet.getBoolean("deleted"));
         user.setLastLogin(resultSet.getTimestamp("last_login"));
         user.setCreatedAt(resultSet.getTimestamp("created_at"));
         user.setUpdatedAt(resultSet.getTimestamp("updated_at"));
@@ -75,7 +76,7 @@ public class UserRepository   {
     }
 
     public  boolean create(User user) {
-        String sql = "INSERT INTO users (username, email, password, first_name, last_name, phone, role, status, verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (username, email, password, first_name, last_name, phone, avt_url, role, status, verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String cartSql = "INSERT INTO carts (user_id) VALUES (?)";
 
         try (Connection connection = JDBCUtils.getConnection()) {
@@ -88,9 +89,10 @@ public class UserRepository   {
                 statement.setString(4, user.getFirstName());
                 statement.setString(5, user.getLastName());
                 statement.setString(6, user.getPhone());
-                statement.setString(7, user.getRole().name());
-                statement.setString(8, user.getStatus() == null ? "ACTIVE" : user.getStatus());
-                statement.setBoolean(9, user.getVerified() != null && user.getVerified());
+                statement.setString(7, user.getAvtUrl());
+                statement.setString(8, user.getRole().name());
+                statement.setString(9, user.getStatus() == null ? "ACTIVE" : user.getStatus());
+                statement.setBoolean(10, user.getVerified() != null && user.getVerified());
                 if (statement.executeUpdate() == 0) {
                     connection.rollback();
                     return false;
@@ -141,7 +143,15 @@ public class UserRepository   {
     }
 
     public User findById(Long id) {
-        String sql = "SELECT * FROM users WHERE id = ?";
+        return findById(id, false);
+    }
+
+    public User findByIdIncludingDeleted(Long id) {
+        return findById(id, true);
+    }
+
+    private User findById(Long id, boolean includeDeleted) {
+        String sql = "SELECT * FROM users WHERE id = ?" + (includeDeleted ? "" : " AND deleted = 0");
         if (id == null) {
             return null;
         }
@@ -170,7 +180,8 @@ public class UserRepository   {
 
         StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE 1=1");
         List<Object> params = buildAdminFilterParams(sql, filters);
-        sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?");
+        sql.append(buildAdminOrderClause(filters));
+        sql.append(" LIMIT ? OFFSET ?");
 
         List<User> users = new ArrayList<>();
         try (Connection connection = JDBCUtils.getConnection();
@@ -241,7 +252,25 @@ public class UserRepository   {
             sql.append(" AND verified = ?");
             params.add(filters.getVerified());
         }
+        if ("active".equalsIgnoreCase(filters.getDeleted())) {
+            sql.append(" AND deleted = 0");
+        } else if ("deleted".equalsIgnoreCase(filters.getDeleted())) {
+            sql.append(" AND deleted = 1");
+        }
         return params;
+    }
+
+    private String buildAdminOrderClause(AdminUserSearchRequest filters) {
+        String sortBy = filters == null || filters.getSortBy() == null ? "" : filters.getSortBy().trim().toLowerCase();
+
+        return switch (sortBy) {
+            case "created_asc" -> " ORDER BY created_at ASC, id ASC";
+            case "deleted_asc" -> " ORDER BY deleted ASC, created_at DESC, id DESC";
+            case "deleted_desc" -> " ORDER BY deleted DESC, created_at DESC, id DESC";
+            case "status_asc" -> " ORDER BY status ASC, created_at DESC, id DESC";
+            case "created_desc" -> " ORDER BY created_at DESC, id DESC";
+            default -> " ORDER BY created_at DESC, id DESC";
+        };
     }
 
     public boolean updateStatus(Long id, String status) {
@@ -254,7 +283,7 @@ public class UserRepository   {
             return false;
         }
 
-        String sql = "UPDATE users SET status = ? WHERE id = ?";
+        String sql = "UPDATE users SET status = ? WHERE id = ? AND deleted = 0";
         try (Connection connection = JDBCUtils.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, normalizedStatus);
@@ -272,8 +301,8 @@ public class UserRepository   {
         }
 
         String sql = updatePassword
-                ? "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone = ?, role = ?, status = ?, verified = ?, password = ? WHERE id = ?"
-                : "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone = ?, role = ?, status = ?, verified = ? WHERE id = ?";
+                ? "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone = ?, avt_url = ?, role = ?, status = ?, verified = ?, password = ?, deleted = 0 WHERE id = ?"
+                : "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone = ?, avt_url = ?, role = ?, status = ?, verified = ?, deleted = 0 WHERE id = ?";
 
         try (Connection connection = JDBCUtils.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -282,15 +311,32 @@ public class UserRepository   {
             statement.setString(3, user.getFirstName());
             statement.setString(4, user.getLastName());
             statement.setString(5, user.getPhone());
-            statement.setString(6, user.getRole().name());
-            statement.setString(7, user.getStatus());
-            statement.setBoolean(8, user.getVerified() != null && user.getVerified());
+            statement.setString(6, user.getAvtUrl());
+            statement.setString(7, user.getRole().name());
+            statement.setString(8, user.getStatus());
+            statement.setBoolean(9, user.getVerified() != null && user.getVerified());
             if (updatePassword) {
-                statement.setString(9, user.getPassword());
-                statement.setLong(10, user.getId());
+                statement.setString(10, user.getPassword());
+                statement.setLong(11, user.getId());
             } else {
-                statement.setLong(9, user.getId());
+                statement.setLong(10, user.getId());
             }
+            return statement.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteById(Long id) {
+        if (id == null || id <= 0) {
+            return false;
+        }
+
+        String sql = "UPDATE users SET deleted = 1, status = 'INACTIVE' WHERE id = ? AND deleted = 0";
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, id);
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -305,8 +351,8 @@ public class UserRepository   {
 
         boolean updatePassword = passwordHash != null && !passwordHash.isBlank();
         String sql = updatePassword
-                ? "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone = ?, avt_url = ?, verified = ?, phone_verified = ?, password = ? WHERE id = ?"
-                : "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone = ?, avt_url = ?, verified = ?, phone_verified = ? WHERE id = ?";
+                ? "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone = ?, avt_url = ?, verified = ?, phone_verified = ?, password = ? WHERE id = ? AND deleted = 0"
+                : "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone = ?, avt_url = ?, verified = ?, phone_verified = ? WHERE id = ? AND deleted = 0";
 
         try (Connection connection = JDBCUtils.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -348,7 +394,7 @@ public class UserRepository   {
             return false;
         }
 
-        String sql = "UPDATE users SET email = ?, verified = 1 WHERE id = ?";
+        String sql = "UPDATE users SET email = ?, verified = 1 WHERE id = ? AND deleted = 0";
         try (Connection connection = JDBCUtils.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, email.trim().toLowerCase());
@@ -369,7 +415,7 @@ public class UserRepository   {
             return false;
         }
 
-        String sql = "UPDATE users SET phone = ?, phone_verified = 1 WHERE id = ?";
+        String sql = "UPDATE users SET phone = ?, phone_verified = 1 WHERE id = ? AND deleted = 0";
         try (Connection connection = JDBCUtils.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, phone.trim());
@@ -386,7 +432,7 @@ public class UserRepository   {
             return false;
         }
 
-        String sql = "UPDATE users SET password = ? WHERE id = ?";
+        String sql = "UPDATE users SET password = ? WHERE id = ? AND deleted = 0";
         try (Connection connection = JDBCUtils.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, passwordHash);
@@ -403,7 +449,7 @@ public class UserRepository   {
             return false;
         }
 
-        String sql = "UPDATE users SET " + column + " = ? WHERE id = ?";
+        String sql = "UPDATE users SET " + column + " = ? WHERE id = ? AND deleted = 0";
         try (Connection connection = JDBCUtils.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setBoolean(1, value);
@@ -435,6 +481,9 @@ public class UserRepository   {
                  Statement statement = connection.createStatement()) {
                 if (!columnExists(connection, "users", "phone_verified")) {
                     statement.executeUpdate("ALTER TABLE users ADD COLUMN phone_verified TINYINT(1) DEFAULT 0 AFTER verified");
+                }
+                if (!columnExists(connection, "users", "deleted")) {
+                    statement.executeUpdate("ALTER TABLE users ADD COLUMN deleted TINYINT(1) DEFAULT 0 AFTER updated_at");
                 }
                 statement.executeUpdate("""
                         CREATE TABLE IF NOT EXISTS verification_otps (

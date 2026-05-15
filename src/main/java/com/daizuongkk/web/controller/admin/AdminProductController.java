@@ -7,6 +7,7 @@ import com.daizuongkk.web.model.Category;
 import com.daizuongkk.web.model.Product;
 import com.daizuongkk.web.service.CloudinaryService;
 import com.daizuongkk.web.service.ProductService;
+import com.daizuongkk.web.util.FlashUtils;
 import com.daizuongkk.web.util.PaginationUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -53,7 +54,7 @@ public class AdminProductController extends BaseAdminServlet {
 
 		if ("delete-product".equals(action)) {
 			productService.deleteProduct(parseLong(request.getParameter("id")));
-			response.sendRedirect(request.getContextPath() + "/admin/products");
+			redirectBackToProducts(request, response);
 			return;
 		}
 
@@ -84,7 +85,7 @@ public class AdminProductController extends BaseAdminServlet {
 	private void loadProductForm(HttpServletRequest request) {
 		Long id = parseLong(request.getParameter("id"));
 		if (id != null) {
-			Product product = productService.getProductModelById(id);
+			Product product = productService.getAdminProductModelById(id);
 			request.setAttribute("productForm", product);
 			request.setAttribute("productImages", productService.getProductImages(id));
 			request.setAttribute("editMode", product != null);
@@ -93,6 +94,7 @@ public class AdminProductController extends BaseAdminServlet {
 		}
 		request.setAttribute("categories", Category.getAlls());
 		request.setAttribute("brands", Brand.getAlls());
+		FlashUtils.consume(request, "error", "productForm");
 	}
 
 	private void saveProduct(HttpServletRequest request, HttpServletResponse response)
@@ -115,13 +117,7 @@ public class AdminProductController extends BaseAdminServlet {
 		try {
 			uploadedImageUrls = uploadImageFiles(request);
 		} catch (Exception e) {
-			request.setAttribute("error", "Không thể upload ảnh lên Cloudinary: " + e.getMessage());
-			request.setAttribute("productForm", product);
-			request.setAttribute("productImages", id == null ? List.of() : productService.getProductImages(id));
-			request.setAttribute("editMode", id != null);
-			request.setAttribute("categories", Category.getAlls());
-			request.setAttribute("brands", Brand.getAlls());
-			forward(request, response, "create-product.jsp");
+			redirectProductFormError(request, response, id, product, "Không thể upload ảnh lên Cloudinary: " + e.getMessage());
 			return;
 		}
 
@@ -138,17 +134,19 @@ public class AdminProductController extends BaseAdminServlet {
 		}
 
 		if (!ok) {
-			request.setAttribute("error", "Không thể lưu sản phẩm. Vui lòng kiểm tra dữ liệu nhập.");
-			request.setAttribute("productForm", product);
-			request.setAttribute("productImages", id == null ? List.of() : productService.getProductImages(id));
-			request.setAttribute("editMode", id != null);
-			request.setAttribute("categories", Category.getAlls());
-			request.setAttribute("brands", Brand.getAlls());
-			forward(request, response, "create-product.jsp");
+			redirectProductFormError(request, response, id, product, "Không thể lưu sản phẩm. Vui lòng kiểm tra dữ liệu nhập.");
 			return;
 		}
 
 		response.sendRedirect(request.getContextPath() + "/admin/products");
+	}
+
+	private void redirectProductFormError(HttpServletRequest request, HttpServletResponse response, Long id, Product product, String error)
+			throws IOException {
+		FlashUtils.put(request, "error", error);
+		FlashUtils.put(request, "productForm", product);
+		String formUrl = request.getContextPath() + "/admin/products/form" + (id == null ? "" : "?id=" + id);
+		response.sendRedirect(formUrl);
 	}
 
 	private AdminProductSearchRequest buildFilters(HttpServletRequest request) {
@@ -160,6 +158,8 @@ public class AdminProductController extends BaseAdminServlet {
 				.maxPrice(parseDouble(request.getParameter("maxPrice")))
 				.minQuantity(parseLong(request.getParameter("minQuantity")))
 				.maxQuantity(parseLong(request.getParameter("maxQuantity")))
+				.deleted(normalizeDeletedFilter(request.getParameter("deleted")))
+				.sortBy(normalizeProductSort(request.getParameter("sortBy")))
 				.build();
 	}
 
@@ -171,6 +171,37 @@ public class AdminProductController extends BaseAdminServlet {
 		request.setAttribute("maxPrice", filters.getMaxPrice());
 		request.setAttribute("minQuantity", filters.getMinQuantity());
 		request.setAttribute("maxQuantity", filters.getMaxQuantity());
+		request.setAttribute("selectedDeleted", filters.getDeleted() == null ? "" : filters.getDeleted());
+		request.setAttribute("selectedSortBy", filters.getSortBy() == null ? "created_desc" : filters.getSortBy());
+	}
+
+	private void redirectBackToProducts(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		String returnUrl = request.getParameter("returnUrl");
+		String adminProductsPath = request.getContextPath() + "/admin/products";
+		if (returnUrl != null && returnUrl.startsWith(adminProductsPath)) {
+			response.sendRedirect(returnUrl);
+			return;
+		}
+		response.sendRedirect(adminProductsPath);
+	}
+
+	private String normalizeDeletedFilter(String value) {
+		String normalized = trim(value);
+		if ("active".equalsIgnoreCase(normalized) || "deleted".equalsIgnoreCase(normalized)) {
+			return normalized.toLowerCase();
+		}
+		return "";
+	}
+
+	private String normalizeProductSort(String value) {
+		String normalized = trim(value);
+		if (normalized == null || normalized.isBlank()) {
+			return "created_desc";
+		}
+		return switch (normalized.toLowerCase()) {
+			case "quantity_asc", "quantity_desc", "created_asc", "created_desc", "deleted_asc", "deleted_desc" -> normalized.toLowerCase();
+			default -> "created_desc";
+		};
 	}
 
 	private List<String> uploadImageFiles(HttpServletRequest request) throws IOException, ServletException {

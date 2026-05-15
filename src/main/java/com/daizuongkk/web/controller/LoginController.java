@@ -9,6 +9,7 @@ import com.daizuongkk.web.model.Order;
 import com.daizuongkk.web.service.AuthService;
 import com.daizuongkk.web.service.CartService;
 import com.daizuongkk.web.service.OrderService;
+import com.daizuongkk.web.util.FlashUtils;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -45,6 +46,7 @@ public class LoginController extends HttpServlet {
 			request.setAttribute("submittedUsername", rememberedUsername);
 			request.setAttribute("rememberChecked", true);
 		}
+		FlashUtils.consume(request, "loginError", "submittedUsername", "rememberChecked");
 
 		request.getRequestDispatcher("/views/pages/login.jsp").forward(request, response);
 	}
@@ -59,20 +61,16 @@ public class LoginController extends HttpServlet {
 		boolean rememberMe = request.getParameter("remember") != null;
 
 		if (username == null || username.trim().isEmpty() || password == null || password.isEmpty()) {
-			request.setAttribute("loginError", "Vui lòng nhập tên đăng nhập & mật khẩu.");
-			request.setAttribute("submittedUsername", username == null ? "" : username.trim());
-			request.setAttribute("rememberChecked", rememberMe);
-			request.getRequestDispatcher("/views/pages/login.jsp").forward(request, response);
+			flashLoginError(request, "Vui lòng nhập tên đăng nhập & mật khẩu.", username, rememberMe);
+			response.sendRedirect("login");
 			return;
 		}
 
 		UserResponse res = authService.login(username, password);
 
 		if (res == null) {
-			request.setAttribute("loginError", "Tên đăng nhập hoặc mật khẩu không hợp lệ.");
-			request.setAttribute("submittedUsername", username.trim());
-			request.setAttribute("rememberChecked", rememberMe);
-			request.getRequestDispatcher("/views/pages/login.jsp").forward(request, response);
+			flashLoginError(request, "Tên đăng nhập hoặc mật khẩu không hợp lệ.", username, rememberMe);
+			response.sendRedirect("login");
 			return;
 		}
 
@@ -127,6 +125,12 @@ public class LoginController extends HttpServlet {
 		}
 
 		response.addCookie(cookie);
+	}
+
+	private void flashLoginError(HttpServletRequest request, String message, String username, boolean rememberMe) {
+		FlashUtils.put(request, "loginError", message);
+		FlashUtils.put(request, "submittedUsername", username == null ? "" : username.trim());
+		FlashUtils.put(request, "rememberChecked", rememberMe);
 	}
 
 }

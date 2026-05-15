@@ -10,6 +10,12 @@
     <link type="text/css" rel="stylesheet" href="assets/css/profile.css"/>
 </head>
 <body id="profile-page">
+<%-- <div id="profileSubmitOverlay" class="profile-submit-overlay">
+    <div class="profile-submit-box">
+        <span class="profile-spinner" aria-hidden="true"></span>
+        Đang lưu...
+    </div>
+</div> --%>
 <%@ include file="../commons/header.jsp" %>
 <jsp:include page="../commons/navigation.jsp"/>
 
@@ -312,6 +318,38 @@
 <%@ include file="../commons/script.jsp" %>
 <script>
     (function () {
+        var maxAvatarSize = 10 * 1024 * 1024;
+
+        function validateAvatarFile(file) {
+            if (!file) {
+                return true;
+            }
+            if (!file.type || !file.type.startsWith('image/')) {
+                window.alert('Vui lòng chọn một file ảnh hợp lệ.');
+                return false;
+            }
+            if (file.size > maxAvatarSize) {
+                window.alert('Ảnh đại diện tối đa 10MB. Vui lòng chọn ảnh nhẹ hơn.');
+                return false;
+            }
+            return true;
+        }
+
+        function lockForm(form, text) {
+            if (!form) {
+                return;
+            }
+            form.querySelectorAll('button[type="submit"]').forEach(function (button) {
+                button.disabled = true;
+                button.dataset.originalHtml = button.innerHTML;
+                button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>' + (text || 'Đang lưu');
+            });
+            var overlay = document.getElementById('profileSubmitOverlay');
+            if (overlay) {
+                overlay.classList.add('is-active');
+            }
+        }
+
         var verificationConfig = {
             EMAIL: {
                 sendFormId: 'sendEmailOtpForm',
@@ -539,6 +577,7 @@
         var input = document.getElementById('avatarFile');
         var preview = document.getElementById('avatarPreview');
         var placeholder = document.getElementById('avatarPlaceholder');
+        var profileForm = input ? input.closest('form') : null;
 
         if (!trigger || !input || !preview) {
             return;
@@ -554,8 +593,7 @@
                 return;
             }
 
-            if (!file.type || !file.type.startsWith('image/')) {
-                window.alert('Vui lòng chọn một file ảnh hợp lệ.');
+            if (!validateAvatarFile(file)) {
                 input.value = '';
                 return;
             }
@@ -566,6 +604,18 @@
                 placeholder.classList.add('hidden');
             }
         });
+
+        if (profileForm) {
+            profileForm.addEventListener('submit', function (event) {
+                var file = input.files && input.files[0];
+                if (!validateAvatarFile(file)) {
+                    input.value = '';
+                    event.preventDefault();
+                    return;
+                }
+                lockForm(profileForm, 'Đang lưu');
+            });
+        }
     })();
 </script>
 </body>

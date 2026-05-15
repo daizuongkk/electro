@@ -27,6 +27,19 @@
 <div id="overlay" class="overlay"></div>
 <%@include file="../commons/admin-header.jsp" %>
 <%@include file="../commons/admin-sidebar.jsp" %>
+<c:url var="currentProductsUrl" value="/admin/products">
+    <c:param name="p" value="${currentPage}"/>
+    <c:param name="size" value="${pageSize}"/>
+    <c:param name="keyword" value="${keyword}"/>
+    <c:param name="category" value="${selectedCategory}"/>
+    <c:param name="brand" value="${selectedBrand}"/>
+    <c:param name="minPrice" value="${minPrice}"/>
+    <c:param name="maxPrice" value="${maxPrice}"/>
+    <c:param name="minQuantity" value="${minQuantity}"/>
+    <c:param name="maxQuantity" value="${maxQuantity}"/>
+    <c:param name="deleted" value="${selectedDeleted}"/>
+    <c:param name="sortBy" value="${selectedSortBy}"/>
+</c:url>
 
 <main id="content" class="content py-10">
     <div class="container-fluid">
@@ -85,6 +98,25 @@
                             <label class="form-label small">Tồn đến</label>
                             <input type="number" name="maxQuantity" class="form-control" value="${maxQuantity}" style="width: 110px;">
                         </div>
+                        <div>
+                            <label class="form-label small">Trạng thái</label>
+                            <select name="deleted" class="form-select" style="width: 150px;">
+                                <option value="" ${empty selectedDeleted ? 'selected' : ''}>Tất cả</option>
+                                <option value="active" ${selectedDeleted == 'active' ? 'selected' : ''}>Đang bán</option>
+                                <option value="deleted" ${selectedDeleted == 'deleted' ? 'selected' : ''}>Đã xóa</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label small">Sắp xếp</label>
+                            <select name="sortBy" class="form-select" style="width: 190px;">
+                                <option value="created_desc" ${selectedSortBy == 'created_desc' ? 'selected' : ''}>Mới nhất</option>
+                                <option value="created_asc" ${selectedSortBy == 'created_asc' ? 'selected' : ''}>Cũ nhất</option>
+                                <option value="quantity_asc" ${selectedSortBy == 'quantity_asc' ? 'selected' : ''}>Tồn kho thấp trước</option>
+                                <option value="quantity_desc" ${selectedSortBy == 'quantity_desc' ? 'selected' : ''}>Tồn kho cao trước</option>
+                                <option value="deleted_asc" ${selectedSortBy == 'deleted_asc' ? 'selected' : ''}>Đang bán trước</option>
+                                <option value="deleted_desc" ${selectedSortBy == 'deleted_desc' ? 'selected' : ''}>Đã xóa trước</option>
+                            </select>
+                        </div>
                         <select name="size" class="form-select" style="width: 110px;">
                             <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
                             <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
@@ -108,6 +140,7 @@
                             <th>Giá</th>
                             <th>Khuyến mãi</th>
                             <th>Tồn kho</th>
+                            <th>Trạng thái</th>
                             <th>Ngày tạo</th>
                             <th>Thao tác</th>
                         </tr>
@@ -116,7 +149,7 @@
                         <c:forEach var="product" items="${products}">
                             <tr class="align-middle">
                                 <td>
-                                    <a href="products?id=${product.id}" class="d-flex align-items-center">
+                                    <a href="admin/products/form?id=${product.id}" class="d-flex align-items-center">
                                         <img src="${not empty product.imageUrl ? product.imageUrl[0] : fallbackProductImage}"
                                              alt="${fn:escapeXml(product.name)}" class="admin-product-thumb"/>
                                         <span class="ms-3">${product.name}</span>
@@ -132,33 +165,41 @@
                                             ${product.quantity}
                                     </span>
                                 </td>
+                                <td>
+                                    <span class="badge ${product.deleted ? 'bg-danger' : 'bg-success'}">
+                                        ${product.deleted ? 'Đã xóa' : 'Đang bán'}
+                                    </span>
+                                </td>
                                 <td><fmt:formatDate value="${product.createdAt}" pattern="dd/MM/yyyy"/></td>
                                 <td>
                                     <a href="admin/products/form?id=${product.id}" class="me-2">
                                         <i class="ti ti-edit"></i>
                                     </a>
-                                    <form method="post" action="admin/products" class="d-inline"
-                                          data-confirm-message="Xóa sản phẩm này?"
-                                          data-confirm-text="Xóa">
-                                        <input type="hidden" name="action" value="delete-product">
-                                        <input type="hidden" name="id" value="${product.id}">
-                                        <button type="submit" class="btn btn-link link-danger p-0">
-                                            <i class="ti ti-trash"></i>
-                                        </button>
-                                    </form>
+                                    <c:if test="${not product.deleted}">
+                                        <form method="post" action="admin/products" class="d-inline"
+                                              data-confirm-message="Xóa sản phẩm này?"
+                                              data-confirm-text="Xóa">
+                                            <input type="hidden" name="action" value="delete-product">
+                                            <input type="hidden" name="id" value="${product.id}">
+                                            <input type="hidden" name="returnUrl" value="${currentProductsUrl}">
+                                            <button type="submit" class="btn btn-link link-danger p-0">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </form>
+                                    </c:if>
                                 </td>
                             </tr>
                         </c:forEach>
                         <c:if test="${empty products}">
                             <tr>
-                                <td colspan="9" class="text-center py-5 text-secondary">Không có sản phẩm phù hợp.</td>
+                                <td colspan="10" class="text-center py-5 text-secondary">Không có sản phẩm phù hợp.</td>
                             </tr>
                         </c:if>
                         </tbody>
                         <tfoot>
                         <tr>
                             <td class="border-bottom-0">Trang ${currentPage}/${totalPages}</td>
-                            <td colspan="8" class="border-bottom-0">
+                            <td colspan="9" class="border-bottom-0">
                                 <nav aria-label="Page navigation" class="d-flex justify-content-end">
                                     <ul class="pagination mb-0">
                                         <c:url var="prevUrl" value="/admin/products">
@@ -171,6 +212,8 @@
                                             <c:param name="maxPrice" value="${maxPrice}"/>
                                             <c:param name="minQuantity" value="${minQuantity}"/>
                                             <c:param name="maxQuantity" value="${maxQuantity}"/>
+                                            <c:param name="deleted" value="${selectedDeleted}"/>
+                                            <c:param name="sortBy" value="${selectedSortBy}"/>
                                         </c:url>
                                         <li class="page-item ${currentPage <= 1 ? 'disabled' : ''}">
                                             <a class="page-link" href="${prevUrl}">Previous</a>
@@ -199,6 +242,8 @@
                                                 <c:param name="maxPrice" value="${maxPrice}"/>
                                                 <c:param name="minQuantity" value="${minQuantity}"/>
                                                 <c:param name="maxQuantity" value="${maxQuantity}"/>
+                                                <c:param name="deleted" value="${selectedDeleted}"/>
+                                                <c:param name="sortBy" value="${selectedSortBy}"/>
                                             </c:url>
                                             <li class="page-item"><a class="page-link" href="${firstUrl}">1</a></li>
                                             <li class="page-item disabled"><span class="page-link">...</span></li>
@@ -214,6 +259,8 @@
                                                 <c:param name="maxPrice" value="${maxPrice}"/>
                                                 <c:param name="minQuantity" value="${minQuantity}"/>
                                                 <c:param name="maxQuantity" value="${maxQuantity}"/>
+                                                <c:param name="deleted" value="${selectedDeleted}"/>
+                                                <c:param name="sortBy" value="${selectedSortBy}"/>
                                             </c:url>
                                             <li class="page-item ${pageNum == currentPage ? 'active' : ''}">
                                                 <a class="page-link" href="${pageUrl}">${pageNum}</a>
@@ -231,6 +278,8 @@
                                                 <c:param name="maxPrice" value="${maxPrice}"/>
                                                 <c:param name="minQuantity" value="${minQuantity}"/>
                                                 <c:param name="maxQuantity" value="${maxQuantity}"/>
+                                                <c:param name="deleted" value="${selectedDeleted}"/>
+                                                <c:param name="sortBy" value="${selectedSortBy}"/>
                                             </c:url>
                                             <li class="page-item"><a class="page-link" href="${lastUrl}">${totalPages}</a></li>
                                         </c:if>
@@ -244,6 +293,8 @@
                                             <c:param name="maxPrice" value="${maxPrice}"/>
                                             <c:param name="minQuantity" value="${minQuantity}"/>
                                             <c:param name="maxQuantity" value="${maxQuantity}"/>
+                                            <c:param name="deleted" value="${selectedDeleted}"/>
+                                            <c:param name="sortBy" value="${selectedSortBy}"/>
                                         </c:url>
                                         <li class="page-item ${currentPage >= totalPages ? 'disabled' : ''}">
                                             <a class="page-link" href="${nextUrl}">Next</a>

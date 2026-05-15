@@ -23,7 +23,7 @@ public class CartController extends HttpServlet {
 	}
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+		response.sendRedirect(request.getContextPath() + "/cart");
 	}
 
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

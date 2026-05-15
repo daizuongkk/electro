@@ -1,21 +1,28 @@
 package com.daizuongkk.web.controller.admin;
 
 import com.daizuongkk.web.dto.request.AdminUserSearchRequest;
+import com.daizuongkk.web.dto.response.UserResponse;
 import com.daizuongkk.web.model.Role;
 import com.daizuongkk.web.model.User;
+import com.daizuongkk.web.service.CloudinaryService;
 import com.daizuongkk.web.service.UserService;
+import com.daizuongkk.web.util.FlashUtils;
 import com.daizuongkk.web.util.PaginationUtils;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 
 import java.io.IOException;
 
 @WebServlet(name = "AdminUserController", value = {"/admin/users", "/admin/users/form"})
+@MultipartConfig(fileSizeThreshold = 1024 * 1024, maxFileSize = 10 * 1024 * 1024, maxRequestSize = 12 * 1024 * 1024)
 public class AdminUserController extends BaseAdminServlet {
 
     private final UserService userService = new UserService();
+    private CloudinaryService cloudinaryService;
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -40,6 +47,11 @@ public class AdminUserController extends BaseAdminServlet {
         }
 
         request.setCharacterEncoding("UTF-8");
+        if ("delete-user".equals(request.getParameter("action"))) {
+            deleteUser(request, response);
+            return;
+        }
+
         saveUser(request, response);
     }
 
@@ -65,17 +77,44 @@ public class AdminUserController extends BaseAdminServlet {
     private void loadUserForm(HttpServletRequest request) {
         Long id = parseLong(request.getParameter("id"));
         if (id != null) {
-            User user = userService.getUserModelById(id);
+            User user = userService.getAdminUserModelById(id);
             request.setAttribute("userForm", user);
             request.setAttribute("editMode", user != null);
         } else {
             request.setAttribute("editMode", false);
         }
         request.setAttribute("roles", Role.values());
+        FlashUtils.consume(request, "error", "userForm");
     }
 
     private void saveUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Long id = parseLong(request.getParameter("id"));
+        User currentUser = id == null ? null : userService.getAdminUserModelById(id);
+        String avatarUrl = currentUser == null ? trim(request.getParameter("avatarUrl")) : currentUser.getAvtUrl();
+        Part avatarPart = request.getPart("avatarFile");
+        User submittedUser = buildSubmittedUser(id, request, avatarUrl);
+
+        if (hasUpload(avatarPart) && !isImageUpload(avatarPart)) {
+            forwardUserFormError(request, response, submittedUser, id != null, "Vui lòng chọn một file ảnh hợp lệ.");
+            return;
+        }
+
+        if (isImageUpload(avatarPart)) {
+            try {
+                if (cloudinaryService == null) {
+                    cloudinaryService = new CloudinaryService();
+                }
+                String uploadedAvatarUrl = cloudinaryService.uploadImage(avatarPart, "electro/avatars");
+                if (uploadedAvatarUrl != null && !uploadedAvatarUrl.isBlank()) {
+                    avatarUrl = uploadedAvatarUrl;
+                }
+            } catch (IOException | RuntimeException e) {
+                forwardUserFormError(request, response, submittedUser, id != null,
+                        "Không thể upload ảnh đại diện. Vui lòng thử ảnh khác.");
+                return;
+            }
+        }
+
         User user = User.builder()
                 .id(id)
                 .username(trim(request.getParameter("username")))
@@ -83,6 +122,7 @@ public class AdminUserController extends BaseAdminServlet {
                 .firstName(trim(request.getParameter("firstName")))
                 .lastName(trim(request.getParameter("lastName")))
                 .phone(trim(request.getParameter("phone")))
+                .avtUrl(avatarUrl)
                 .role(parseRole(request.getParameter("role")))
                 .status(parseStatus(request.getParameter("status")))
                 .verified("true".equals(request.getParameter("verified")))
@@ -94,15 +134,63 @@ public class AdminUserController extends BaseAdminServlet {
                 : userService.updateUser(user, password);
 
         if (!ok) {
-            request.setAttribute("error", "Không thể lưu người dùng. Kiểm tra username/email/password và thử lại.");
-            request.setAttribute("userForm", user);
-            request.setAttribute("editMode", id != null);
-            request.setAttribute("roles", Role.values());
-            forward(request, response, "user-form.jsp");
+            forwardUserFormError(request, response, user, id != null,
+                    "Không thể lưu người dùng. Kiểm tra username/email/password và thử lại.");
             return;
         }
 
+        UserResponse account = (UserResponse) request.getSession().getAttribute("account");
+        if (account != null && id != null && id.equals(account.getId())) {
+            User updatedUser = userService.getAdminUserModelById(id);
+            request.getSession().setAttribute("account", userService.toUserResponse(updatedUser));
+        }
+
         response.sendRedirect(request.getContextPath() + "/admin/users");
+    }
+
+    private User buildSubmittedUser(Long id, HttpServletRequest request, String avatarUrl) {
+        return User.builder()
+                .id(id)
+                .username(trim(request.getParameter("username")))
+                .email(trim(request.getParameter("email")))
+                .firstName(trim(request.getParameter("firstName")))
+                .lastName(trim(request.getParameter("lastName")))
+                .phone(trim(request.getParameter("phone")))
+                .avtUrl(avatarUrl)
+                .role(parseRole(request.getParameter("role")))
+                .status(parseStatus(request.getParameter("status")))
+                .verified("true".equals(request.getParameter("verified")))
+                .deleted(false)
+                .build();
+    }
+
+    private void forwardUserFormError(HttpServletRequest request, HttpServletResponse response, User user, boolean editMode, String error)
+            throws ServletException, IOException {
+        FlashUtils.put(request, "error", error);
+        FlashUtils.put(request, "userForm", user);
+        String formUrl = request.getContextPath() + "/admin/users/form" + (editMode && user.getId() != null ? "?id=" + user.getId() : "");
+        response.sendRedirect(formUrl);
+    }
+
+    private boolean hasUpload(Part part) {
+        return part != null && part.getSize() > 0;
+    }
+
+    private boolean isImageUpload(Part part) {
+        String contentType = part == null ? null : part.getContentType();
+        return hasUpload(part) && contentType != null && contentType.toLowerCase().startsWith("image/");
+    }
+
+    private void deleteUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Long id = parseLong(request.getParameter("id"));
+        UserResponse account = (UserResponse) request.getSession().getAttribute("account");
+        if (account == null || id == null || id.equals(account.getId())) {
+            redirectBackToUsers(request, response);
+            return;
+        }
+
+        userService.deleteUser(id);
+        redirectBackToUsers(request, response);
     }
 
     private AdminUserSearchRequest buildFilters(HttpServletRequest request) {
@@ -111,6 +199,8 @@ public class AdminUserController extends BaseAdminServlet {
                 .role(parseRoleNullable(request.getParameter("role")))
                 .status(trim(request.getParameter("status")))
                 .verified(parseVerified(request.getParameter("verified")))
+                .deleted(normalizeDeletedFilter(request.getParameter("deleted")))
+                .sortBy(normalizeUserSort(request.getParameter("sortBy")))
                 .build();
     }
 
@@ -119,7 +209,38 @@ public class AdminUserController extends BaseAdminServlet {
         request.setAttribute("selectedRole", filters.getRole() == null ? "" : filters.getRole().name());
         request.setAttribute("selectedStatus", filters.getStatus() == null ? "" : filters.getStatus());
         request.setAttribute("selectedVerified", filters.getVerified() == null ? "" : filters.getVerified().toString());
+        request.setAttribute("selectedDeleted", filters.getDeleted() == null ? "" : filters.getDeleted());
+        request.setAttribute("selectedSortBy", filters.getSortBy() == null ? "created_desc" : filters.getSortBy());
         request.setAttribute("roles", Role.values());
+    }
+
+    private void redirectBackToUsers(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String returnUrl = request.getParameter("returnUrl");
+        String adminUsersPath = request.getContextPath() + "/admin/users";
+        if (returnUrl != null && returnUrl.startsWith(adminUsersPath)) {
+            response.sendRedirect(returnUrl);
+            return;
+        }
+        response.sendRedirect(adminUsersPath);
+    }
+
+    private String normalizeDeletedFilter(String value) {
+        String normalized = trim(value);
+        if ("active".equalsIgnoreCase(normalized) || "deleted".equalsIgnoreCase(normalized)) {
+            return normalized.toLowerCase();
+        }
+        return "";
+    }
+
+    private String normalizeUserSort(String value) {
+        String normalized = trim(value);
+        if (normalized == null || normalized.isBlank()) {
+            return "created_desc";
+        }
+        return switch (normalized.toLowerCase()) {
+            case "created_asc", "created_desc", "deleted_asc", "deleted_desc", "status_asc" -> normalized.toLowerCase();
+            default -> "created_desc";
+        };
     }
 
     private Role parseRole(String value) {

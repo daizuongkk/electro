@@ -1,18 +1,20 @@
 package com.daizuongkk.web.dto.request;
 
-import com.daizuongkk.web.model.Role;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @Builder
-public class AdminUserSearchRequest {
+public class AdminOrderSearchRequest {
     private String keyword;
-    private Role role;
     private String status;
-    private Boolean verified;
-    private String deleted;
+    private Double minTotal;
+    private Double maxTotal;
+    private LocalDate fromDate;
+    private LocalDate toDate;
     private String sortBy;
 }

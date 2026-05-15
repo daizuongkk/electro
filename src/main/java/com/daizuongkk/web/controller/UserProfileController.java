@@ -6,6 +6,7 @@ import com.daizuongkk.web.model.VerificationChannel;
 import com.daizuongkk.web.service.CloudinaryService;
 import com.daizuongkk.web.service.UserService;
 import com.daizuongkk.web.service.VerificationService;
+import com.daizuongkk.web.util.FlashUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -22,8 +23,8 @@ import java.util.Map;
 @WebServlet(name = "UserProfile", value = "/profile")
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024,
-        maxFileSize = 5 * 1024 * 1024,
-        maxRequestSize = 8 * 1024 * 1024
+        maxFileSize = 10 * 1024 * 1024,
+        maxRequestSize = 12 * 1024 * 1024
 )
 public class UserProfileController extends HttpServlet {
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -52,6 +53,12 @@ public class UserProfileController extends HttpServlet {
         }
 
         request.setAttribute("profileUser", user);
+        FlashUtils.consume(request,
+                "profileUser",
+                "profileSuccess",
+                "profileError",
+                "activeVerificationChannel",
+                "verificationTarget");
         request.getRequestDispatcher("/views/pages/profile.jsp").forward(request, response);
     }
 
@@ -98,21 +105,20 @@ public class UserProfileController extends HttpServlet {
             );
 
             if (status == UserService.UpdateProfileStatus.SUCCESS) {
-                request.setAttribute("profileSuccess", "Mật khẩu đã được cập nhật.");
+                FlashUtils.put(request, "profileSuccess", "Mật khẩu đã được cập nhật.");
             } else {
-                request.setAttribute("profileError", getErrorMessage(status));
+                FlashUtils.put(request, "profileError", getErrorMessage(status));
             }
-            request.setAttribute("profileUser", currentUser);
-            request.getRequestDispatcher("/views/pages/profile.jsp").forward(request, response);
+            response.sendRedirect(request.getContextPath() + "/profile");
             return;
         }
 
         String avatarUrl = currentUser.getAvtUrl();
         Part avatarPart = request.getPart("avatarFile");
         if (hasUpload(avatarPart) && !isImageUpload(avatarPart)) {
-            request.setAttribute("profileError", "Vui lòng chọn một file ảnh hợp lệ.");
-            request.setAttribute("profileUser", buildSubmittedUser(account.getId(), request, currentUser.getAvtUrl()));
-            request.getRequestDispatcher("/views/pages/profile.jsp").forward(request, response);
+            flashProfileError(request, "Vui lòng chọn một file ảnh hợp lệ.",
+                    buildSubmittedUser(account.getId(), request, currentUser.getAvtUrl()));
+            response.sendRedirect(request.getContextPath() + "/profile");
             return;
         }
 
@@ -126,9 +132,9 @@ public class UserProfileController extends HttpServlet {
                     avatarUrl = uploadedAvatarUrl;
                 }
             } catch (IOException | RuntimeException e) {
-                request.setAttribute("profileError", "Không thể upload ảnh đại diện. Vui lòng thử ảnh khác.");
-                request.setAttribute("profileUser", buildSubmittedUser(account.getId(), request, currentUser.getAvtUrl()));
-                request.getRequestDispatcher("/views/pages/profile.jsp").forward(request, response);
+                flashProfileError(request, "Không thể upload ảnh đại diện. Vui lòng thử ảnh khác.",
+                        buildSubmittedUser(account.getId(), request, currentUser.getAvtUrl()));
+                response.sendRedirect(request.getContextPath() + "/profile");
                 return;
             }
         }
@@ -146,15 +152,13 @@ public class UserProfileController extends HttpServlet {
         if (status == UserService.UpdateProfileStatus.SUCCESS) {
             User updatedUser = userService.getUserModelById(account.getId());
             request.getSession().setAttribute("account", userService.toUserResponse(updatedUser));
-            request.setAttribute("profileSuccess", "Thông tin cá nhân đã được cập nhật.");
-            request.setAttribute("profileUser", updatedUser);
-            request.getRequestDispatcher("/views/pages/profile.jsp").forward(request, response);
+            FlashUtils.put(request, "profileSuccess", "Thông tin cá nhân đã được cập nhật.");
+            response.sendRedirect(request.getContextPath() + "/profile");
             return;
         }
 
-        request.setAttribute("profileError", getErrorMessage(status));
-        request.setAttribute("profileUser", buildSubmittedUser(account.getId(), request, avatarUrl));
-        request.getRequestDispatcher("/views/pages/profile.jsp").forward(request, response);
+        flashProfileError(request, getErrorMessage(status), buildSubmittedUser(account.getId(), request, avatarUrl));
+        response.sendRedirect(request.getContextPath() + "/profile");
     }
 
     private void handleSendVerificationOtp(HttpServletRequest request,
@@ -178,20 +182,20 @@ public class UserProfileController extends HttpServlet {
                 ));
                 return;
             }
-            request.setAttribute("profileSuccess", message);
-            request.setAttribute("activeVerificationChannel", channel.name());
-            request.setAttribute("verificationTarget", targetValue);
+            FlashUtils.put(request, "profileSuccess", message);
+            FlashUtils.put(request, "activeVerificationChannel", channel.name());
+            FlashUtils.put(request, "verificationTarget", targetValue);
         } else {
             String message = getVerificationMessage(status, channel);
             if (isAjaxRequest(request)) {
                 writeJson(response, Map.of("success", false, "message", message));
                 return;
             }
-            request.setAttribute("profileError", message);
+            FlashUtils.put(request, "profileError", message);
         }
 
-        request.setAttribute("profileUser", buildVerificationUser(currentUser, channel, targetValue));
-        request.getRequestDispatcher("/views/pages/profile.jsp").forward(request, response);
+        FlashUtils.put(request, "profileUser", buildVerificationUser(currentUser, channel, targetValue));
+        response.sendRedirect(request.getContextPath() + "/profile");
     }
 
     private void handleVerifyOtp(HttpServletRequest request,
@@ -222,8 +226,8 @@ public class UserProfileController extends HttpServlet {
                 ));
                 return;
             }
-            request.setAttribute("profileSuccess", message);
-            request.setAttribute("profileUser", updatedUser);
+            FlashUtils.put(request, "profileSuccess", message);
+            FlashUtils.put(request, "profileUser", updatedUser);
         } else {
             String message = getVerificationMessage(status, channel);
             if (isAjaxRequest(request)) {
@@ -235,13 +239,13 @@ public class UserProfileController extends HttpServlet {
                 ));
                 return;
             }
-            request.setAttribute("profileError", message);
-            request.setAttribute("activeVerificationChannel", channel == null ? "" : channel.name());
-            request.setAttribute("verificationTarget", targetValue);
-            request.setAttribute("profileUser", buildVerificationUser(currentUser, channel, targetValue));
+            FlashUtils.put(request, "profileError", message);
+            FlashUtils.put(request, "activeVerificationChannel", channel == null ? "" : channel.name());
+            FlashUtils.put(request, "verificationTarget", targetValue);
+            FlashUtils.put(request, "profileUser", buildVerificationUser(currentUser, channel, targetValue));
         }
 
-        request.getRequestDispatcher("/views/pages/profile.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/profile");
     }
 
     private UserResponse getAuthenticatedAccount(HttpServletRequest request) {
@@ -259,6 +263,11 @@ public class UserProfileController extends HttpServlet {
                 .phone(trim(request.getParameter("phone")))
                 .avtUrl(avatarUrl)
                 .build();
+    }
+
+    private void flashProfileError(HttpServletRequest request, String message, User profileUser) {
+        FlashUtils.put(request, "profileError", message);
+        FlashUtils.put(request, "profileUser", profileUser);
     }
 
     private String getErrorMessage(UserService.UpdateProfileStatus status) {

@@ -97,6 +97,10 @@ public class ProductService {
         return productRepository.findById(id);
     }
 
+    public Product getAdminProductModelById(Long id) {
+        return productRepository.findByIdIncludingDeleted(id);
+    }
+
     public List<String> getProductImageUrls(Long productId) {
         return productImgRepository.findUrlsByProductId(productId);
     }
@@ -155,9 +159,14 @@ public class ProductService {
 
 
     private ProductResponse productToProductResponse(Product product) {
+        if (product == null) {
+            return null;
+        }
+
         ProductResponse productResponse = this.modelMapper.map(product, ProductResponse.class);
         List<String> imageUrls = productImgRepository.findUrlsByProductId(product.getId());
-      productResponse.setCategory(Category.getNameByCode(product.getCategory()));
+        productResponse.setCategory(Category.getNameByCode(product.getCategory()));
+        productResponse.setDeleted(product.getDeleted());
 
         productResponse.setImageUrl(imageUrls);
 

@@ -16,9 +16,14 @@ import com.daizuongkk.web.util.JDBCUtils;
 
 public class ProductRepository {
 	private static final String SQL = "SELECT p.* FROM products p ";
+	private static volatile boolean softDeleteSchemaReady = false;
+
+	public ProductRepository() {
+		ensureSoftDeleteColumn();
+	}
 
 	public List<Product> findAll() {
-		String sql = SQL + " ORDER BY p.created_at DESC";
+		String sql = SQL + " WHERE p.deleted = 0 ORDER BY p.created_at DESC";
 		return findManyBySql(sql, statement -> {
 		});
 	}
@@ -28,7 +33,7 @@ public class ProductRepository {
 		int normalizedSize = Math.max(size, 1);
 		int offset = (normalizedPage - 1) * normalizedSize;
 
-		String sql = SQL + " ORDER BY RAND() LIMIT ? OFFSET ?";
+		String sql = SQL + " WHERE p.deleted = 0 ORDER BY RAND() LIMIT ? OFFSET ?";
 		return findManyBySql(sql, statement -> {
 
 			statement.setInt(1, normalizedSize);
@@ -45,7 +50,7 @@ public class ProductRepository {
 		int normalizedSize = Math.max(size, 1);
 		int offset = (normalizedPage - 1) * normalizedSize;
 
-		StringBuilder sql = new StringBuilder(SQL + " WHERE 1=1");
+		StringBuilder sql = new StringBuilder(SQL + " WHERE p.deleted = 0");
 		List<Object> params = buildFilterParams(sql, filters);
 
 		// Add sorting
@@ -63,11 +68,19 @@ public class ProductRepository {
 	}
 
 	public Product findById(Long id) {
+		return findById(id, false);
+	}
+
+	public Product findByIdIncludingDeleted(Long id) {
+		return findById(id, true);
+	}
+
+	private Product findById(Long id, boolean includeDeleted) {
 		if (id == null) {
 			return null;
 		}
 
-		String sql = SQL + " WHERE p.id = ? LIMIT 1";
+		String sql = SQL + " WHERE p.id = ?" + (includeDeleted ? "" : " AND p.deleted = 0") + " LIMIT 1";
 		try (Connection connection = JDBCUtils.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setLong(1, id);
@@ -87,7 +100,7 @@ public class ProductRepository {
 			return Collections.emptyList();
 		}
 
-		String sql = SQL + " WHERE p.category = ? ORDER BY p.created_at DESC";
+		String sql = SQL + " WHERE p.category = ? AND p.deleted = 0 ORDER BY p.created_at DESC";
 		return findManyBySql(sql, statement -> statement.setString(1, category.trim()));
 	}
 
@@ -96,13 +109,13 @@ public class ProductRepository {
 			return Collections.emptyList();
 		}
 
-		String sql = SQL + " WHERE p.name LIKE ? ORDER BY p.created_at DESC";
+		String sql = SQL + " WHERE p.name LIKE ? AND p.deleted = 0 ORDER BY p.created_at DESC";
 		return findManyBySql(sql, statement -> statement.setString(1, "%" + keyword.trim() + "%"));
 	}
 
 	public List<Product> findLatest(int limit) {
 		int normalizedLimit = Math.max(limit, 1);
-		String sql = "SELECT * FROM  products ORDER BY created_at DESC LIMIT ?";
+		String sql = "SELECT * FROM products WHERE deleted = 0 ORDER BY created_at DESC LIMIT ?";
 		return findManyBySql(sql, statement -> statement.setInt(1, normalizedLimit));
 	}
 
@@ -113,7 +126,8 @@ public class ProductRepository {
 
 		StringBuilder sql = new StringBuilder(SQL + " WHERE 1=1");
 		List<Object> params = buildAdminFilterParams(sql, filters);
-		sql.append(" ORDER BY p.created_at DESC LIMIT ? OFFSET ?");
+		sql.append(buildAdminOrderClause(filters));
+		sql.append(" LIMIT ? OFFSET ?");
 
 		return findManyBySql(sql.toString(), statement -> {
 			for (int i = 0; i < params.size(); i++) {
@@ -183,12 +197,31 @@ public class ProductRepository {
 			sql.append(" AND p.quantity <= ?");
 			params.add(filters.getMaxQuantity());
 		}
+		if ("active".equalsIgnoreCase(filters.getDeleted())) {
+			sql.append(" AND p.deleted = 0");
+		} else if ("deleted".equalsIgnoreCase(filters.getDeleted())) {
+			sql.append(" AND p.deleted = 1");
+		}
 		return params;
+	}
+
+	private String buildAdminOrderClause(AdminProductSearchRequest filters) {
+		String sortBy = filters == null || filters.getSortBy() == null ? "" : filters.getSortBy().trim().toLowerCase();
+
+		return switch (sortBy) {
+			case "quantity_asc" -> " ORDER BY p.quantity ASC, p.created_at DESC, p.id DESC";
+			case "quantity_desc" -> " ORDER BY p.quantity DESC, p.created_at DESC, p.id DESC";
+			case "created_asc" -> " ORDER BY p.created_at ASC, p.id ASC";
+			case "deleted_asc" -> " ORDER BY p.deleted ASC, p.created_at DESC, p.id DESC";
+			case "deleted_desc" -> " ORDER BY p.deleted DESC, p.created_at DESC, p.id DESC";
+			case "created_desc" -> " ORDER BY p.created_at DESC, p.id DESC";
+			default -> " ORDER BY p.created_at DESC, p.id DESC";
+		};
 	}
 
 	public List<Product> findLowStock(int limit) {
 		int normalizedLimit = Math.max(limit, 1);
-		String sql = SQL + " ORDER BY p.quantity ASC, p.updated_at DESC LIMIT ?";
+		String sql = SQL + " WHERE p.deleted = 0 ORDER BY p.quantity ASC, p.updated_at DESC LIMIT ?";
 		return findManyBySql(sql, statement -> statement.setInt(1, normalizedLimit));
 	}
 
@@ -238,7 +271,7 @@ public class ProductRepository {
 		}
 
 		String sql = "UPDATE products SET name = ?, description = ?, detail = ?, summary = ?, price = ?, brand = ?, "
-				+ "category = ?, promotion = ?, quantity = ? WHERE id = ?";
+				+ "category = ?, promotion = ?, quantity = ?, deleted = 0 WHERE id = ?";
 
 		try (Connection connection = JDBCUtils.getConnection();
 			 PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -268,42 +301,11 @@ public class ProductRepository {
 			return false;
 		}
 
-		try (Connection connection = JDBCUtils.getConnection()) {
-			boolean autoCommit = connection.getAutoCommit();
-			connection.setAutoCommit(false);
-			try {
-				try (PreparedStatement statement = connection.prepareStatement("DELETE FROM cart_items WHERE product_id = ?")) {
-					statement.setLong(1, id);
-					statement.executeUpdate();
-				}
-				try (PreparedStatement statement = connection.prepareStatement("DELETE FROM wishlists WHERE product_id = ?")) {
-					statement.setLong(1, id);
-					statement.executeUpdate();
-				}
-				try (PreparedStatement statement = connection.prepareStatement("DELETE FROM reviews WHERE product_id = ?")) {
-					statement.setLong(1, id);
-					statement.executeUpdate();
-				}
-				try (PreparedStatement statement = connection.prepareStatement("UPDATE order_items SET product_id = NULL WHERE product_id = ?")) {
-					statement.setLong(1, id);
-					statement.executeUpdate();
-				}
-				try (PreparedStatement statement = connection.prepareStatement("DELETE FROM product_images WHERE product_id = ?")) {
-					statement.setLong(1, id);
-					statement.executeUpdate();
-				}
-				try (PreparedStatement statement = connection.prepareStatement("DELETE FROM products WHERE id = ?")) {
-					statement.setLong(1, id);
-					boolean deleted = statement.executeUpdate() > 0;
-					connection.commit();
-					connection.setAutoCommit(autoCommit);
-					return deleted;
-				}
-			} catch (Exception e) {
-				connection.rollback();
-				connection.setAutoCommit(autoCommit);
-				throw e;
-			}
+		String sql = "UPDATE products SET deleted = 1 WHERE id = ? AND deleted = 0";
+		try (Connection connection = JDBCUtils.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(sql)) {
+			statement.setLong(1, id);
+			return statement.executeUpdate() > 0;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
@@ -311,7 +313,7 @@ public class ProductRepository {
 	}
 
 	public Long countAll() {
-		String sql = "SELECT COUNT(*) FROM products";
+		String sql = "SELECT COUNT(*) FROM products WHERE deleted = 0";
 		try (Connection connection = JDBCUtils.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql);
 				ResultSet resultSet = statement.executeQuery()) {
@@ -328,16 +330,15 @@ public class ProductRepository {
 		if (category == null || category.trim().isEmpty()) {
 			return 0L;
 		}
-		String sql = "SELECT COUNT(*) FROM products WHERE category = ?";
+		String sql = "SELECT COUNT(*) FROM products WHERE category = ? AND deleted = 0";
 		try (Connection connection = JDBCUtils.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql);
-				ResultSet resultSet = statement.executeQuery()) {
-
-			// set params
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setString(1, category.trim());
 
-			if (resultSet.next()) {
-				return resultSet.getLong(1);
+			try (ResultSet resultSet = statement.executeQuery()) {
+				if (resultSet.next()) {
+					return resultSet.getLong(1);
+				}
 			}
 
 		} catch (Exception e) {
@@ -352,7 +353,7 @@ public class ProductRepository {
 			filters = SearchProductRequest.builder().build();
 		}
 
-		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM products p WHERE 1=1 ");
+		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM products p WHERE p.deleted = 0 ");
 		List<Object> params = buildFilterParams(sql, filters);
 
 		// 1. Chỉ khởi tạo PreparedStatement trước
@@ -471,7 +472,48 @@ public class ProductRepository {
 				.brand(resultSet.getString("brand"))
 				.createdAt(resultSet.getTimestamp("created_at"))
 				.updatedAt(resultSet.getTimestamp("updated_at"))
+				.deleted(resultSet.getBoolean("deleted"))
 				.build();
+	}
+
+	private void ensureSoftDeleteColumn() {
+		if (softDeleteSchemaReady) {
+			return;
+		}
+
+		synchronized (ProductRepository.class) {
+			if (softDeleteSchemaReady) {
+				return;
+			}
+
+			try (Connection connection = JDBCUtils.getConnection();
+				 Statement statement = connection.createStatement()) {
+				if (!columnExists(connection, "products", "deleted")) {
+					statement.executeUpdate("ALTER TABLE products ADD COLUMN deleted TINYINT(1) DEFAULT 0 AFTER view");
+				}
+				softDeleteSchemaReady = true;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private boolean columnExists(Connection connection, String table, String column) throws SQLException {
+		String sql = """
+				SELECT 1
+				FROM information_schema.COLUMNS
+				WHERE TABLE_SCHEMA = DATABASE()
+				  AND TABLE_NAME = ?
+				  AND COLUMN_NAME = ?
+				LIMIT 1
+				""";
+		try (PreparedStatement statement = connection.prepareStatement(sql)) {
+			statement.setString(1, table);
+			statement.setString(2, column);
+			try (ResultSet resultSet = statement.executeQuery()) {
+				return resultSet.next();
+			}
+		}
 	}
 
 	@FunctionalInterface

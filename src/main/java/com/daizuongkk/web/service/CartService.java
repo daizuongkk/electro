@@ -25,10 +25,14 @@ public class CartService {
 
 		List<CartItemResponse> cartItemResponses = new ArrayList<>();
 		for (CartItem cartItem : cartItems) {
+			var product = productService.getProductById(cartItem.getProductId());
+			if (product == null) {
+				continue;
+			}
 
 			CartItemResponse cartItemResponse = CartItemResponse.builder()
 					.id(cartItem.getId())
-					.product(productService.getProductById(cartItem.getProductId()))
+					.product(product)
 					.quantity(cartItem.getQuantity())
 					.build();
 			cartItemResponses.add(cartItemResponse);

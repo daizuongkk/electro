@@ -1,5 +1,6 @@
 package com.daizuongkk.web.service;
 
+import com.daizuongkk.web.dto.request.AdminOrderSearchRequest;
 import com.daizuongkk.web.dto.response.CartItemResponse;
 import com.daizuongkk.web.model.Order;
 import com.daizuongkk.web.model.OrderItem;
@@ -30,6 +31,14 @@ public class OrderService {
 
     public List<Order> findAllOrders() {
         return orderRepository.findAll();
+    }
+
+    public List<Order> findAdminOrders(AdminOrderSearchRequest filters, int page, int size) {
+        return orderRepository.findAdminPage(filters, page, size);
+    }
+
+    public long countAdminOrders(AdminOrderSearchRequest filters) {
+        return orderRepository.countAdmin(filters);
     }
 
     public long countOrdersByUserId(Long userId) {

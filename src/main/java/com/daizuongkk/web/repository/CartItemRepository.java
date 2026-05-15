@@ -72,7 +72,13 @@ public class CartItemRepository {
 			return false;
 		}
 
-		String sql = "UPDATE cart_items ci JOIN carts c ON c.id = ci.cart_id SET ci.quantity = ? WHERE c.user_id = ? AND ci.product_id = ?";
+		String sql = """
+				UPDATE cart_items ci
+				JOIN carts c ON c.id = ci.cart_id
+				JOIN products p ON p.id = ci.product_id
+				SET ci.quantity = ?
+				WHERE c.user_id = ? AND ci.product_id = ? AND p.deleted = 0
+				""";
 
 		try (Connection connection = JDBCUtils.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {

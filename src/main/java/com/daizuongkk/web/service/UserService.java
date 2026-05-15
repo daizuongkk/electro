@@ -64,6 +64,10 @@ public class UserService {
 		return userRepository.update(user, updatePassword);
 	}
 
+	public boolean deleteUser(Long id) {
+		return userRepository.deleteById(id);
+	}
+
 	public UpdateProfileStatus updateProfile(Long userId,
 			String username,
 			String email,
@@ -145,6 +149,10 @@ public class UserService {
 		return userRepository.findById(id);
 	}
 
+	public User getAdminUserModelById(Long id) {
+		return userRepository.findByIdIncludingDeleted(id);
+	}
+
 	public boolean usernameExists(String username) {
 		return userRepository.existsByUsername(username);
 	}
@@ -202,7 +210,10 @@ public class UserService {
 				.email(user.getEmail())
 				.verified(user.getVerified())
 				.phoneVerified(user.getPhoneVerified())
+				.deleted(user.getDeleted())
 				.status(user.getStatus())
+				.createdAt(user.getCreatedAt())
+				.updatedAt(user.getUpdatedAt())
 				.build();
 	}
 }

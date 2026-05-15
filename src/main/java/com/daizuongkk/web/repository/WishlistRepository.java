@@ -19,7 +19,13 @@ public class WishlistRepository {
 			return Collections.emptyList();
 		}
 
-		String sql = "SELECT product_id FROM wishlists WHERE user_id = ? ORDER BY product_id DESC";
+		String sql = """
+				SELECT w.product_id
+				FROM wishlists w
+				JOIN products p ON p.id = w.product_id
+				WHERE w.user_id = ? AND p.deleted = 0
+				ORDER BY w.product_id DESC
+				""";
 		List<Long> productIds = new ArrayList<>();
 
 		try (Connection connection = JDBCUtils.getConnection();
@@ -42,7 +48,13 @@ public class WishlistRepository {
 			return false;
 		}
 
-		String sql = "SELECT 1 FROM wishlists WHERE user_id = ? AND product_id = ? LIMIT 1";
+		String sql = """
+				SELECT 1
+				FROM wishlists w
+				JOIN products p ON p.id = w.product_id
+				WHERE w.user_id = ? AND w.product_id = ? AND p.deleted = 0
+				LIMIT 1
+				""";
 
 		try (Connection connection = JDBCUtils.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {

@@ -12,6 +12,50 @@ body#profile-page {
   background-color: #fbfbfc;
 }
 
+#profile-page .profile-submit-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(251, 251, 252, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+#profile-page .profile-submit-overlay.is-active {
+  display: flex;
+}
+
+#profile-page .profile-submit-box {
+  min-width: 220px;
+  padding: 18px 22px;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(21, 22, 29, 0.18);
+  color: #2b2d42;
+  font-weight: 700;
+  text-align: center;
+}
+
+#profile-page .profile-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  vertical-align: -3px;
+  border: 2px solid #e4e7ed;
+  border-top-color: #d10024;
+  border-radius: 50%;
+  animation: profile-spinner-rotate 0.75s linear infinite;
+}
+
+@keyframes profile-spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ── Section ── */
 #profile-page .profile-section {
   padding-top: 10px;

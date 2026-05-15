@@ -20,7 +20,14 @@ public class CartRepository {
 			return Collections.emptyList();
 		}
 
-		String sql = "SELECT ci.* FROM carts c JOIN cart_items ci ON c.id = ci.cart_id  WHERE c.user_id = ? ORDER BY ci.created_at DESC";
+		String sql = """
+				SELECT ci.*
+				FROM carts c
+				JOIN cart_items ci ON c.id = ci.cart_id
+				JOIN products p ON p.id = ci.product_id
+				WHERE c.user_id = ? AND p.deleted = 0
+				ORDER BY ci.created_at DESC
+				""";
 		List<CartItem> carts = new ArrayList<>();
 
 		try (Connection connection = JDBCUtils.getConnection();

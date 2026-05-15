@@ -22,5 +22,6 @@ public class Product {
 	private String category;
 	private Long promotion;
 	private Long quantity;
+	private Boolean deleted;
 
 }
