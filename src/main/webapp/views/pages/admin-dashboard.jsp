@@ -173,18 +173,34 @@
             <div class="col-12 col-lg-6">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center bg-transparent px-4 py-3">
-                        <h3 class="h5 mb-0">Sales vs Purchase</h3>
+                        <h3 class="h5 mb-0">Doanh thu theo tháng</h3>
                         <div>
-                            <select class="form-select form-select-sm">
-                                <option selected>This Year</option>
-                                <option>This Month</option>
-                                <option>This Week</option>
-                            </select>
+                            <span class="badge bg-primary-subtle text-primary border border-primary">12 tháng gần nhất</span>
                         </div>
                     </div>
                     <div class="card-body p-4">
-
-                        <div id="salesPurchaseChart"></div>
+                        <div class="admin-chart-legend mb-4">
+                            <span><i class="admin-chart-dot bg-primary"></i>Doanh thu</span>
+                            <span><i class="admin-chart-dot bg-warning"></i>Số đơn</span>
+                        </div>
+                        <div class="admin-monthly-chart">
+                            <c:forEach var="month" items="${monthlySalesData}">
+                                <div class="admin-monthly-item">
+                                    <div class="admin-monthly-bars">
+                                        <div class="admin-monthly-bar bg-primary"
+                                             style="height: ${month.revenuePercent}%"
+                                             title="${month.label}: ${month.revenueLabel}"></div>
+                                        <div class="admin-monthly-bar bg-warning"
+                                             style="height: ${month.orderPercent}%"
+                                             title="${month.label}: ${month.orderCount} đơn"></div>
+                                    </div>
+                                    <small>${month.label}</small>
+                                </div>
+                            </c:forEach>
+                        </div>
+                        <c:if test="${empty monthlySalesData}">
+                            <p class="text-center text-secondary mb-0 py-5">Chưa có dữ liệu đơn hàng.</p>
+                        </c:if>
                     </div>
                 </div>
             </div>
@@ -193,39 +209,37 @@
             <div class="col-12 col-lg-6">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center bg-transparent px-4 py-3">
-                        <h3 class="h5 mb-0">Overall Information</h3>
+                        <h3 class="h5 mb-0">Tổng quan khách hàng</h3>
                         <div>
-                            <select class="form-select form-select-sm">
-                                <option selected>Last 6 Months</option>
-                                <option>This Month</option>
-                                <option>This Week</option>
-                            </select>
+                            <span class="badge bg-success-subtle text-success border border-success">Đơn hợp lệ</span>
                         </div>
                     </div>
                     <div class="card-body p-4">
-                        <h3 class="h6">Customers Overview</h3>
+                        <h3 class="h6">Tỉ lệ khách mua hàng</h3>
                         <div class="row align-items-center">
                             <div class="col-sm-6">
-                                <div id="customerChart">
-
+                                <div class="admin-donut-chart"
+                                     style="--first-time: ${customerOverview.firstTimePercent}; --returning: ${customerOverview.returningPercent};">
+                                    <div class="admin-donut-center">
+                                        <strong>${customerOverview.totalBuyingCustomers}</strong>
+                                        <span>khách</span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-sm-6">
                                 <div class="row">
                                     <div class="col-6 border-end">
                                         <div class="text-center ">
-                                            <h2 class="mb-1">5.5K</h2>
-                                            <p class="text-success mb-2">First Time</p>
-                                            <span class="badge bg-success"><i
-                                                    class="ti ti-arrow-up-left me-1"></i>25%</span>
+                                            <h2 class="mb-1">${customerOverview.firstTimeCustomers}</h2>
+                                            <p class="text-success mb-2">Mua lần đầu</p>
+                                            <span class="badge bg-success">${customerOverview.firstTimePercent}%</span>
                                         </div>
                                     </div>
                                     <div class="col-6">
                                         <div class="text-center">
-                                            <h2 class="mb-1">3.5K</h2>
-                                            <p class="text-warning mb-2">Return</p>
-                                            <span class="badge bg-success badge-xs d-inline-flex align-items-center"><i
-                                                    class="ti ti-arrow-up-left me-1"></i>21%</span>
+                                            <h2 class="mb-1">${customerOverview.returningCustomers}</h2>
+                                            <p class="text-warning mb-2">Quay lại</p>
+                                            <span class="badge bg-warning text-dark">${customerOverview.returningPercent}%</span>
                                         </div>
                                     </div>
                                 </div>
@@ -235,16 +249,16 @@
                         </div>
                         <div class="row text-center border-top mt-4 pt-4">
                             <div class="col-4 border-end">
-                                <h3 class="fw-bold mb-2">6987</h3>
-                                <small class="text-secondary">Suppliers</small>
+                                <h3 class="fw-bold mb-2">${customerOverview.activeProducts}</h3>
+                                <small class="text-secondary">Sản phẩm</small>
                             </div>
                             <div class="col-4 border-end">
-                                <h3 class="fw-bold mb-2">4896</h3>
-                                <small class="text-secondary">Customers</small>
+                                <h3 class="fw-bold mb-2">${customerOverview.totalBuyingCustomers}</h3>
+                                <small class="text-secondary">Khách đã mua</small>
                             </div>
                             <div class="col-4">
-                                <h3 class="fw-bold mb-2">487</h3>
-                                <small class="text-secondary">Orders</small>
+                                <h3 class="fw-bold mb-2">${customerOverview.totalOrders}</h3>
+                                <small class="text-secondary">Đơn hợp lệ</small>
                             </div>
                         </div>
                     </div>
