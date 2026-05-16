@@ -2,6 +2,7 @@ package com.daizuongkk.web.controller.web;
 
 import com.daizuongkk.web.dto.response.ProductResponse;
 import com.daizuongkk.web.dto.response.ReviewResponse;
+import com.daizuongkk.web.dto.response.UserResponse;
 import com.daizuongkk.web.model.Category;
 import com.daizuongkk.web.service.ProductService;
 import com.daizuongkk.web.service.ReviewService;
@@ -11,6 +12,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.List;
@@ -58,6 +60,9 @@ public class ProductController extends HttpServlet {
 
 		List<ReviewResponse> reviews = reviewService.getReviewsByProductId(productId, currentPage, REVIEWS_PER_PAGE);
 		List<ProductResponse> relatedProducts = productService.getProductsByCategory(product.getCategory());
+		UserResponse account = getAccount(request);
+		boolean hasReviewed = account != null && reviewService.hasUserReviewedProduct(productId, account.getId());
+		boolean canReview = account != null && !hasReviewed && reviewService.canUserReviewProduct(productId, account.getId());
 
 		request.setAttribute("product", product);
 		request.setAttribute("categories", Category.getAlls());
@@ -67,7 +72,58 @@ public class ProductController extends HttpServlet {
 		request.setAttribute("totalRv", totalReviews);
 		request.setAttribute("currentPage", currentPage);
 		request.setAttribute("totalPages", totalPages);
+		request.setAttribute("hasReviewed", hasReviewed);
+		request.setAttribute("canReview", canReview);
 
 		request.getRequestDispatcher("views/pages/product.jsp").forward(request, response);
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		request.setCharacterEncoding("UTF-8");
+		Long productId = parseLong(request.getParameter("id"));
+		UserResponse account = getAccount(request);
+
+		if (productId == null || productId <= 0) {
+			response.sendRedirect(request.getContextPath() + "/home");
+			return;
+		}
+		if (account == null) {
+			response.sendRedirect(request.getContextPath() + "/login");
+			return;
+		}
+
+		Integer score = parseInteger(request.getParameter("rating"));
+		String message = request.getParameter("message");
+		boolean added = score != null && reviewService.addReview(productId, account.getId(), message, score);
+		String result = added ? "reviewed" : "review_error";
+		response.sendRedirect(request.getContextPath() + "/products?id=" + productId + "&tab=reviews&" + result + "=1");
+	}
+
+	private UserResponse getAccount(HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		return session == null ? null : (UserResponse) session.getAttribute("account");
+	}
+
+	private Long parseLong(String value) {
+		if (value == null || value.isBlank()) {
+			return null;
+		}
+		try {
+			return Long.parseLong(value.trim());
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
+	private Integer parseInteger(String value) {
+		if (value == null || value.isBlank()) {
+			return null;
+		}
+		try {
+			return Integer.parseInt(value.trim());
+		} catch (NumberFormatException e) {
+			return null;
+		}
 	}
 }

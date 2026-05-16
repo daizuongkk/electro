@@ -9,6 +9,7 @@
 
 <fmt:setLocale value="vi_VN"/>
 <c:set var="reviewScore" value="${product.reviewScore}"/>
+<c:set var="reviewTabActive" value="${param.tab == 'reviews' or param.reviewed == '1' or param.review_error == '1'}"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,6 +52,12 @@
 <div class="section">
     <!-- container -->
     <div class="container">
+        <c:if test="${param.reviewed == '1'}">
+            <div class="js-popup-message hidden" data-type="success" data-message="Cảm ơn bạn đã đánh giá sản phẩm."></div>
+        </c:if>
+        <c:if test="${param.review_error == '1'}">
+            <div class="js-popup-message hidden" data-type="warning" data-message="Bạn chỉ có thể đánh giá sản phẩm đã mua trong đơn hàng hoàn tất và chưa từng đánh giá trước đó."></div>
+        </c:if>
         <!-- row -->
         <div class="row">
             <!-- Product main img -->
@@ -214,16 +221,16 @@
                 <div id="product-tab">
                     <!-- product tab nav -->
                     <ul class="tab-nav">
-                        <li class="active"><a data-toggle="tab" href="#tab1">Mô tả</a></li>
+                        <li class="${reviewTabActive ? '' : 'active'}"><a data-toggle="tab" href="#tab1">Mô tả</a></li>
                         <li><a data-toggle="tab" href="#tab2">Chi tiết</a></li>
-                        <li><a data-toggle="tab" href="#tab3">Đánh giá (${totalRv})</a></li>
+                        <li class="${reviewTabActive ? 'active' : ''}"><a data-toggle="tab" href="#tab3">Đánh giá (${totalRv})</a></li>
                     </ul>
                     <!-- /product tab nav -->
 
                     <!-- product tab content -->
                     <div class="tab-content">
                         <!-- tab1  -->
-                        <div id="tab1" class="tab-pane fade in active">
+                        <div id="tab1" class="tab-pane fade ${reviewTabActive ? '' : 'in active'}">
                             <div class="row">
                                 <div class="col-md-12">
                                     <p><c:if test="${product.description != null}">
@@ -283,7 +290,7 @@
                         <!-- /tab2  -->
 
                         <!-- tab3  -->
-                        <div id="tab3" class="tab-pane fade in">
+                        <div id="tab3" class="tab-pane fade ${reviewTabActive ? 'in active' : ''}">
                             <div class="row">
                                 <!-- Rating -->
                                 <div class="col-md-3">
@@ -318,7 +325,7 @@
                                                     <i class="fa fa-star"></i>
                                                 </div>
                                                 <div class="rating-progress">
-                                                    <div style="width: ${stars.fiveStars / totalRv * 100}%"></div>
+                                                    <div style="width: ${totalRv > 0 ? stars.fiveStars / totalRv * 100 : 0}%"></div>
                                                 </div>
                                                 <span class="sum">${stars.fiveStars}</span>
                                             </li>
@@ -331,7 +338,7 @@
                                                     <i class="fa fa-star-o"></i>
                                                 </div>
                                                 <div class="rating-progress">
-                                                    <div style="width: ${stars.fourStars / totalRv * 100}%"></div>
+                                                    <div style="width: ${totalRv > 0 ? stars.fourStars / totalRv * 100 : 0}%"></div>
                                                 </div>
                                                 <span class="sum">${stars.fourStars}</span>
                                             </li>
@@ -344,7 +351,7 @@
                                                     <i class="fa fa-star-o"></i>
                                                 </div>
                                                 <div class="rating-progress">
-                                                    <div style="width: ${stars.threeStars / totalRv * 100}%"></div>
+                                                    <div style="width: ${totalRv > 0 ? stars.threeStars / totalRv * 100 : 0}%"></div>
                                                 </div>
                                                 <span class="sum">${stars.threeStars}</span>
                                             </li>
@@ -357,7 +364,7 @@
                                                     <i class="fa fa-star-o"></i>
                                                 </div>
                                                 <div class="rating-progress">
-                                                    <div style="width: ${stars.twoStars / totalRv * 100}%"></div>
+                                                    <div style="width: ${totalRv > 0 ? stars.twoStars / totalRv * 100 : 0}%"></div>
                                                 </div>
                                                 <span class="sum">${stars.twoStars}</span>
                                             </li>
@@ -370,7 +377,7 @@
                                                     <i class="fa fa-star-o"></i>
                                                 </div>
                                                 <div class="rating-progress">
-                                                    <div style="width: ${stars.oneStars / totalRv * 100}%"></div>
+                                                    <div style="width: ${totalRv > 0 ? stars.oneStars / totalRv * 100 : 0}%"></div>
                                                 </div>
                                                 <span class="sum">${stars.oneStars}</span>
                                             </li>
@@ -399,18 +406,18 @@
                                                             <p class="date"><fmt:formatDate value="${review.createdAt}"
                                                                                             pattern="dd MMM yyyy, h:mm a"/></p>
                                                             <div class="review-rating">
-                                                                <c:forEach begin="1" end="${reviewScore}"
+                                                                <c:forEach begin="1" end="${review.score}"
                                                                            var="i">
                                                                     <i class="fa fa-star"></i>
                                                                 </c:forEach>
-                                                                <c:forEach begin="${reviewScore + 1}" end="5"
+                                                                <c:forEach begin="${review.score + 1}" end="5"
                                                                            var="i">
                                                                     <i class="fa fa-star-o empty"></i>
                                                                 </c:forEach>
                                                             </div>
                                                         </div>
                                                         <div class="review-body">
-                                                            <p><c:out value="${review.message}" escapeXml="false"/></p>
+                                                            <p><c:out value="${review.message}"/></p>
                                                         </div>
                                                     </li>
                                                 </c:forEach>
@@ -418,13 +425,29 @@
 
 
                                         </ul>
-                                        <ul class="reviews-pagination">
-                                            <li class="active">1</li>
-                                            <li><a href="#">2</a></li>
-                                            <li><a href="#">3</a></li>
-                                            <li><a href="#">4</a></li>
-                                            <li><a href="#"><i class="fa fa-angle-right"></i></a></li>
-                                        </ul>
+                                        <c:if test="${totalPages > 1}">
+                                            <ul class="reviews-pagination">
+                                                <c:if test="${currentPage > 1}">
+                                                    <li>
+                                                        <a href="products?id=${product.id}&page=${currentPage - 1}&tab=reviews">
+                                                            <i class="fa fa-angle-left"></i>
+                                                        </a>
+                                                    </li>
+                                                </c:if>
+                                                <c:forEach begin="1" end="${totalPages}" var="pageNum">
+                                                    <li class="${pageNum == currentPage ? 'active' : ''}">
+                                                        <a href="products?id=${product.id}&page=${pageNum}&tab=reviews">${pageNum}</a>
+                                                    </li>
+                                                </c:forEach>
+                                                <c:if test="${currentPage < totalPages}">
+                                                    <li>
+                                                        <a href="products?id=${product.id}&page=${currentPage + 1}&tab=reviews">
+                                                            <i class="fa fa-angle-right"></i>
+                                                        </a>
+                                                    </li>
+                                                </c:if>
+                                            </ul>
+                                        </c:if>
                                     </div>
                                 </div>
                                 <!-- /Reviews -->
@@ -432,26 +455,40 @@
                                 <!-- Review Form -->
                                 <div class="col-md-3">
                                     <div id="review-form">
-                                        <form class="review-form">
-
-                                            <textarea class="input" placeholder="Đánh giá"></textarea>
-                                            <div class="input-rating">
-                                                <span>Your Rating: </span>
-                                                <div class="stars">
-                                                    <input id="star5" name="rating" value="5" type="radio"><label
-                                                        for="star5"></label>
-                                                    <input id="star4" name="rating" value="4" type="radio"><label
-                                                        for="star4"></label>
-                                                    <input id="star3" name="rating" value="3" type="radio"><label
-                                                        for="star3"></label>
-                                                    <input id="star2" name="rating" value="2" type="radio"><label
-                                                        for="star2"></label>
-                                                    <input id="star1" name="rating" value="1" type="radio"><label
-                                                        for="star1"></label>
-                                                </div>
-                                            </div>
-                                            <button class="primary-btn">Submit</button>
-                                        </form>
+                                        <c:choose>
+                                            <c:when test="${canReview}">
+                                                <form class="review-form" method="post" action="products">
+                                                    <input type="hidden" name="id" value="${product.id}">
+                                                    <textarea class="input" name="message" placeholder="Chia sẻ trải nghiệm của bạn" maxlength="2000" required></textarea>
+                                                    <div class="input-rating">
+                                                        <span>Đánh giá: </span>
+                                                        <div class="stars">
+                                                            <input id="star5" name="rating" value="5" type="radio" required><label
+                                                                for="star5"></label>
+                                                            <input id="star4" name="rating" value="4" type="radio"><label
+                                                                for="star4"></label>
+                                                            <input id="star3" name="rating" value="3" type="radio"><label
+                                                                for="star3"></label>
+                                                            <input id="star2" name="rating" value="2" type="radio"><label
+                                                                for="star2"></label>
+                                                            <input id="star1" name="rating" value="1" type="radio"><label
+                                                                for="star1"></label>
+                                                        </div>
+                                                    </div>
+                                                    <button class="primary-btn" type="submit">Gửi đánh giá</button>
+                                                </form>
+                                            </c:when>
+                                            <c:when test="${hasReviewed}">
+                                                <p>Bạn đã đánh giá sản phẩm này.</p>
+                                            </c:when>
+                                            <c:when test="${empty sessionScope.account}">
+                                                <p>Đăng nhập để đánh giá sản phẩm sau khi đơn hàng hoàn tất.</p>
+                                                <a class="primary-btn" href="login">Đăng nhập</a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <p>Bạn có thể đánh giá sau khi mua sản phẩm này và đơn hàng đã hoàn tất.</p>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </div>
                                 </div>
                                 <!-- /Review Form -->

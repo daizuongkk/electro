@@ -206,7 +206,9 @@
                                     <c:forEach var="image" items="${productImages}">
                                         <div class="admin-product-image-item" data-image-id="${image.id}">
                                             <img src="${fn:escapeXml(image.url)}" alt="Ảnh sản phẩm">
-                                            <button type="button" class="admin-product-image-remove" aria-label="Xóa ảnh">&times;</button>
+                                            <button type="button" class="admin-product-image-remove" aria-label="Xóa ảnh"
+                                                    data-confirm-click="Xóa ảnh sản phẩm này?"
+                                                    data-confirm-text="Xóa">&times;</button>
                                         </div>
                                     </c:forEach>
                                     <label class="admin-product-image-add" for="productImageFiles" title="Thêm ảnh">
@@ -361,6 +363,8 @@
                 remove.type = 'button';
                 remove.className = 'admin-product-image-remove';
                 remove.setAttribute('aria-label', 'Xóa ảnh');
+                remove.setAttribute('data-confirm-click', 'Xóa ảnh vừa chọn?');
+                remove.setAttribute('data-confirm-text', 'Xóa');
                 remove.innerHTML = '&times;';
 
                 item.appendChild(img);

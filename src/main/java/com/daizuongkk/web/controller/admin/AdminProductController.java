@@ -1,5 +1,9 @@
 package com.daizuongkk.web.controller.admin;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.daizuongkk.web.dto.request.AdminProductSearchRequest;
 import com.daizuongkk.web.dto.response.ProductResponse;
 import com.daizuongkk.web.model.Brand;
@@ -9,16 +13,13 @@ import com.daizuongkk.web.service.CloudinaryService;
 import com.daizuongkk.web.service.ProductService;
 import com.daizuongkk.web.util.FlashUtils;
 import com.daizuongkk.web.util.PaginationUtils;
+
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @WebServlet(name = "AdminProductController", value = { "/admin/products", "/admin/products/form" })
 @MultipartConfig(fileSizeThreshold = 1024 * 1024, maxFileSize = 10 * 1024 * 1024, maxRequestSize = 60 * 1024 * 1024)
@@ -117,7 +118,8 @@ public class AdminProductController extends BaseAdminServlet {
 		try {
 			uploadedImageUrls = uploadImageFiles(request);
 		} catch (Exception e) {
-			redirectProductFormError(request, response, id, product, "Không thể upload ảnh lên Cloudinary: " + e.getMessage());
+			redirectProductFormError(request, response, id, product,
+					"Không thể upload ảnh lên Cloudinary: " + e.getMessage());
 			return;
 		}
 
@@ -134,14 +136,16 @@ public class AdminProductController extends BaseAdminServlet {
 		}
 
 		if (!ok) {
-			redirectProductFormError(request, response, id, product, "Không thể lưu sản phẩm. Vui lòng kiểm tra dữ liệu nhập.");
+			redirectProductFormError(request, response, id, product,
+					"Không thể lưu sản phẩm. Vui lòng kiểm tra dữ liệu nhập.");
 			return;
 		}
 
 		response.sendRedirect(request.getContextPath() + "/admin/products");
 	}
 
-	private void redirectProductFormError(HttpServletRequest request, HttpServletResponse response, Long id, Product product, String error)
+	private void redirectProductFormError(HttpServletRequest request, HttpServletResponse response, Long id,
+			Product product, String error)
 			throws IOException {
 		FlashUtils.put(request, "error", error);
 		FlashUtils.put(request, "productForm", product);
@@ -199,7 +203,8 @@ public class AdminProductController extends BaseAdminServlet {
 			return "created_desc";
 		}
 		return switch (normalized.toLowerCase()) {
-			case "quantity_asc", "quantity_desc", "created_asc", "created_desc", "deleted_asc", "deleted_desc" -> normalized.toLowerCase();
+			case "quantity_asc", "quantity_desc", "created_asc", "created_desc", "deleted_asc", "deleted_desc" ->
+				normalized.toLowerCase();
 			default -> "created_desc";
 		};
 	}

@@ -15,7 +15,6 @@
 <c:url var="fallbackProductImage" value="/assets/img/fallback_product_img.jpg"/>
 
 <%@ include file="../commons/header.jsp" %>
-<jsp:include page="../commons/navigation.jsp"/>
 
 <%-- Breadcrumb --%>
 <div id="breadcrumb" class="section">
@@ -195,6 +194,11 @@
                                             <div class="order-detail-info">
                                                 <h4><a href="products?id=${item.productId}">${fn:escapeXml(item.productName)}</a></h4>
                                                 <p>${item.quantity} &times; <fmt:formatNumber value="${item.price}" type="currency" currencySymbol="₫"/></p>
+                                                <c:if test="${selectedOrder.status == 'COMPLETED'}">
+                                                    <a class="order-review-link" href="products?id=${item.productId}&tab=reviews">
+                                                        <i class="fa fa-star"></i> Đánh giá sản phẩm
+                                                    </a>
+                                                </c:if>
                                             </div>
                                         </div>
                                     </c:forEach>

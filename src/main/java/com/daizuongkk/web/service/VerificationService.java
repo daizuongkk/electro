@@ -1,13 +1,11 @@
 package com.daizuongkk.web.service;
 
+import java.security.SecureRandom;
+
 import com.daizuongkk.web.model.User;
 import com.daizuongkk.web.model.VerificationChannel;
 import com.daizuongkk.web.repository.UserRepository;
 import com.daizuongkk.web.repository.VerificationOtpRepository;
-
-import java.security.SecureRandom;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 public class VerificationService {
 	private static final SecureRandom RANDOM = new SecureRandom();

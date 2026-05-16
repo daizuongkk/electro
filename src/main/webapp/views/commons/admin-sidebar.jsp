@@ -33,6 +33,13 @@
             </a>
         </li>
 
+        <li>
+            <a class="nav-link" href="<c:url value='/admin/reviews'/>">
+                <i class="ti ti-star"></i>
+                <span class="nav-text">Đánh Giá</span>
+            </a>
+        </li>
+
       <li class="px-4 py-2"><small class="nav-text">Account</small></li>
 
         <li>

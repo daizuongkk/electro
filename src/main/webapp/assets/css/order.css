@@ -404,6 +404,18 @@ body#orders-page {
   font-size: 12px;
   color: #8d99ae;
 }
+#orders-page .order-review-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #d10024;
+}
+#orders-page .order-review-link:hover {
+  color: #a8001d;
+}
 
 /* Total row */
 #orders-page .order-detail-total {

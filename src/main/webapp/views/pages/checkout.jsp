@@ -260,7 +260,6 @@
 <c:set var="paymentDefault" value="${not empty submittedPaymentMethod ? submittedPaymentMethod : 'BANK_TRANSFER'}"/>
 
 <%@ include file="../commons/header.jsp" %>
-<jsp:include page="../commons/navigation.jsp"/>
 
 <div id="breadcrumb" class="section">
     <div class="container">

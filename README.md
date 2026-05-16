@@ -1,13 +1,13 @@
 # Hướng dẫn cài đặt và chạy dự án `web`
 
 Tài liệu này hướng dẫn nhanh các bước để:
+
 - Clone project về máy
 - Khởi tạo cơ sở dữ liệu từ file `data/electro_db.sql`
 - Cấu hình và chạy ứng dụng bằng Tomcat Server trong IntelliJ IDEA
 
 ## 1. Yêu cầu môi trường
 
-Dựa trên cấu hình hiện tại của `pom.xml`, bạn cần chuẩn bị:
 - Git
 - JDK 21
 - MySQL 8.x
@@ -27,7 +27,6 @@ java -version
 git clone https://github.com/daizuongkk/javawebhaui.git
 cd web
 ```
-
 
 ## 3. Khởi tạo database từ `electro_db.sql`
 
@@ -61,6 +60,7 @@ mysql -u root -p cellphoneS < .\data\electro_db.sql
 Project đang cấu hình kết nối tại `src/main/java/com/daizuongkk/web/util/JDBCUtils.java`.
 
 Bạn cần kiểm tra và cập nhật các giá trị sau cho phù hợp với máy local:
+
 - `DB_URL`
 - `USER`
 - `PASSWORD`

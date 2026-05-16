@@ -1,8 +1,10 @@
 package com.daizuongkk.web.service;
 
+import com.daizuongkk.web.dto.request.AdminReviewSearchRequest;
 import com.daizuongkk.web.dto.response.ReviewResponse;
 import com.daizuongkk.web.dto.response.UserResponse;
 import com.daizuongkk.web.model.Review;
+import com.daizuongkk.web.repository.OrderRepository;
 import com.daizuongkk.web.repository.ReviewRepository;
 
 import java.util.*;
@@ -10,16 +12,19 @@ import java.util.*;
 public class ReviewService {
     private final ReviewRepository reviewRepository;
 	private final UserService userService;
+    private final OrderRepository orderRepository;
 
     public ReviewService() {
         this.userService = new UserService();
         this.reviewRepository = new ReviewRepository();
+        this.orderRepository = new OrderRepository();
     }
 
 
     public ReviewService(ReviewRepository reviewRepository, UserService userService) {
         this.reviewRepository = reviewRepository;
         this.userService = userService;
+        this.orderRepository = new OrderRepository();
     }
 
     public List<ReviewResponse> getReviewsByProductId(Long productId, int page, int size) {
@@ -37,7 +42,9 @@ public class ReviewService {
             UserResponse userResponse = userService.findById(review.getUserId());
             ReviewResponse reviewResponse = reviewToResponse(review);
 
-            reviewResponse.setUserDisplayName(userResponse.getFirstName() + " " + userResponse.getLastName());
+            if (userResponse != null) {
+                reviewResponse.setUserDisplayName((userResponse.getFirstName() + " " + userResponse.getLastName()).trim());
+            }
             reviewResponses.add(reviewResponse);
         }
         return reviewResponses;
@@ -68,6 +75,14 @@ public class ReviewService {
             return false;
         }
 
+        if (message == null || message.trim().isEmpty() || message.trim().length() > 2000) {
+            return false;
+        }
+
+        if (!canUserReviewProduct(productId, userId)) {
+            return false;
+        }
+
         if (reviewRepository.existsByProductIdAndUserId(productId, userId)) {
             return false;
         }
@@ -87,6 +102,25 @@ public class ReviewService {
         return reviewRepository.existsByProductIdAndUserId(productId, userId);
     }
 
+    public boolean canUserReviewProduct(Long productId, Long userId) {
+        return orderRepository.hasCompletedOrderContainingProduct(userId, productId);
+    }
+
+    public List<ReviewResponse> getAdminReviews(AdminReviewSearchRequest filters, int page, int size) {
+        return reviewRepository.findAdminPage(filters, page, size)
+                .stream()
+                .map(this::reviewToResponse)
+                .toList();
+    }
+
+    public long countAdminReviews(AdminReviewSearchRequest filters) {
+        return reviewRepository.countAdmin(filters);
+    }
+
+    public boolean deleteReview(Long id) {
+        return reviewRepository.deleteById(id);
+    }
+
 
     private ReviewResponse reviewToResponse(Review review) {
 
@@ -95,6 +129,9 @@ public class ReviewService {
                 .id(review.getId())
                 .productId(review.getProductId())
                 .userId(review.getUserId())
+                .productName(review.getProductName())
+                .userDisplayName(review.getUserDisplayName())
+                .userEmail(review.getUserEmail())
                 .score(review.getScore())
                 .message(review.getMessage())
                 .createdAt(review.getCreatedAt())

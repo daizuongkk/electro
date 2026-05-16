@@ -283,6 +283,33 @@ public class OrderRepository {
         }
     }
 
+    public boolean hasCompletedOrderContainingProduct(Long userId, Long productId) {
+        if (userId == null || userId <= 0 || productId == null || productId <= 0) {
+            return false;
+        }
+
+        String sql = """
+                SELECT 1
+                FROM orders o
+                JOIN order_items oi ON oi.order_id = o.id
+                WHERE o.user_id = ?
+                  AND oi.product_id = ?
+                  AND o.status = 'COMPLETED'
+                LIMIT 1
+                """;
+        try (Connection connection = JDBCUtils.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, userId);
+            statement.setLong(2, productId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public Order findByIdAndUserId(Long orderId, Long userId) {
         if (orderId == null || orderId <= 0 || userId == null || userId <= 0) {
             return null;

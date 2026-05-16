@@ -15,6 +15,9 @@ public class Review {
     private Long id;
     private Long productId;
     private Long userId;
+    private String productName;
+    private String userDisplayName;
+    private String userEmail;
     private String message;
     private Integer score;
     private Date createdAt;
