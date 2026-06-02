@@ -81,7 +81,8 @@ public class OrderController extends HttpServlet {
 		}
 
 		response
-				.sendRedirect(request.getContextPath() + "/orders?tab=" + tab + "&id=" + (orderId == null ? "" : orderId) + "&error=cancel");
+				.sendRedirect(request.getContextPath() + "/orders?tab=" + tab + "&id=" + (orderId == null ? "" : orderId)
+						+ "&error=cancel");
 	}
 
 	private UserResponse getAccount(HttpServletRequest request) {

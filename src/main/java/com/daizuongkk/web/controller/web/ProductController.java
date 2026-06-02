@@ -39,7 +39,8 @@ public class ProductController extends HttpServlet {
 				throw new NumberFormatException("Missing ID");
 			}
 			productId = Long.parseLong(idParam);
-			if (productId < 0) throw new NumberFormatException("Negative ID");
+			if (productId < 0)
+				throw new NumberFormatException("Negative ID");
 		} catch (NumberFormatException e) {
 			response.sendRedirect(request.getContextPath() + "/home");
 			return;
@@ -56,13 +57,15 @@ public class ProductController extends HttpServlet {
 		totalPages = Math.max(totalPages, 1);
 
 		int currentPage = PaginationUtils.parsePositiveInt(request.getParameter("page"), 1);
-		if (currentPage > totalPages) currentPage = totalPages;
+		if (currentPage > totalPages)
+			currentPage = totalPages;
 
 		List<ReviewResponse> reviews = reviewService.getReviewsByProductId(productId, currentPage, REVIEWS_PER_PAGE);
 		List<ProductResponse> relatedProducts = productService.getProductsByCategory(product.getCategory());
 		UserResponse account = getAccount(request);
 		boolean hasReviewed = account != null && reviewService.hasUserReviewedProduct(productId, account.getId());
-		boolean canReview = account != null && !hasReviewed && reviewService.canUserReviewProduct(productId, account.getId());
+		boolean canReview = account != null && !hasReviewed
+				&& reviewService.canUserReviewProduct(productId, account.getId());
 
 		request.setAttribute("product", product);
 		request.setAttribute("categories", Category.getAlls());

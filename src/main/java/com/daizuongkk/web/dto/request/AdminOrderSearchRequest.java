@@ -10,11 +10,11 @@ import java.time.LocalDate;
 @Setter
 @Builder
 public class AdminOrderSearchRequest {
-    private String keyword;
-    private String status;
-    private Double minTotal;
-    private Double maxTotal;
-    private LocalDate fromDate;
-    private LocalDate toDate;
-    private String sortBy;
+	private String keyword;
+	private String status;
+	private Double minTotal;
+	private Double maxTotal;
+	private LocalDate fromDate;
+	private LocalDate toDate;
+	private String sortBy;
 }

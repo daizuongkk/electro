@@ -25,9 +25,29 @@
     <div class="container-fluid">
         <div class="row ">
             <div class="col-12">
-                <div class="mb-6">
-                    <h1 class="fs-3 mb-1">Dashboard</h1>
-                    <p>Tổng quan dữ liệu bán hàng và kho hiện tại.</p>
+                <div class="mb-6 d-flex flex-column flex-xl-row gap-3 justify-content-between align-items-xl-end">
+                    <div>
+                        <h1 class="fs-3 mb-1">Dashboard</h1>
+                        <p class="mb-0">Tổng quan dữ liệu bán hàng và kho hiện tại.</p>
+                    </div>
+                    <form class="admin-report-form d-flex flex-column flex-md-row gap-2 align-items-md-end"
+                          method="get"
+                          action="admin/report">
+                        <div>
+                            <label class="form-label small mb-1" for="reportFromDate">Từ ngày</label>
+                            <input class="form-control form-control-sm" type="date" id="reportFromDate" name="fromDate"
+                                   value="${reportFromDate}">
+                        </div>
+                        <div>
+                            <label class="form-label small mb-1" for="reportToDate">Đến ngày</label>
+                            <input class="form-control form-control-sm" type="date" id="reportToDate" name="toDate"
+                                   value="${reportToDate}">
+                        </div>
+                        <button class="btn btn-primary btn-sm admin-report-button" type="submit">
+                            <i class="ti ti-file-spreadsheet"></i>
+                            Xuất Excel
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

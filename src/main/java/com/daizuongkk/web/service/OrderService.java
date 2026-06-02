@@ -59,6 +59,10 @@ public class OrderService {
         return orderRepository.findAdminPage(filters, page, size);
     }
 
+    public List<Order> findAdminOrdersForExport(AdminOrderSearchRequest filters) {
+        return orderRepository.findAdminForExport(filters, 10000);
+    }
+
     public long countAdminOrders(AdminOrderSearchRequest filters) {
         return orderRepository.countAdmin(filters);
     }
