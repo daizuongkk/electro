@@ -1,0 +1,1101 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Electro - Bài thuyết trình bảo vệ sản phẩm</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --ink: #171b26;
+      --muted: #677184;
+      --line: #e0e5ef;
+      --brand: #d90429;
+      --brand-dark: #9f071f;
+      --dark: #151821;
+      --panel: #ffffff;
+      --green: #12b76a;
+      --amber: #f59e0b;
+      --blue: #2563eb;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    .deck {
+      width: 100vw;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .slide {
+      display: none;
+      min-height: 100vh;
+      padding: 42px 56px 36px;
+      background: linear-gradient(180deg, #fff 0%, #f4f6fb 100%);
+    }
+
+    .slide.active {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 22px;
+    }
+
+    .slide.hero {
+      background:
+        linear-gradient(90deg, rgba(17, 20, 29, 0.92), rgba(17, 20, 29, 0.48)),
+        url("presentation-assets/03-home.png") center / cover;
+      color: #fff;
+    }
+
+    .slide.dark {
+      background: radial-gradient(circle at 20% 10%, #343a4f 0%, #151821 42%, #0e1017 100%);
+      color: #fff;
+    }
+
+    .topbar,
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .hero .topbar,
+    .hero .footer,
+    .dark .topbar,
+    .dark .footer {
+      color: rgba(255, 255, 255, 0.74);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--brand);
+      color: #fff;
+    }
+
+    .content {
+      display: grid;
+      align-content: center;
+      gap: 24px;
+    }
+
+    .content.top {
+      align-content: start;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      max-width: 1100px;
+      font-size: 70px;
+      line-height: 0.98;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      max-width: 1020px;
+      font-size: 42px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      font-size: 21px;
+      line-height: 1.25;
+    }
+
+    .lead {
+      max-width: 900px;
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1.5;
+    }
+
+    .hero .lead,
+    .dark .lead {
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .tag {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      border-radius: 999px;
+      padding: 8px 13px;
+      background: rgba(217, 4, 41, 0.1);
+      color: var(--brand-dark);
+      font-weight: 800;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    .hero .tag,
+    .dark .tag {
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .two-col.reverse {
+      grid-template-columns: 1.08fr 0.92fr;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .grid.four {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .card,
+    .screen,
+    .metric,
+    .flow-step {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 18px 42px rgba(24, 32, 52, 0.08);
+    }
+
+    .dark .card,
+    .dark .metric,
+    .dark .flow-step {
+      border-color: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: none;
+    }
+
+    .card {
+      padding: 22px;
+    }
+
+    .card p,
+    .flow-step p,
+    .caption,
+    .checklist li {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .dark .card p,
+    .dark .flow-step p,
+    .dark .caption,
+    .dark .checklist li {
+      color: rgba(255, 255, 255, 0.74);
+    }
+
+    .card p {
+      margin-top: 10px;
+    }
+
+    .screen {
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .screen img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .screen.tall {
+      max-height: 610px;
+      overflow: hidden;
+    }
+
+    .screen.tall img {
+      height: 610px;
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    .screen.compact {
+      max-height: 520px;
+    }
+
+    .screen.compact img {
+      height: 520px;
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    .callout {
+      border-left: 4px solid var(--brand);
+      border-radius: 0 8px 8px 0;
+      background: #fff;
+      padding: 16px 18px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .dark .callout {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .detail-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      padding: 14px;
+    }
+
+    .dark .detail-box {
+      border-color: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .detail-box strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--ink);
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+
+    .dark .detail-box strong {
+      color: #fff;
+    }
+
+    .detail-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .dark .detail-box span {
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    .checklist {
+      display: grid;
+      gap: 12px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .checklist li {
+      position: relative;
+      padding-left: 28px;
+      font-size: 18px;
+    }
+
+    .checklist li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 9px;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--brand);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .metric {
+      padding: 22px;
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--brand);
+      font-size: 34px;
+      line-height: 1;
+    }
+
+    .dark .metric strong {
+      color: #fff;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .dark .metric span {
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    .flow {
+      display: grid;
+      gap: 13px;
+    }
+
+    .flow-step {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 16px;
+    }
+
+    .number {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--brand);
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .badge {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 9px 12px;
+      color: #313849;
+      font-weight: 800;
+    }
+
+    .dark .badge {
+      border-color: rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.09);
+      color: #fff;
+    }
+
+    .mini-title {
+      color: var(--brand);
+      font-weight: 900;
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 0;
+    }
+
+    .slide-index::after {
+      content: attr(data-current) " / " attr(data-total);
+    }
+
+    @media (max-width: 980px) {
+      .slide {
+        padding: 28px 20px 34px;
+      }
+
+      h1 {
+        font-size: 48px;
+      }
+
+      h2 {
+        font-size: 32px;
+      }
+
+      .lead {
+        font-size: 18px;
+      }
+
+      .two-col,
+      .two-col.reverse,
+      .grid,
+      .grid.four,
+      .metrics,
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      .deck {
+        overflow: visible;
+      }
+
+      .slide,
+      .slide.active {
+        display: grid;
+        min-height: 100vh;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <section class="slide hero active" data-title="Cover">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Bảo vệ học phần Lập trình Web bằng Java</div></div>
+      <div class="content">
+        <span class="tag">Đề tài nhóm 03</span>
+        <div>
+          <h1>Xây dựng cửa hàng trực tuyến Electro sử dụng JSP/Servlet và MySQL</h1>
+          <p class="lead">Sản phẩm thương mại điện tử cho thiết bị công nghệ, bao gồm trải nghiệm mua hàng cho khách hàng và hệ thống quản trị vận hành cho cửa hàng.</p>
+          <div class="badges"><span class="badge">Đại học Công nghiệp Hà Nội</span><span class="badge">GVHD: ThS. Đỗ Hữu Công</span><span class="badge">Nhóm 03</span><span class="badge">Năm 2026</span></div>
+        </div>
+      </div>
+      <div class="footer"><span>Website thương mại điện tử thiết bị công nghệ</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide dark" data-title="Agenda">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Nội dung</div></div>
+      <div class="content">
+        <span class="tag">Nội dung trình bày</span>
+        <h2>Nội dung bảo vệ tập trung vào bài toán, giải pháp, sản phẩm, kỹ thuật và kết quả kiểm thử</h2>
+        <div class="grid">
+          <article class="card"><h3>1. Bối cảnh và mục tiêu</h3><p>Nhu cầu chuyển đổi số, phạm vi đề tài và mục tiêu xây dựng hệ thống.</p></article>
+          <article class="card"><h3>2. Phân tích hệ thống</h3><p>Tác nhân sử dụng, luồng nghiệp vụ và các yêu cầu chức năng chính.</p></article>
+          <article class="card"><h3>3. Sản phẩm triển khai</h3><p>Các màn hình khách hàng và quản trị viên được xây dựng trong hệ thống Electro.</p></article>
+          <article class="card"><h3>4. Thiết kế kỹ thuật</h3><p>Kiến trúc JSP/Servlet, mô hình dữ liệu MySQL, phân quyền và yêu cầu phi chức năng.</p></article>
+          <article class="card"><h3>5. Kiểm thử và đánh giá</h3><p>Kết quả kiểm thử các luồng nghiệp vụ quan trọng và mức độ đáp ứng yêu cầu.</p></article>
+          <article class="card"><h3>6. Kết luận</h3><p>Những kết quả đạt được, hạn chế hiện tại và định hướng phát triển tiếp theo.</p></article>
+        </div>
+      </div>
+      <div class="footer"><span>Nội dung</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Problem">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Bài toán</div></div>
+      <div class="content">
+        <span class="tag">Bối cảnh</span>
+        <h2>Electro giải quyết nhu cầu chuyển đổi số cho hệ thống bán lẻ thiết bị công nghệ</h2>
+        <div class="grid">
+          <article class="card"><h3>Thay thế quy trình thủ công</h3><p>Kho hàng, đơn hàng và khách hàng cần được số hóa để giảm sai sót và tăng tốc xử lý.</p></article>
+          <article class="card"><h3>Tối ưu trải nghiệm mua sắm</h3><p>Khách hàng cần nền tảng minh bạch thông tin, dễ tìm sản phẩm và đặt hàng mọi lúc.</p></article>
+          <article class="card"><h3>Hỗ trợ quyết định kinh doanh</h3><p>Admin cần dashboard, thống kê, tồn kho và trạng thái đơn hàng để điều hành nhanh hơn.</p></article>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-box"><strong>Vấn đề trong thực tế</strong><span>Quản lý bằng sổ sách hoặc file rời dễ sai lệch tồn kho, khó biết đơn nào đang chờ xử lý và khó tổng hợp doanh thu.</span></div>
+          <div class="detail-box"><strong>Ý nghĩa sản phẩm</strong><span>Electro biến quy trình bán hàng thành chuỗi thao tác có dữ liệu: sản phẩm - giỏ hàng - thanh toán - đơn hàng - báo cáo.</span></div>
+        </div>
+      </div>
+      <div class="footer"><span>Bài toán</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Solution">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Giải pháp</div></div>
+      <div class="content">
+        <span class="tag">Giải pháp đề xuất</span>
+        <h2>Electro kết nối trải nghiệm mua hàng với quản trị kho, đơn hàng và doanh thu</h2>
+        <div class="metrics">
+          <div class="metric"><strong>670</strong><span>Sản phẩm trong hệ thống quản trị kho.</span></div>
+          <div class="metric"><strong>45</strong><span>Tài khoản người dùng để demo phân quyền và quản lý.</span></div>
+          <div class="metric"><strong>31</strong><span>Đơn hàng với nhiều trạng thái vận hành.</span></div>
+          <div class="metric"><strong>9/9</strong><span>Integration test passed cho các luồng nghiệp vụ chính.</span></div>
+        </div>
+        <p class="callout">Theo báo cáo đề tài, hệ thống được xây dựng theo MVC với JSP/Servlet, MySQL, Bootstrap và jQuery, hướng tới sản phẩm Java Web ổn định, dễ bảo trì và có khả năng ứng dụng thực tế.</p>
+        <div class="detail-grid">
+          <div class="detail-box"><strong>Giá trị cho khách hàng</strong><span>Rút ngắn thời gian tìm sản phẩm, kiểm tra thông tin kỹ thuật, lưu sản phẩm quan tâm và đặt hàng trực tuyến.</span></div>
+          <div class="detail-box"><strong>Giá trị cho quản trị</strong><span>Tập trung dữ liệu vận hành, theo dõi tồn kho, trạng thái đơn và hiệu quả kinh doanh trên cùng giao diện.</span></div>
+        </div>
+      </div>
+      <div class="footer"><span>Giải pháp</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Actors">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Người dùng</div></div>
+      <div class="content">
+        <span class="tag">Tác nhân hệ thống</span>
+        <h2>Hai nhóm người dùng quyết định toàn bộ thiết kế chức năng</h2>
+        <div class="grid">
+          <article class="card"><p class="mini-title">Khách hàng</p><h3>Người mua thiết bị công nghệ</h3><p>Cần thông tin sản phẩm rõ, giá minh bạch, thao tác mua hàng nhanh và theo dõi đơn tiện lợi.</p></article>
+          <article class="card"><p class="mini-title">Quản trị viên</p><h3>Người vận hành cửa hàng</h3><p>Cần dashboard, danh sách sản phẩm, xử lý đơn hàng, quản lý tài khoản và kiểm soát đánh giá.</p></article>
+          <article class="card"><p class="mini-title">Hệ thống</p><h3>Nền tảng đảm bảo dữ liệu</h3><p>Cần xác thực, phân quyền, kiểm tra dữ liệu đầu vào và duy trì các trạng thái nghiệp vụ nhất quán.</p></article>
+        </div>
+        <p class="callout">Mỗi tác nhân được xác định từ nhu cầu thực tế của hệ thống bán hàng: khách hàng cần mua sắm thuận tiện, quản trị viên cần kiểm soát vận hành, hệ thống cần đảm bảo tính đúng đắn và an toàn dữ liệu.</p>
+      </div>
+      <div class="footer"><span>Tác nhân</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Scope">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Phạm vi đề tài</div></div>
+      <div class="content">
+        <span class="tag">Phạm vi triển khai</span>
+        <h2>Phạm vi tập trung vào website bán lẻ thiết bị công nghệ cho quy mô vừa và nhỏ</h2>
+        <div class="grid">
+          <article class="card"><h3>Frontend khách hàng</h3><p>Xem danh mục, tìm kiếm thiết bị, xem chi tiết thông số, quản lý giỏ hàng, đặt hàng và thanh toán.</p></article>
+          <article class="card"><h3>Backend quản trị</h3><p>Quản lý sản phẩm, kho hàng, trạng thái đơn hàng, người dùng và thống kê doanh thu cơ bản.</p></article>
+          <article class="card"><h3>Giới hạn rõ ràng</h3><p>Chưa tích hợp API vận chuyển, chưa triển khai bảo mật hạ tầng nâng cao hoặc cổng thanh toán thật.</p></article>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-box"><strong>Trong phạm vi triển khai</strong><span>Luồng nghiệp vụ chính được mô phỏng đầy đủ từ đăng ký, đăng nhập, mua hàng, checkout đến quản trị đơn.</span></div>
+          <div class="detail-box"><strong>Ngoài phạm vi</strong><span>Các tích hợp bên thứ ba được đặt ở hướng phát triển để bài toán hiện tại giữ trọng tâm Java Web và cơ sở dữ liệu.</span></div>
+        </div>
+      </div>
+      <div class="footer"><span>Phạm vi đề tài</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide dark" data-title="Customer Journey">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Hành trình khách hàng</div></div>
+      <div class="content">
+        <span class="tag">Luồng khách hàng</span>
+        <h2>Hành trình mua hàng được thiết kế theo chuỗi hành động tự nhiên</h2>
+        <div class="flow">
+          <div class="flow-step"><div class="number">1</div><div><h3>Đăng ký hoặc đăng nhập</h3><p>Xác thực người dùng trước khi sử dụng giỏ hàng, đặt hàng và xem thông tin cá nhân.</p></div></div>
+          <div class="flow-step"><div class="number">2</div><div><h3>Khám phá và chọn sản phẩm</h3><p>Duyệt trang chủ, lọc theo danh mục, xem chi tiết thông số và đánh giá.</p></div></div>
+          <div class="flow-step"><div class="number">3</div><div><h3>Thêm giỏ và thanh toán</h3><p>Điều chỉnh số lượng, chọn sản phẩm cần mua, nhập thông tin giao hàng và phương thức thanh toán.</p></div></div>
+          <div class="flow-step"><div class="number">4</div><div><h3>Theo dõi đơn và phản hồi</h3><p>Xem trạng thái đơn, hủy đơn đang chờ xử lý hoặc đánh giá sau khi đơn hoàn tất.</p></div></div>
+        </div>
+        <p class="callout">Luồng khách hàng được thiết kế liền mạch để giảm số bước thao tác, đồng thời bảo đảm dữ liệu mua hàng được ghi nhận đầy đủ cho quá trình xử lý đơn và chăm sóc sau bán.</p>
+      </div>
+      <div class="footer"><span>Hành trình khách hàng</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Login">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Xác thực</div></div>
+      <div class="content two-col">
+        <div>
+          <span class="tag">Đăng nhập</span>
+          <h2>Cổng vào hệ thống với giao diện nhận diện thương hiệu rõ ràng</h2>
+          <ul class="checklist">
+            <li>Form đăng nhập tối giản, có ghi nhớ tài khoản và quên mật khẩu.</li>
+            <li>Hỗ trợ liên kết giao diện Google/Facebook cho hướng mở rộng sau này.</li>
+            <li>Sau khi đăng nhập, người dùng có thể truy cập giỏ hàng, đơn hàng và hồ sơ.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Xử lý nghiệp vụ</strong><span>Kiểm tra thông tin đăng nhập, tạo session và điều hướng theo quyền người dùng.</span></div>
+            <div class="detail-box"><strong>Phân quyền</strong><span>Tài khoản khách hàng truy cập các chức năng mua sắm; tài khoản quản trị có quyền vào khu vực admin.</span></div>
+          </div>
+        </div>
+        <div class="screen compact"><img src="presentation-assets/01-login.png" alt="Màn hình đăng nhập Electro"></div>
+      </div>
+      <div class="footer"><span>Đăng nhập</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Register">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Đăng ký tài khoản</div></div>
+      <div class="content two-col reverse">
+        <div class="screen compact"><img src="presentation-assets/02-register.png" alt="Màn hình đăng ký Electro"></div>
+        <div>
+          <span class="tag">Đăng ký</span>
+          <h2>Đăng ký tài khoản mới với kiểm tra dữ liệu đầu vào</h2>
+          <ul class="checklist">
+            <li>Yêu cầu username, email, mật khẩu và xác nhận mật khẩu.</li>
+            <li>Có thông báo lỗi trực tiếp khi thiếu thông tin.</li>
+            <li>Backend kiểm tra trùng username/email để bảo vệ tính duy nhất của tài khoản.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Validation</strong><span>Không cho bỏ trống trường bắt buộc, kiểm tra định dạng email và xác nhận mật khẩu.</span></div>
+            <div class="detail-box"><strong>Dữ liệu tạo mới</strong><span>Tài khoản được lưu vào `users`, mặc định vai trò khách hàng và sẵn sàng dùng cho giỏ hàng/đơn hàng.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Đăng ký</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Home">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Giao diện khách hàng</div></div>
+      <div class="content two-col">
+        <div>
+          <span class="tag">Trang chủ</span>
+          <h2>Trang chủ tạo điểm vào nhanh cho các danh mục và sản phẩm mới</h2>
+          <ul class="checklist">
+            <li>Thanh tìm kiếm nổi bật ở header.</li>
+            <li>Danh mục chính: điện thoại, máy tính, phụ kiện, máy tính bảng và khác.</li>
+            <li>Khối banner dẫn người dùng đến nhóm sản phẩm quan trọng.</li>
+            <li>Khu vực mới ra mắt giúp tăng khả năng khám phá sản phẩm.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Vai trò màn hình</strong><span>Là landing page của trải nghiệm mua hàng, giúp người dùng không cần biết trước chính xác sản phẩm vẫn có thể bắt đầu.</span></div>
+            <div class="detail-box"><strong>Điều hướng chính</strong><span>Header gom tìm kiếm, yêu thích, giỏ hàng, đơn hàng và đường vào quản trị khi có quyền.</span></div>
+          </div>
+        </div>
+        <div class="screen compact"><img src="presentation-assets/03-home.png" alt="Trang chủ Electro"></div>
+      </div>
+      <div class="footer"><span>Trang chủ</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Product Card">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Thẻ sản phẩm</div></div>
+      <div class="content two-col reverse">
+        <div class="screen compact"><img src="presentation-assets/11-new-arrivals-hover.png" alt="Thẻ sản phẩm và hover action"></div>
+        <div>
+          <span class="tag">Tương tác sản phẩm</span>
+          <h2>Thẻ sản phẩm ưu tiên hành động mua nhanh</h2>
+          <ul class="checklist">
+            <li>Hiển thị ảnh, danh mục, tên sản phẩm, giá, giá gốc và đánh giá.</li>
+            <li>Hover mở hành động thêm vào giỏ hàng.</li>
+            <li>Các icon yêu thích, so sánh, xem nhanh hỗ trợ quyết định mua.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Thiết kế tương tác</strong><span>Thông tin quan trọng luôn thấy; hành động mua được hiện ra khi người dùng quan tâm đến sản phẩm.</span></div>
+            <div class="detail-box"><strong>Giá trị UX</strong><span>Giảm số bước từ xem sản phẩm đến thêm giỏ, đặc biệt hữu ích với danh sách sản phẩm dài.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Thẻ sản phẩm</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Shop">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Danh mục sản phẩm</div></div>
+      <div class="content two-col">
+        <div>
+          <span class="tag">Danh sách và bộ lọc</span>
+          <h2>Danh sách sản phẩm có bộ lọc đủ dùng cho cửa hàng công nghệ</h2>
+          <ul class="checklist">
+            <li>Lọc theo phân loại, khoảng giá và hãng.</li>
+            <li>Chuyển chế độ hiển thị dạng lưới hoặc danh sách.</li>
+            <li>Sắp xếp và giới hạn số sản phẩm hiển thị trên mỗi trang.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Dữ liệu đầu vào</strong><span>Keyword, category, brand, price range, sort và page size được gom thành request tìm kiếm.</span></div>
+            <div class="detail-box"><strong>Điểm kỹ thuật</strong><span>Repository chỉ trả về sản phẩm phù hợp tiêu chí, giúp màn hình vẫn mượt khi dữ liệu nhiều.</span></div>
+          </div>
+        </div>
+        <div class="screen compact"><img src="presentation-assets/04-shop-filter.png" alt="Trang danh sách sản phẩm"></div>
+      </div>
+      <div class="footer"><span>Cửa hàng</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Product Detail Specs">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Chi tiết sản phẩm</div></div>
+      <div class="content two-col reverse">
+        <div class="screen compact"><img src="presentation-assets/05-product-specs.png" alt="Chi tiết và thông số sản phẩm"></div>
+        <div>
+          <span class="tag">Thông số sản phẩm</span>
+          <h2>Trang chi tiết giúp khách hàng kiểm tra kỹ trước khi mua</h2>
+          <ul class="checklist">
+            <li>Gallery ảnh sản phẩm, ảnh chính và thông tin giá.</li>
+            <li>Trạng thái tồn kho, số lượng và nút thêm vào giỏ.</li>
+            <li>Tab mô tả, chi tiết kỹ thuật và đánh giá.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Thông tin quyết định mua</strong><span>Giá bán, giá gốc, khuyến mãi, tồn kho, mô tả và thông số kỹ thuật được đặt cùng một luồng xem.</span></div>
+            <div class="detail-box"><strong>Hành động tiếp theo</strong><span>Người dùng chọn số lượng, thêm giỏ hoặc lưu yêu thích ngay tại trang chi tiết.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Chi tiết sản phẩm</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Reviews">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Đánh giá sản phẩm</div></div>
+      <div class="content two-col">
+        <div>
+          <span class="tag">Đánh giá</span>
+          <h2>Đánh giá sản phẩm được gắn với lịch sử mua hàng hợp lệ</h2>
+          <ul class="checklist">
+            <li>Tổng điểm trung bình và phân bố số sao.</li>
+            <li>Danh sách nhận xét kèm tên người dùng và thời gian.</li>
+            <li>Chỉ người mua có đơn hoàn tất mới được tạo đánh giá hợp lệ.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Tính tin cậy</strong><span>Review gắn với lịch sử mua hàng, hạn chế đánh giá ảo và tăng chất lượng thông tin cho khách sau.</span></div>
+            <div class="detail-box"><strong>Quản trị nội dung</strong><span>Admin có trang quản lý đánh giá để kiểm soát nội dung không phù hợp nếu phát sinh.</span></div>
+          </div>
+        </div>
+        <div class="screen compact"><img src="presentation-assets/06-product-reviews.png" alt="Đánh giá sản phẩm"></div>
+      </div>
+      <div class="footer"><span>Đánh giá</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Cart">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Giỏ hàng</div></div>
+      <div class="content two-col reverse">
+        <div class="screen compact"><img src="presentation-assets/08-cart.png" alt="Giỏ hàng"></div>
+        <div>
+          <span class="tag">Giỏ hàng</span>
+          <h2>Giỏ hàng hỗ trợ chọn chính xác sản phẩm cần thanh toán</h2>
+          <ul class="checklist">
+            <li>Checkbox chọn từng sản phẩm hoặc chọn tất cả.</li>
+            <li>Tăng giảm số lượng, xóa sản phẩm và cập nhật tạm tính.</li>
+            <li>Mini cart ở header phản ánh số lượng và tổng tiền tức thời.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Quy tắc quan trọng</strong><span>Checkout chỉ xử lý các item được chọn, tránh tình huống người dùng mua nhầm toàn bộ giỏ.</span></div>
+            <div class="detail-box"><strong>Dữ liệu liên quan</strong><span>`carts` đại diện giỏ của user, `cart_items` lưu sản phẩm, số lượng và trạng thái chọn.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Giỏ hàng</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Checkout">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Thanh toán</div></div>
+      <div class="content two-col">
+        <div>
+          <span class="tag">Thanh toán</span>
+          <h2>Checkout gom thông tin giao hàng, đơn hàng và phương thức thanh toán</h2>
+          <ul class="checklist">
+            <li>Thông tin người nhận, email, số điện thoại và địa chỉ giao hàng.</li>
+            <li>Tóm tắt đơn hàng giúp người dùng kiểm tra trước khi đặt.</li>
+            <li>Hỗ trợ chuyển khoản ngân hàng, thanh toán thẻ và COD.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Tạo đơn</strong><span>Thông tin giao hàng và các sản phẩm được chọn được ghi vào `orders` và `order_items`.</span></div>
+            <div class="detail-box"><strong>Trạng thái thanh toán</strong><span>COD tạo đơn chờ xử lý; thẻ hợp lệ tạo đơn đã thanh toán kèm mã giao dịch.</span></div>
+          </div>
+        </div>
+        <div class="screen compact"><img src="presentation-assets/09-checkout.png" alt="Trang thanh toán"></div>
+      </div>
+      <div class="footer"><span>Thanh toán</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Orders">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Đơn hàng cá nhân</div></div>
+      <div class="content two-col reverse">
+        <div class="screen compact"><img src="presentation-assets/10-orders.png" alt="Trang đơn hàng của khách"></div>
+        <div>
+          <span class="tag">Theo dõi đơn hàng</span>
+          <h2>Khách hàng theo dõi vòng đời đơn hàng sau khi đặt</h2>
+          <ul class="checklist">
+            <li>Nhóm đơn theo trạng thái: đang thực hiện, đã hoàn thành, đã hủy.</li>
+            <li>Panel chi tiết hiển thị sản phẩm, tổng tiền và tiến trình xử lý.</li>
+            <li>Đơn đang chờ xử lý có thể hủy ngay từ giao diện khách hàng.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Vòng đời đơn</strong><span>PENDING/PAID -> SHIPPED -> COMPLETED hoặc CANCELLED, tùy thao tác khách và admin.</span></div>
+            <div class="detail-box"><strong>Trải nghiệm sau mua</strong><span>Khách hàng không cần gọi cửa hàng để hỏi trạng thái, vì tiến trình được hiển thị ngay trên trang.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Đơn hàng</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Profile">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Thông tin cá nhân</div></div>
+      <div class="content two-col">
+        <div>
+          <span class="tag">Tài khoản cá nhân</span>
+          <h2>Trang hồ sơ giúp người dùng tự quản lý thông tin tài khoản</h2>
+          <ul class="checklist">
+            <li>Hiển thị avatar, tên, email và trạng thái xác minh.</li>
+            <li>Cập nhật họ tên, số điện thoại và mật khẩu.</li>
+            <li>Lối tắt sang giỏ hàng để tiếp tục hành trình mua.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Bảo vệ tài khoản</strong><span>Đổi mật khẩu và xác minh thông tin giúp giảm rủi ro sai lệch khi đặt hàng.</span></div>
+            <div class="detail-box"><strong>Dữ liệu cá nhân</strong><span>Thông tin profile được dùng lại trong các bước giao hàng, thông báo và quản lý đơn.</span></div>
+          </div>
+        </div>
+        <div class="screen compact"><img src="presentation-assets/07-profile.png" alt="Hồ sơ người dùng"></div>
+      </div>
+      <div class="footer"><span>Thông tin cá nhân</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide dark" data-title="Admin Journey">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Luồng quản trị</div></div>
+      <div class="content">
+        <span class="tag">Luồng quản trị</span>
+        <h2>Admin có bộ công cụ để nhìn tổng quan, tìm vấn đề và xử lý nghiệp vụ</h2>
+        <div class="grid four">
+          <article class="card"><h3>Bảng điều khiển</h3><p>Theo dõi doanh thu, đơn hàng, sản phẩm, khách hàng và cảnh báo tồn kho.</p></article>
+          <article class="card"><h3>Kho sản phẩm</h3><p>Tìm kiếm, lọc, thêm, sửa, xóa mềm và theo dõi trạng thái bán.</p></article>
+          <article class="card"><h3>Đơn hàng</h3><p>Lọc đơn, xem sản phẩm trong đơn và cập nhật trạng thái xử lý.</p></article>
+          <article class="card"><h3>Tài khoản</h3><p>Quản lý vai trò, trạng thái, xác thực và thông tin liên hệ người dùng.</p></article>
+        </div>
+        <p class="callout">Khu vực quản trị là phần vận hành của hệ thống, tiếp nhận dữ liệu từ hoạt động mua hàng để theo dõi doanh thu, xử lý đơn, kiểm soát kho và quản lý người dùng.</p>
+      </div>
+      <div class="footer"><span>Luồng quản trị</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Admin Dashboard">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Bảng điều khiển</div></div>
+      <div class="content two-col reverse">
+        <div class="screen compact"><img src="presentation-assets/12-admin-dashboard.png" alt="Admin dashboard"></div>
+        <div>
+          <span class="tag">Dashboard quản trị</span>
+          <h2>Tổng quan vận hành được đưa lên màn hình đầu tiên</h2>
+          <ul class="checklist">
+            <li>Card doanh thu, đơn hàng, sản phẩm và khách hàng.</li>
+            <li>Biểu đồ doanh thu theo tháng và tổng quan tỉ lệ khách mua hàng.</li>
+            <li>Danh sách sản phẩm mới, sản phẩm sắp hết và đơn hàng gần nhất.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Chỉ số điều hành</strong><span>Doanh thu, số đơn, số sản phẩm và số khách hàng giúp admin nắm tình trạng cửa hàng trong vài giây.</span></div>
+            <div class="detail-box"><strong>Cảnh báo vận hành</strong><span>Sản phẩm sắp hết và đơn mới là hai vùng cần xử lý ngay, được ưu tiên hiển thị trực tiếp trên dashboard.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Bảng điều khiển</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Admin Products">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Quản trị sản phẩm</div></div>
+      <div class="content two-col">
+        <div>
+          <span class="tag">Quản lý sản phẩm</span>
+          <h2>Danh sách sản phẩm được thiết kế cho thao tác quản trị nhanh</h2>
+          <ul class="checklist">
+            <li>Tìm theo tên, mô tả, hãng; lọc danh mục, hãng, giá, tồn kho và trạng thái.</li>
+            <li>Bảng hiển thị mã, danh mục, hãng, giá, khuyến mãi, tồn kho và ngày tạo.</li>
+            <li>Hỗ trợ thêm sản phẩm, chỉnh sửa và xóa mềm.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Validation sản phẩm</strong><span>Giá không âm, số lượng tồn kho hợp lệ, trường bắt buộc không bỏ trống và ảnh đúng định dạng.</span></div>
+            <div class="detail-box"><strong>Xóa mềm</strong><span>Giữ lịch sử đơn hàng và tránh phá vỡ dữ liệu liên quan khi sản phẩm đã từng được mua.</span></div>
+          </div>
+        </div>
+        <div class="screen compact"><img src="presentation-assets/13-admin-products.png" alt="Quản lý sản phẩm"></div>
+      </div>
+      <div class="footer"><span>Quản trị sản phẩm</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Admin Orders">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Quản trị đơn hàng</div></div>
+      <div class="content two-col reverse">
+        <div class="screen compact"><img src="presentation-assets/14-admin-orders.png" alt="Quản lý đơn hàng"></div>
+        <div>
+          <span class="tag">Quản lý đơn hàng</span>
+          <h2>Admin xử lý trạng thái đơn hàng theo vòng đời nghiệp vụ</h2>
+          <ul class="checklist">
+            <li>Lọc theo từ khóa, trạng thái, ngày tạo, khoảng tổng tiền và sắp xếp.</li>
+            <li>Các trạng thái nổi bật: PENDING, PAID, SHIPPED, COMPLETED, CANCELLED.</li>
+            <li>Thao tác xác nhận, giao hàng, hoàn tất hoặc hủy tùy trạng thái đơn.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Quy trình trạng thái</strong><span>Admin không cập nhật tùy tiện, mà đi theo luồng nghiệp vụ để tránh chuyển sai trạng thái.</span></div>
+            <div class="detail-box"><strong>Tác động dữ liệu</strong><span>Hoàn tất đơn mở quyền đánh giá sản phẩm; hủy đơn giữ lại lịch sử để đối soát.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Quản trị đơn hàng</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Admin Users">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Quản trị người dùng</div></div>
+      <div class="content two-col">
+        <div>
+          <span class="tag">Quản lý tài khoản</span>
+          <h2>Danh sách tài khoản giúp kiểm soát người dùng và trạng thái truy cập</h2>
+          <ul class="checklist">
+            <li>Tìm theo username, email, tên hoặc số điện thoại.</li>
+            <li>Lọc vai trò, trạng thái, xác thực, xóa mềm và sắp xếp.</li>
+            <li>Hiển thị avatar, email, điện thoại, vai trò, trạng thái và ngày tạo.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Kiểm soát truy cập</strong><span>Vai trò CUSTOMER/ADMIN quyết định khu vực và chức năng mà tài khoản được phép dùng.</span></div>
+            <div class="detail-box"><strong>Vận hành tài khoản</strong><span>Trạng thái ACTIVE/INACTIVE giúp admin tạm khóa tài khoản mà vẫn giữ dữ liệu lịch sử.</span></div>
+          </div>
+        </div>
+        <div class="screen compact"><img src="presentation-assets/15-admin-users.png" alt="Quản lý tài khoản"></div>
+      </div>
+      <div class="footer"><span>Quản trị người dùng</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Edit User">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Cập nhật người dùng</div></div>
+      <div class="content two-col reverse">
+        <div class="screen compact"><img src="presentation-assets/16-admin-user-edit.png" alt="Chỉnh sửa người dùng"></div>
+        <div>
+          <span class="tag">Chỉnh sửa người dùng</span>
+          <h2>Admin có thể cập nhật thông tin người dùng và quyền truy cập</h2>
+          <ul class="checklist">
+            <li>Cập nhật avatar, username, email, họ tên và số điện thoại.</li>
+            <li>Điều chỉnh vai trò CUSTOMER/ADMIN, trạng thái ACTIVE/INACTIVE và xác thực.</li>
+            <li>Cho phép đặt mật khẩu mới khi cần, nhưng có thể bỏ trống để giữ nguyên.</li>
+          </ul>
+          <div class="detail-grid">
+            <div class="detail-box"><strong>Tình huống sử dụng</strong><span>Admin sửa thông tin sai, đổi vai trò cho nhân sự vận hành hoặc mở/khóa tài khoản khi cần.</span></div>
+            <div class="detail-box"><strong>An toàn thao tác</strong><span>Form tách rõ mật khẩu mới để tránh vô tình đổi mật khẩu khi chỉ cập nhật thông tin khác.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Cập nhật người dùng</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide dark" data-title="Architecture">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Kiến trúc hệ thống</div></div>
+      <div class="content">
+        <span class="tag">Kỹ thuật</span>
+        <h2>Kiến trúc Java Web tách lớp rõ ràng, phù hợp bài toán thương mại điện tử</h2>
+        <div class="grid">
+          <article class="card"><h3>Tầng giao diện</h3><p>JSP, Bootstrap, CSS/JS tĩnh, component dùng chung cho header, navigation, cart modal và admin layout.</p></article>
+          <article class="card"><h3>Tầng điều khiển</h3><p>Servlet xử lý route web, API giỏ hàng/yêu thích, checkout, đơn hàng và khu vực admin.</p></article>
+          <article class="card"><h3>Tầng nghiệp vụ</h3><p>Đóng gói nghiệp vụ như đăng nhập, giỏ hàng, đặt hàng, đánh giá, dashboard và người dùng.</p></article>
+          <article class="card"><h3>Tầng truy cập dữ liệu</h3><p>Truy vấn MySQL cho sản phẩm, user, cart, order, review và báo cáo thống kê.</p></article>
+          <article class="card"><h3>Bộ lọc xác thực</h3><p>Bảo vệ route cần đăng nhập và giới hạn khu vực admin theo vai trò.</p></article>
+          <article class="card"><h3>Cơ sở dữ liệu</h3><p>MySQL 8 với dữ liệu seed sản phẩm, người dùng, đơn hàng, đánh giá và tồn kho.</p></article>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-box"><strong>Lợi ích MVC</strong><span>View không chứa nghiệp vụ nặng, controller điều hướng, service xử lý logic, repository chịu trách nhiệm dữ liệu.</span></div>
+          <div class="detail-box"><strong>Dễ mở rộng</strong><span>Khi thêm tiêu chí lọc, trạng thái đơn hoặc báo cáo mới, có thể mở rộng đúng lớp thay vì sửa toàn bộ hệ thống.</span></div>
+        </div>
+        <div class="badges"><span class="badge">Java 21</span><span class="badge">Servlet/JSP</span><span class="badge">Maven</span><span class="badge">Tomcat 10.1+</span><span class="badge">MySQL 8</span></div>
+      </div>
+      <div class="footer"><span>Kiến trúc hệ thống</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Database">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Thiết kế cơ sở dữ liệu</div></div>
+      <div class="content">
+        <span class="tag">Thiết kế cơ sở dữ liệu</span>
+        <h2>Mô hình dữ liệu bao phủ đầy đủ quan hệ giữa người dùng, sản phẩm, giỏ hàng, đơn hàng và đánh giá</h2>
+        <div class="grid">
+          <article class="card"><h3>Người dùng & xác thực</h3><p>`users`, `addresses`, `verification_otps` lưu tài khoản, địa chỉ giao hàng và mã xác thực OTP.</p></article>
+          <article class="card"><h3>Sản phẩm & hình ảnh</h3><p>`products`, `product_images` quản lý tên, mô tả, giá, thương hiệu, danh mục, khuyến mãi, tồn kho và ảnh.</p></article>
+          <article class="card"><h3>Giỏ hàng & yêu thích</h3><p>`carts`, `cart_items`, `wishlists` lưu sản phẩm người dùng quan tâm trước khi đặt hàng.</p></article>
+          <article class="card"><h3>Đơn hàng</h3><p>`orders`, `order_items` lưu thông tin người nhận, tổng tiền, phương thức thanh toán, trạng thái và từng dòng sản phẩm.</p></article>
+          <article class="card"><h3>Đánh giá</h3><p>`reviews` liên kết người dùng và sản phẩm, hỗ trợ số sao, nội dung nhận xét và thời điểm tạo.</p></article>
+          <article class="card"><h3>Toàn vẹn dữ liệu</h3><p>Các bảng dùng khóa ngoại để giữ quan hệ giữa user, product, order, cart và review nhất quán.</p></article>
+        </div>
+        <p class="callout">Luồng dữ liệu chính: `users` sở hữu `carts` và `orders`; `orders` có nhiều `order_items`; mỗi `order_item` liên kết về `products`; sau khi đơn hoàn tất, `reviews` ghi phản hồi của người mua cho sản phẩm.</p>
+      </div>
+      <div class="footer"><span>Cơ sở dữ liệu</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Non Functional">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Yêu cầu phi chức năng</div></div>
+      <div class="content">
+        <span class="tag">Yêu cầu phi chức năng</span>
+        <h2>Sản phẩm không chỉ đủ chức năng, mà còn cần ổn định, dễ dùng và bảo vệ dữ liệu người dùng</h2>
+        <div class="grid">
+          <article class="card"><h3>Hiệu năng</h3><p>Thời gian phản hồi nhanh, ổn định khi tìm kiếm, lọc sản phẩm và xử lý các thao tác giỏ hàng.</p></article>
+          <article class="card"><h3>Bảo mật</h3><p>Kiểm tra session, phân quyền admin/user và bảo vệ dữ liệu đầu vào để giảm rủi ro SQL Injection, XSS.</p></article>
+          <article class="card"><h3>Dễ sử dụng</h3><p>Giao diện tiếng Việt, thân thiện, rõ trạng thái và tối ưu cho các thao tác mua hàng phổ biến.</p></article>
+          <article class="card"><h3>Đồng thời</h3><p>Hỗ trợ nhiều người dùng truy cập, đặt hàng và cập nhật dữ liệu trong cùng thời điểm.</p></article>
+          <article class="card"><h3>Bảo trì</h3><p>MVC và tách lớp controller, service, repository giúp dễ mở rộng tiêu chí lọc hoặc nghiệp vụ mới.</p></article>
+          <article class="card"><h3>Dữ liệu quản trị</h3><p>Có khả năng quản lý tập trung thông tin tài khoản, sản phẩm, đơn hàng và báo cáo.</p></article>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-box"><strong>Minh chứng trong UI</strong><span>Trạng thái đơn, badge tồn kho, thông báo lỗi form và bộ lọc rõ ràng giúp người dùng hiểu hệ thống đang làm gì.</span></div>
+          <div class="detail-box"><strong>Minh chứng trong code</strong><span>AuthFilter, service validation và repository query có tham số là các điểm triển khai chính cho bảo mật và ổn định.</span></div>
+        </div>
+      </div>
+      <div class="footer"><span>Yêu cầu phi chức năng</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Quality">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Kiểm thử</div></div>
+      <div class="content">
+        <span class="tag">Kiểm thử</span>
+        <h2>Các luồng nghiệp vụ quan trọng được kiểm thử theo kế hoạch từ tài liệu và test tự động trong dự án</h2>
+        <div class="grid">
+          <article class="card"><h3>Luồng xác thực</h3><p>Đăng ký, đăng nhập và từ chối đăng ký khi username/email bị trùng.</p></article>
+          <article class="card"><h3>Luồng tìm kiếm</h3><p>Tìm kiếm, lọc sản phẩm và forward đúng view khi người dùng thao tác tại shop.</p></article>
+          <article class="card"><h3>Luồng thanh toán</h3><p>COD tạo đơn PENDING, thanh toán thẻ tạo đơn PAID và chỉ checkout sản phẩm được chọn.</p></article>
+          <article class="card"><h3>Luồng đơn hàng</h3><p>Khách hủy đơn PENDING, admin hoàn tất đơn và cập nhật trạng thái hợp lệ.</p></article>
+          <article class="card"><h3>Luồng đánh giá</h3><p>Người mua chỉ được đánh giá sản phẩm sau khi có đơn hoàn tất.</p></article>
+          <article class="card"><h3>Kết quả</h3><p>9 integration tests, 9 passed, 0 failed, 0 errors, 0 skipped. Tài liệu cũng mô tả test plan theo giai đoạn.</p></article>
+        </div>
+        <p class="callout">Các ca kiểm thử tập trung vào rủi ro nghiệp vụ: đăng ký trùng dữ liệu, checkout sai sản phẩm được chọn, cập nhật trạng thái đơn không hợp lệ và đánh giá khi chưa đủ điều kiện.</p>
+      </div>
+      <div class="footer"><span>Kiểm thử</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide" data-title="Demonstration Flow">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Quy trình minh họa sản phẩm</div></div>
+      <div class="content">
+        <span class="tag">Minh họa chức năng</span>
+        <h2>Quy trình minh họa phản ánh đầy đủ chu trình từ mua hàng đến quản trị vận hành</h2>
+        <div class="flow">
+          <div class="flow-step"><div class="number">1</div><div><h3>Xác thực người dùng</h3><p>Người dùng đăng nhập, hệ thống tạo phiên làm việc và xác định quyền truy cập tương ứng.</p></div></div>
+          <div class="flow-step"><div class="number">2</div><div><h3>Khám phá và lựa chọn sản phẩm</h3><p>Khách hàng tìm kiếm, lọc danh mục, xem chi tiết sản phẩm, kiểm tra thông số và đánh giá.</p></div></div>
+          <div class="flow-step"><div class="number">3</div><div><h3>Giỏ hàng và thanh toán</h3><p>Sản phẩm được thêm vào giỏ, chọn đúng item cần mua, nhập thông tin giao hàng và tạo đơn.</p></div></div>
+          <div class="flow-step"><div class="number">4</div><div><h3>Theo dõi vòng đời đơn hàng</h3><p>Khách hàng theo dõi trạng thái; hệ thống ghi nhận tiến trình xử lý từ chờ xác nhận đến hoàn tất hoặc hủy.</p></div></div>
+          <div class="flow-step"><div class="number">5</div><div><h3>Quản trị vận hành</h3><p>Quản trị viên theo dõi dashboard, kiểm soát kho, cập nhật trạng thái đơn và quản lý tài khoản.</p></div></div>
+        </div>
+      </div>
+      <div class="footer"><span>Quy trình minh họa</span><span class="slide-index"></span></div>
+    </section>
+
+    <section class="slide dark" data-title="Closing">
+      <div class="topbar"><div class="brand"><span class="brand-mark">E</span> Electro</div><div>Kết luận</div></div>
+      <div class="content">
+        <span class="tag">Tổng kết</span>
+        <h2>Electro đã bao phủ được phần lõi của một hệ thống thương mại điện tử</h2>
+        <div class="grid">
+          <article class="card"><h3>Đầy đủ luồng mua hàng</h3><p>Từ đăng nhập, tìm kiếm, chi tiết, giỏ hàng, checkout đến theo dõi đơn.</p></article>
+          <article class="card"><h3>Có năng lực vận hành</h3><p>Admin quản lý dashboard, sản phẩm, đơn hàng, người dùng và đánh giá.</p></article>
+          <article class="card"><h3>Có nền tảng mở rộng</h3><p>Có thể bổ sung cổng thanh toán thật, API vận chuyển, email/SMS, voucher, báo cáo nâng cao và bảo mật chuyên sâu.</p></article>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-box"><strong>Điểm đạt được</strong><span>Sản phẩm biến yêu cầu phân tích trong báo cáo thành các màn hình và luồng nghiệp vụ có thể demo được.</span></div>
+          <div class="detail-box"><strong>Thông điệp kết thúc</strong><span>Electro là nền tảng Java Web hoàn chỉnh ở mức đồ án, có dữ liệu thực tế và cấu trúc đủ tốt để tiếp tục phát triển.</span></div>
+        </div>
+        <p class="lead">Cảm ơn thầy/cô và các bạn đã lắng nghe. Nhóm em xin sẵn sàng nhận câu hỏi và góp ý.</p>
+      </div>
+      <div class="footer"><span>Trao đổi</span><span class="slide-index"></span></div>
+    </section>
+  </main>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    let index = 0;
+
+    function updateCounters() {
+      document.querySelectorAll(".slide-index").forEach((counter) => {
+        counter.dataset.current = String(index + 1);
+        counter.dataset.total = String(slides.length);
+      });
+    }
+
+    function showSlide(nextIndex) {
+      index = Math.max(0, Math.min(slides.length - 1, nextIndex));
+      slides.forEach((slide, current) => {
+        slide.classList.toggle("active", current === index);
+      });
+      updateCounters();
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        showSlide(index + 1);
+      }
+
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        showSlide(index - 1);
+      }
+
+      if (event.key === "Home") {
+        showSlide(0);
+      }
+
+      if (event.key === "End") {
+        showSlide(slides.length - 1);
+      }
+    });
+
+    showSlide(0);
+  </script>
+</body>
+</html>
