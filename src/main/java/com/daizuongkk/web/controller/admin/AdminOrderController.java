@@ -2,7 +2,6 @@ package com.daizuongkk.web.controller.admin;
 
 import com.daizuongkk.web.dto.request.AdminOrderSearchRequest;
 import com.daizuongkk.web.model.Order;
-import com.daizuongkk.web.service.DashboardReportExcelExporter;
 import com.daizuongkk.web.service.OrderService;
 import com.daizuongkk.web.util.PaginationUtils;
 import jakarta.servlet.ServletException;
@@ -11,12 +10,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 
-@WebServlet(name = "AdminOrderController", value = { "/admin/orders", "/admin/orders/export" })
+@WebServlet(name = "AdminOrderController", value = "/admin/orders")
 public class AdminOrderController extends BaseAdminServlet {
 	private final OrderService orderService = new OrderService();
 
@@ -29,10 +26,6 @@ public class AdminOrderController extends BaseAdminServlet {
 		int page = PaginationUtils.parsePositiveInt(request.getParameter("p"), 1);
 		int size = PaginationUtils.parsePositiveInt(request.getParameter("size"), 10);
 		AdminOrderSearchRequest filters = buildFilters(request);
-		if (request.getServletPath().endsWith("/export")) {
-			exportOrders(request, response, filters);
-			return;
-		}
 
 		long totalOrders = orderService.countAdminOrders(filters);
 		int totalPages = Math.max(1, (int) Math.ceil(totalOrders / (double) size));
@@ -83,16 +76,6 @@ public class AdminOrderController extends BaseAdminServlet {
 		request.setAttribute("fromDate", filters.getFromDate() == null ? "" : filters.getFromDate().toString());
 		request.setAttribute("toDate", filters.getToDate() == null ? "" : filters.getToDate().toString());
 		request.setAttribute("selectedSortBy", filters.getSortBy() == null ? "created_desc" : filters.getSortBy());
-	}
-
-	private void exportOrders(HttpServletRequest request, HttpServletResponse response, AdminOrderSearchRequest filters)
-			throws IOException {
-		List<Order> orders = orderService.findAdminOrdersForExport(filters);
-		String filename = "bao-cao-don-hang-" + LocalDate.now() + ".xlsx";
-		response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-		response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"; filename*=UTF-8''"
-				+ URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20"));
-		new DashboardReportExcelExporter().exportOrders(orders, filters, response.getOutputStream());
 	}
 
 	private void redirectBackToOrders(HttpServletRequest request, HttpServletResponse response) throws IOException {

@@ -6,14 +6,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TopProductReportResponse {
-    private Long productId;
-    private String productName;
-    private Long quantitySold;
+public class RevenueReportRowResponse {
+    private LocalDate reportDate;
+    private Long orderCount;
+    private Long productCount;
     private Double revenue;
 }

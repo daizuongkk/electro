@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.time.LocalDate;
 
 @WebServlet(name = "AdminController", value = "/admin")
 public class AdminController extends BaseAdminServlet {
@@ -42,6 +41,9 @@ public class AdminController extends BaseAdminServlet {
 			case "orders":
 				response.sendRedirect(request.getContextPath() + "/admin/orders");
 				return;
+			case "reports":
+				response.sendRedirect(request.getContextPath() + "/admin/reports");
+				return;
 			case "create-user":
 				response.sendRedirect(request.getContextPath() + "/admin/users/form");
 				return;
@@ -63,7 +65,5 @@ public class AdminController extends BaseAdminServlet {
 		request.setAttribute("recentOrders", dashboard.getRecentOrders());
 		request.setAttribute("monthlySalesData", dashboard.getMonthlySalesData());
 		request.setAttribute("customerOverview", dashboard.getCustomerOverview());
-		request.setAttribute("reportFromDate", LocalDate.now().minusDays(30));
-		request.setAttribute("reportToDate", LocalDate.now());
 	}
 }

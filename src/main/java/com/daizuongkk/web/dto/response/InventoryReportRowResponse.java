@@ -11,8 +11,11 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SalesTrendResponse {
-    private String label;
-    private Double revenue;
-    private Long orderCount;
+public class InventoryReportRowResponse {
+    private Long productId;
+    private String productName;
+    private String category;
+    private Long quantity;
+    private Double price;
+    private String stockStatus;
 }

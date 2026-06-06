@@ -3,12 +3,12 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <base href="${pageContext.request.contextPath}/">
 
 
 <head>
-    <c:set var="pageTitle" value="Admin - Thống Kê"/>
+    <c:set var="pageTitle" value="Quản trị - Thống kê"/>
     <%@include file="../commons/admin-head.jsp"%>
 </head>
 
@@ -27,27 +27,13 @@
             <div class="col-12">
                 <div class="mb-6 d-flex flex-column flex-xl-row gap-3 justify-content-between align-items-xl-end">
                     <div>
-                        <h1 class="fs-3 mb-1">Dashboard</h1>
+                        <h1 class="fs-3 mb-1">Bảng điều khiển</h1>
                         <p class="mb-0">Tổng quan dữ liệu bán hàng và kho hiện tại.</p>
                     </div>
-                    <form class="admin-report-form d-flex flex-column flex-md-row gap-2 align-items-md-end"
-                          method="get"
-                          action="admin/report">
-                        <div>
-                            <label class="form-label small mb-1" for="reportFromDate">Từ ngày</label>
-                            <input class="form-control form-control-sm" type="date" id="reportFromDate" name="fromDate"
-                                   value="${reportFromDate}">
-                        </div>
-                        <div>
-                            <label class="form-label small mb-1" for="reportToDate">Đến ngày</label>
-                            <input class="form-control form-control-sm" type="date" id="reportToDate" name="toDate"
-                                   value="${reportToDate}">
-                        </div>
-                        <button class="btn btn-primary btn-sm admin-report-button" type="submit">
-                            <i class="ti ti-file-spreadsheet"></i>
-                            Xuất Excel
-                        </button>
-                    </form>
+                    <a class="btn btn-primary btn-sm" href="admin/reports">
+                        <i class="ti ti-report-analytics"></i>
+                        Báo cáo quản trị
+                    </a>
                 </div>
             </div>
         </div>
@@ -274,7 +260,7 @@
                                      class="rounded" width="48" height="48" alt="${fn:escapeXml(product.name)}">
                                 <div class="flex-grow-1">
                                     <p class="mb-1">${product.name}</p>
-                                    <small>ID: #${product.id}</small>
+                                    <small>Mã: #${product.id}</small>
                                 </div>
                                 <div class="d-flex flex-column gap-0 align-items-center">
                                     <span class="fw-semibold ${product.quantity <= 10 ? 'text-danger' : 'text-primary'}">${product.quantity}</span>
@@ -314,7 +300,14 @@
                                     </div>
                                 </div>
                                 <span class="badge ${order.status == 'COMPLETED' ? 'bg-success-subtle text-success' : (order.status == 'CANCELLED' ? 'bg-danger-subtle text-danger' : 'bg-warning-subtle text-warning')}">
-                                        ${order.status}
+                                    <c:choose>
+                                        <c:when test="${order.status == 'PENDING'}">Chờ xử lý</c:when>
+                                        <c:when test="${order.status == 'PAID'}">Đã thanh toán</c:when>
+                                        <c:when test="${order.status == 'SHIPPED'}">Đang giao</c:when>
+                                        <c:when test="${order.status == 'COMPLETED'}">Hoàn tất</c:when>
+                                        <c:when test="${order.status == 'CANCELLED'}">Đã hủy</c:when>
+                                        <c:otherwise>${order.status}</c:otherwise>
+                                    </c:choose>
                                 </span>
                             </li>
                         </c:forEach>
@@ -329,10 +322,7 @@
         <div class="row">
             <div class="col-12">
                 <footer class="text-center py-2 mt-6 text-secondary ">
-                    <p class="mb-0">Copyright © 2026 InApp Inventory Dashboard. Developed by <a
-                            href="https://codescandy.com/" target="_blank" class="text-primary">CodesCandy</a> •
-                        Distributed by <a href="https://themewagon.com/" target="_blank"
-                                          class="text-primary">ThemeWagon</a></p>
+                    <p class="mb-0">© 2026 Electro. Báo cáo và quản trị hệ thống.</p>
                 </footer>
             </div>
 

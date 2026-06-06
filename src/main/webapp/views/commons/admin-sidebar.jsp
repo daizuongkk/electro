@@ -18,48 +18,55 @@
         </a>
     </div>
     <ul class="nav flex-column">
-        <li class="px-4 py-2"><small class="nav-text">Main</small></li>
+        <li class="px-4 py-2"><small class="nav-text">Chính</small></li>
         <li><a class="nav-link active" href="admin"><i class="ti ti-home"></i><span
-                class="nav-text">Thống Kê</span></a></li>
+                class="nav-text">Thống kê</span></a></li>
         <li><a class="nav-link" href="<c:url value='/admin/products'/>"><i class="ti ti-box-seam"></i><span
                 class="nav-text">Kho</span></a></li>
-        <li><a class="nav-link" href="<c:url value='/admin/products/form'/>"><i class="ti ti-plus"></i><span class="nav-text">Thêm Sản Phẩm</span></a>
+        <li><a class="nav-link" href="<c:url value='/admin/products/form'/>"><i class="ti ti-plus"></i><span class="nav-text">Thêm sản phẩm</span></a>
         </li>
 
         <li>
             <a class="nav-link" href="<c:url value='/admin/orders'/>">
                 <i class="ti ti-receipt"></i>
-                <span class="nav-text">Đơn Hàng</span>
+                <span class="nav-text">Đơn hàng</span>
+            </a>
+        </li>
+
+        <li>
+            <a class="nav-link" href="<c:url value='/admin/reports'/>">
+                <i class="ti ti-report-analytics"></i>
+                <span class="nav-text">Báo cáo</span>
             </a>
         </li>
 
         <li>
             <a class="nav-link" href="<c:url value='/admin/reviews'/>">
                 <i class="ti ti-star"></i>
-                <span class="nav-text">Đánh Giá</span>
+                <span class="nav-text">Đánh giá</span>
             </a>
         </li>
 
-      <li class="px-4 py-2"><small class="nav-text">Account</small></li>
+      <li class="px-4 py-2"><small class="nav-text">Tài khoản</small></li>
 
         <li>
             <a class="nav-link" href="<c:url value='/admin/users'/>">
                 <i class="fa fa-users"></i>
-                <span class="nav-text">Người Dùng</span>
+                <span class="nav-text">Người dùng</span>
             </a>
         </li>
 
         <li>
             <a class="nav-link" href="<c:url value='/admin/users/form'/>">
                 <i class="ti ti-user-plus"></i>
-                <span class="nav-text">Thêm Người Dùng</span>
+                <span class="nav-text">Thêm người dùng</span>
             </a>
         </li>
 
         <li>
             <a class="nav-link" href="logout">
                 <i class="ti ti-logout"></i>
-                <span class="nav-text">Đăng Xuất</span>
+                <span class="nav-text">Đăng xuất</span>
             </a>
         </li>
     </ul>

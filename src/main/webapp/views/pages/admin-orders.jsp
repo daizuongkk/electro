@@ -25,16 +25,6 @@
     <c:param name="toDate" value="${toDate}"/>
     <c:param name="sortBy" value="${selectedSortBy}"/>
 </c:url>
-<c:url var="exportOrdersUrl" value="/admin/orders/export">
-    <c:param name="keyword" value="${keyword}"/>
-    <c:param name="status" value="${selectedStatus}"/>
-    <c:param name="minTotal" value="${minTotal}"/>
-    <c:param name="maxTotal" value="${maxTotal}"/>
-    <c:param name="fromDate" value="${fromDate}"/>
-    <c:param name="toDate" value="${toDate}"/>
-    <c:param name="sortBy" value="${selectedSortBy}"/>
-</c:url>
-
 <main id="content" class="content py-10">
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -43,8 +33,8 @@
                 <p class="mb-0">${totalOrders} đơn hàng trong hệ thống</p>
             </div>
             <div class="d-flex gap-2">
-                <a href="${exportOrdersUrl}" class="btn btn-primary">
-                    <i class="ti ti-file-spreadsheet"></i> Xuất Excel
+                <a href="admin/reports/orders" class="btn btn-primary">
+                    <i class="ti ti-report-analytics"></i> Báo cáo đơn hàng
                 </a>
                 <a href="admin" class="btn btn-outline-secondary">Thống kê</a>
             </div>
@@ -103,9 +93,6 @@
                 <button class="btn btn-outline-secondary" type="submit">
                     <i class="ti ti-search"></i> Tìm
                 </button>
-                <a href="${exportOrdersUrl}" class="btn btn-primary">
-                    <i class="ti ti-file-spreadsheet"></i> Xuất Excel
-                </a>
                 <a href="admin/orders" class="btn btn-outline-secondary">Xóa lọc</a>
             </div>
         </form>
